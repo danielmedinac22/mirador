@@ -178,6 +178,7 @@ documents
   password_hash   text NULL            -- argon2; only when visibility='password'
   expires_at      timestamptz NULL
   parent_id       text NULL FK         -- if forked, points to source doc
+  forkable        boolean DEFAULT true -- allow viewers to fork
   created_at      timestamptz
   deleted_at      timestamptz NULL
 
@@ -289,6 +290,7 @@ This is the highest-risk surface — arbitrary user-supplied HTML rendered in a 
 
 - A motivated attacker can still ship a phishing page inside the iframe. The path forward (v1.x) is reputation/warning banners on first view; not in MVP.
 - Crypto miners running inside the sandbox — possible. Mitigated only by rate limits and abuse reports.
+- The CSP `connect-src https:` allows the rendered page to call any HTTPS endpoint, so a malicious doc can exfiltrate its own contents. Accepted because the iframe runs in a null origin and has no access to the user's session — exfiltration is bounded to whatever is already in the rendered HTML, which the author wrote anyway. Tightening to a deny-list of egress domains is a v1.x feature, not MVP.
 
 ---
 
@@ -302,6 +304,8 @@ The skill is what makes Mirador "AI-native". Manifest sketch:
 └── scripts/
     └── share.sh       # thin wrapper that calls `mirador share`
 ```
+
+**Delivery mechanism:** `packages/skill` in the monorepo is the source of truth. Users install via the CLI itself: `mirador skill install` copies the skill bundle to `~/.claude/skills/mirador/` and verifies the `mirador` binary is on PATH. The CLI also supports `mirador skill uninstall` and `mirador skill upgrade`. No separate npm package needed; the skill ships with the CLI.
 
 `SKILL.md` description (draft):
 
@@ -374,6 +378,10 @@ The MVP is considered successful when:
 ## 13. Open Questions (to resolve during planning, not blockers for this spec)
 
 - Final product domain. Placeholder: `mirador.app`. Decision happens before the first public commit.
-- Cloud deployment: Workers + R2 + Neon vs. a single Fly.io VM. Default: Workers + R2 + Neon (closer to MVP architecture).
 - Whether to require an email at create-time for anonymous users (helps abuse handling; small friction). Tentative: yes, email captured but never verified for MVP.
-- Anthropic model choice for "edit with AI" endpoint: default to Claude Sonnet 4.6 for cost/quality balance; fall back to Haiku for small edits.
+
+## 14. Pinned Decisions (resolved during review)
+
+- **Cloud deployment target:** Cloudflare Workers + R2 + Neon Postgres. Single Hono codebase runs on Workers (cloud) and Node (self-host). SQLite for self-host, Postgres for cloud — both driven by Drizzle with the same schema.
+- **Anthropic model:** default `claude-sonnet-4-6` for the AI edit endpoint; `claude-haiku-4-5` for cost-sensitive small edits. Confirmed current as of 2026-05-12; planner should re-confirm the latest model IDs at wiring time.
+- **Skill packaging:** ships inside the `mirador` CLI; installed via `mirador skill install` (see Section 9).
