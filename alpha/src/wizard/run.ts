@@ -9,6 +9,7 @@ import { pointerPath } from '../paths.js';
 import * as vercel from '../vercel.js';
 import { printBanner } from './banner.js';
 import { installAgents } from './install-agents.js';
+import { ui } from './ui.js';
 
 // dist/index.js → package root is two segments up (../..).
 const PKG_DIR = resolve(fileURLToPath(import.meta.url), '../..');
@@ -167,7 +168,18 @@ export async function runInit(opts: RunOptions): Promise<void> {
     'utf8',
   );
 
-  await installAgents(agents, PKG_DIR);
+  const agentLines = await installAgents(agents, PKG_DIR);
 
-  p.outro('Done. Open Claude Code and type /mirador to publish your first HTML.');
+  // Final summary — GSD-style block with green checkmarks.
+  p.log.success(`Linked Vercel project: ${vercelInfo!.projectName}`);
+  p.log.success(`Storage at ${tildify(storagePath)}`);
+  for (const line of agentLines) p.log.success(line);
+
+  p.outro(
+    `${ui.done('Done!')} Open Claude Code and type ${ui.highlight('/mirador')} to publish your first HTML.`,
+  );
+}
+
+function tildify(p: string): string {
+  return p.startsWith(homedir()) ? p.replace(homedir(), '~') : p;
 }
