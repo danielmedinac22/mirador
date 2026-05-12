@@ -473,9 +473,53 @@ These are static files that ship in the npm package and are copied into `<storag
 <meta name="viewport" content="width=device-width, initial-scale=1">
 ```
 
-- [ ] **Step 2: Create the `deck` theme** (presentation-style; same content as v1 of the plan — full CSS in `alpha/themes/deck/theme.css`, fonts via Google Fonts link in `head.html`).
+- [ ] **Step 2: Create the `deck` theme**
 
-- [ ] **Step 3: Create the `memo` theme** (serif body, Source Serif Pro + Inter; same content as v1 of the plan).
+`alpha/themes/deck/meta.json`:
+```json
+{ "name": "deck", "description": "Presentation-style: large type, vertical slide rhythm, dark background.", "tags": ["presentation", "slides"] }
+```
+
+`alpha/themes/deck/theme.css`:
+```css
+.mirador-content { font-family: 'Inter', -apple-system, system-ui, sans-serif; background: #0e0f11; color: #f5f5f7; min-height: 100vh; padding: 4rem 2rem; font-size: 20px; line-height: 1.5; }
+.mirador-content > * { max-width: 960px; margin-inline: auto; }
+.mirador-content h1 { font-size: 3.5rem; font-weight: 700; letter-spacing: -0.02em; }
+.mirador-content h2 { font-size: 2.5rem; font-weight: 600; }
+.mirador-content h3 { font-size: 1.8rem; }
+.mirador-content section, .mirador-content .slide { min-height: 90vh; display: flex; flex-direction: column; justify-content: center; padding: 4rem 0; border-top: 1px solid #2a2b2e; }
+.mirador-content code { background: #1f2024; color: #c5e3ff; padding: 0.1em 0.4em; border-radius: 4px; }
+```
+
+`alpha/themes/deck/head.html`:
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+```
+
+- [ ] **Step 3: Create the `memo` theme**
+
+`alpha/themes/memo/meta.json`:
+```json
+{ "name": "memo", "description": "Document/report style: serif body, restrained palette, optimized for reading.", "tags": ["document", "memo", "report"] }
+```
+
+`alpha/themes/memo/theme.css`:
+```css
+.mirador-content { max-width: 680px; margin: 5rem auto; padding: 0 1.5rem; font-family: 'Source Serif Pro', Georgia, 'Times New Roman', serif; font-size: 17px; line-height: 1.75; color: #2a2a2a; }
+.mirador-content h1, .mirador-content h2, .mirador-content h3 { font-family: 'Inter', -apple-system, system-ui, sans-serif; font-weight: 600; letter-spacing: -0.01em; color: #1a1a1a; }
+.mirador-content h1 { font-size: 1.75rem; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; }
+.mirador-content blockquote { border-left: 3px solid #888; padding-left: 1rem; margin-left: 0; color: #555; font-style: italic; }
+.mirador-content code { font-family: 'SF Mono', ui-monospace, monospace; font-size: 0.92em; }
+```
+
+`alpha/themes/memo/head.html`:
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&family=Source+Serif+Pro:wght@400;600&display=swap" rel="stylesheet">
+```
 
 - [ ] **Step 4: Commit**
 
@@ -501,7 +545,77 @@ git commit -m "feat(alpha): ship default, deck, memo themes"
 
 - [ ] **Step 2: password-gate template**
 
-`alpha/templates/password-gate.html` — same as the v1 plan version (form + script that decodes `__SALT__`, `__IV__`, `__CT__`, `__ITER__` constants and decrypts via `window.crypto.subtle`). Full content lives at this path in the repo.
+`alpha/templates/password-gate.html`:
+```html
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Password required</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: -apple-system, system-ui, sans-serif; min-height: 100vh; margin:0; display:flex; align-items:center; justify-content:center; background:#fafafa; color:#111; }
+  @media (prefers-color-scheme: dark) { body { background:#0e0f11; color:#eee; } .card { background:#16181c; border-color:#2a2b2e; } input { background:#1f2024; color:#eee; border-color:#2a2b2e; } }
+  .card { background:#fff; border:1px solid #e5e5e5; padding:2rem; border-radius:10px; max-width:360px; width:100%; }
+  h1 { margin:0 0 1rem; font-size:1.1rem; font-weight:600; }
+  input { width:100%; padding:0.6rem 0.8rem; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:1rem; }
+  button { margin-top:0.8rem; width:100%; padding:0.6rem; border:none; background:#2451b7; color:white; border-radius:6px; cursor:pointer; font-size:1rem; }
+  .err { color:#c0392b; font-size:0.85em; margin-top:0.6rem; min-height:1em; }
+  footer { color:#888; font-size:0.75em; margin-top:1.5rem; }
+</style>
+</head>
+<body>
+<form class="card" id="f" autocomplete="off">
+  <h1>Password required</h1>
+  <input id="p" type="password" placeholder="Password" autofocus required>
+  <button type="submit">Unlock</button>
+  <div class="err" id="e"></div>
+  <footer>Client-side gate — deters casual viewing; not authentication.</footer>
+</form>
+<script>
+const SALT_B64 = "__SALT__";
+const IV_B64 = "__IV__";
+const CT_B64 = "__CT__";
+const ITER = __ITER__;
+
+const b64 = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function deriveKey(pw) {
+  const enc = new TextEncoder();
+  const base = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: b64(SALT_B64), iterations: ITER, hash: 'SHA-256' },
+    base,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['decrypt'],
+  );
+}
+
+document.getElementById('f').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const pw = document.getElementById('p').value;
+  const err = document.getElementById('e');
+  err.textContent = '';
+  try {
+    const key = await deriveKey(pw);
+    const plain = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: b64(IV_B64) },
+      key,
+      b64(CT_B64),
+    );
+    const html = new TextDecoder().decode(plain);
+    document.open(); document.write(html); document.close();
+  } catch {
+    err.textContent = 'Incorrect password.';
+  }
+});
+</script>
+</body>
+</html>
+```
+
+The four placeholders (`__SALT__`, `__IV__`, `__CT__`, `__ITER__`) are exactly what `encrypt.mjs` substitutes via `String.prototype.replace` — keep them spelled this way.
 
 - [ ] **Step 3: Commit**
 
@@ -525,11 +639,13 @@ This is a single-file Node script with **zero dependencies** that the agent invo
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const script = resolve(__dirname, 'encrypt.mjs');
-// Note: encrypt.mjs needs the gate template; for tests, use the shipped one.
+// encrypt.mjs needs the gate template; for tests, point at the shipped one.
 const template = resolve(__dirname, '..', 'templates', 'password-gate.html');
 
 describe('encrypt.mjs', () => {
@@ -752,7 +868,8 @@ import { cp } from 'node:fs/promises';
 
 export interface RunOptions { mode: 'init' | 'config'; }
 
-const PKG_DIR = resolve(fileURLToPath(import.meta.url), '../../../');
+// dist/index.js → package root is two segments up (../..).
+const PKG_DIR = resolve(fileURLToPath(import.meta.url), '../..');
 
 export async function runInit(opts: RunOptions): Promise<void> {
   p.intro(opts.mode === 'init' ? 'mirador init' : 'mirador config');
