@@ -26,8 +26,8 @@ EOF
 require_node20
 require_npm_global_writable
 
-echo "Installing @mirador/cli…"
-npm i -g @mirador/cli
+echo "Installing mirador-cli…"
+npm i -g mirador-cli
 
 echo
 echo "Installed. Next: run \`mirador init\` to set up Vercel and your agents."

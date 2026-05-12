@@ -1,12 +1,12 @@
 {
-  "name": "@mirador/cli",
+  "name": "mirador-cli",
   "version": "0.1.0-alpha.0",
   "description": "Mirador alpha — setup wizard for the agent-driven HTML publishing skill.",
   "license": "MIT",
   "type": "module",
   "engines": { "node": ">=20" },
   "bin": { "mirador": "./dist/index.js" },
-  "files": ["dist", "themes", "templates", "scripts", "skill"],
+  "files": ["dist", "themes", "templates", "scripts/encrypt.mjs", "skill"],
   "scripts": {
     "build": "tsup src/index.ts --format esm --target node20 --shims --no-splitting --clean",
     "dev": "tsup src/index.ts --format esm --target node20 --shims --watch",

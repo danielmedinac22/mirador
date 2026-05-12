@@ -19,7 +19,7 @@ curl -fsSL https://mirador.dev/install.sh | sh
 or via npm:
 
 ```
-npm i -g @mirador/cli
+npm i -g mirador-cli
 ```
 
 Requires **Node 20+** and the **Vercel CLI** (`npm i -g vercel`) plus a free Vercel account.
@@ -92,7 +92,7 @@ For real auth, wait for V1 (or use Vercel Pro's password protection on your proj
 ## Uninstall
 
 ```
-npm uninstall -g @mirador/cli
+npm uninstall -g mirador-cli
 rm -rf ~/.mirador ~/.claude/skills/mirador ~/.claude/commands/mirador.md ~/.codex/skills/mirador
 ```
 
