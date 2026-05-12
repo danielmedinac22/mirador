@@ -1,0 +1,43 @@
+.mirador-content {
+  max-width: 720px;
+  margin: 4rem auto;
+  padding: 0 1.5rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #1a1a1a;
+}
+.mirador-content h1,
+.mirador-content h2,
+.mirador-content h3 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.mirador-content h1 { font-size: 2rem; margin-top: 0; }
+.mirador-content h2 { font-size: 1.5rem; margin-top: 2.5rem; }
+.mirador-content h3 { font-size: 1.2rem; margin-top: 2rem; }
+.mirador-content p,
+.mirador-content li { color: #333; }
+.mirador-content code {
+  background: #f3f3f3;
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: 'SF Mono', ui-monospace, monospace;
+}
+.mirador-content pre {
+  background: #1a1a1a;
+  color: #eee;
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+.mirador-content a { color: #2451b7; text-decoration: underline; }
+.mirador-content table { border-collapse: collapse; width: 100%; }
+.mirador-content th,
+.mirador-content td {
+  border-bottom: 1px solid #e5e5e5;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}

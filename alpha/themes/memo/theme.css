@@ -1,0 +1,33 @@
+.mirador-content {
+  max-width: 680px;
+  margin: 5rem auto;
+  padding: 0 1.5rem;
+  font-family: 'Source Serif Pro', Georgia, 'Times New Roman', serif;
+  font-size: 17px;
+  line-height: 1.75;
+  color: #2a2a2a;
+}
+.mirador-content h1,
+.mirador-content h2,
+.mirador-content h3 {
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #1a1a1a;
+}
+.mirador-content h1 {
+  font-size: 1.75rem;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+.mirador-content blockquote {
+  border-left: 3px solid #888;
+  padding-left: 1rem;
+  margin-left: 0;
+  color: #555;
+  font-style: italic;
+}
+.mirador-content code {
+  font-family: 'SF Mono', ui-monospace, monospace;
+  font-size: 0.92em;
+}

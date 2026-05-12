@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mirador</title>
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; max-width: 640px; margin: 4rem auto; padding: 0 1.5rem; color: #1a1a1a; }
+    h1 { font-weight: 600; letter-spacing: -0.01em; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 0.75rem 0; border-bottom: 1px solid #eee; }
+    a { color: #2451b7; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .empty { color: #888; }
+  </style>
+</head>
+<body>
+  <h1>Mirador</h1>
+  <p class="empty">{{empty_or_list}}</p>
+  {{list_html}}
+  <footer style="margin-top:4rem;color:#888;font-size:0.85em;">
+    Powered by <a href="https://github.com/mirador">Mirador</a>.
+  </footer>
+</body>
+</html>
