@@ -30,7 +30,7 @@ The alpha is a stepping stone. The V1 spec replaces Vercel with our own runtime 
    - **password** (no password / soft client-side gate)
    - **visibility** (unlisted link-only / public listed on index)
 5. A theme system with:
-   - 3 shipped themes: `default`, `deck`, `memo`
+   - 3 shipped themes: `default`, `deck`, `memo`, plus a pseudo-theme `none` (publish verbatim, no wrapping)
    - The ability to **generate a custom theme from a reference** — URL, screenshot, or natural-language description
    - Local persistence in `~/.mirador/themes/` so generated themes can be reused
 6. A local static site that the CLI maintains and deploys to Vercel on each share.
@@ -227,7 +227,7 @@ This is the most interesting feature in the alpha. It uses Claude's vision and r
 
 ### Three input modes
 
-1. **URL** — the user pastes a web page they want their doc to look like. The skill fetches the HTML+CSS (best effort), then asks Claude to produce a single self-contained `theme.css` that captures the typographic, color, and spacing language. Stylesheets that are too dynamic (JS-driven, gated, login-walled) get a graceful fallback to "couldn't fully fetch, here is a best-effort theme based on the visible structure".
+1. **URL** — the user pastes a web page they want their doc to look like. The CLI fetches the HTML and any linked CSS files using a plain HTTP client (no JS execution, no headless browser) and passes the raw text to Claude, which produces a single self-contained `theme.css` that captures the typographic, color, and spacing language. Stylesheets that are too dynamic (JS-driven, gated, login-walled) get a graceful fallback to "couldn't fully fetch, here is a best-effort theme based on the visible structure".
 2. **Screenshot** — the user attaches an image. The skill sends the image to Claude (vision) with a prompt that asks for the same `theme.css`. Works for designs that aren't crawlable (Figma exports, paper sketches photographed, designs from other tools).
 3. **Description** — the user describes in natural language: "calm, navy and beige, generous whitespace, serif headings, sans body". Pure text-to-theme via Claude.
 
@@ -260,12 +260,14 @@ The CSS is scoped under `.mirador-content { ... }` (we wrap the user's `<body>` 
 
 ## 8. Password gate
 
-Client-side only. The flow:
+Client-side only. Invoked from inside the `share` flow (`flows/password`); it is **not** a standalone CLI command. The flow:
 
 1. User provides a password in the share flow.
 2. CLI derives a `key = PBKDF2(password, salt, 200_000, sha-256)`. Stores `salt` and `kdf_iter` in the page.
 3. CLI encrypts the themed HTML body with AES-GCM using `key`. The ciphertext is embedded in `index.html` as a base64 string. The salt and IV are in plain text.
 4. The page's visible content is the gate UI; the encrypted body is *not* rendered until the user enters the password, the key is re-derived in the browser, and the body is decrypted.
+
+Both ends use the same primitive: the CLI uses Node's `crypto.subtle` (`globalThis.crypto.subtle`, available natively on Node 20+); the gate uses `window.crypto.subtle` in the browser. No third-party JS crypto library on either side.
 
 This means: someone viewing the HTML source sees ciphertext, not plaintext. **It's still client-side**, so a determined attacker who watches a real user's browser memory could grab the decrypted content. We disclose this honestly in the skill flow and in the gate page footer ("client-side gate — disuasive, not authentication"). Real auth comes with V1.
 
@@ -293,7 +295,7 @@ The CLI shells out to the official `vercel` CLI. We require it on PATH and instr
 vercel deploy ~/.mirador/site --prod --yes --no-clipboard
 ```
 
-The CLI parses stdout for the deployed URL (Vercel CLI prints `https://...` on success). If output parsing fails, we fall back to reading `.vercel/output/static/...` and constructing the URL from the project domain.
+The CLI parses stdout for the deployed URL (Vercel CLI prints `https://...` on success). If parsing fails, we fall back to the project's stable production domain stored in config (e.g. `https://mirador-danielm.vercel.app`), since Vercel always aliases that domain to the latest prod deploy. We then append `/d/<slug>/` to get the final doc URL.
 
 ### What if the user doesn't have Vercel?
 
@@ -317,9 +319,10 @@ curl -fsSL https://mirador.dev/install.sh | sh
 `install.sh` is committed in `alpha/install.sh`. It:
 
 1. Requires Node 20+. Fails with a clear message otherwise.
-2. `npm i -g @mirador/cli`.
-3. Runs `mirador skill install` (an internal command, not user-facing) which copies the skill bundle to `~/.claude/skills/mirador/`.
-4. Prints next steps.
+2. Checks that `npm` global installs work without sudo (probes the npm global prefix; if it points under `/usr/local` and isn't user-writable, prints instructions for using `nvm` / `volta` or running with sudo, then exits non-zero). We do *not* silently `sudo`.
+3. `npm i -g @mirador/cli`.
+4. Runs `mirador skill install` (an internal command, not user-facing) which copies the skill bundle to `~/.claude/skills/mirador/`.
+5. Prints next steps.
 
 ### npm
 
@@ -385,5 +388,4 @@ In order:
 ## 14. Open questions
 
 - Final installer domain (`mirador.dev`? something else?). Decision before public.
-- Whether to allow a "no theme" mode where the user's HTML is published verbatim with zero wrapping. Tentative: yes, expose as theme name `none`. Adds zero scope.
 - Whether `list` should let the user re-share an existing doc with a different theme (basically "re-theme"). Tentative: yes, it's one extra branch in the same flow. Treats themes as mutable per-doc.
