@@ -20,7 +20,8 @@ The alpha is a stepping stone. The V1 spec replaces Vercel with our own runtime 
 ## 2. What's in scope
 
 1. A Claude Code skill that activates when the agent has produced HTML in the session.
-2. A Node CLI installed alongside the skill, with two public commands:
+2. A Claude Code **slash command** `/mirador [archivo]` for explicit, user-driven invocation. Without args, Claude looks back in the conversation for the most recent HTML produced; with a path, uses it directly. Internally it triggers the same skill flow.
+3. A Node CLI installed alongside the skill, with two public commands:
    - `mirador share <file>` — main flow
    - `mirador list` — view & manage your shared docs
 3. A guided first-run that authenticates Vercel and creates the user's Mirador project.
@@ -74,6 +75,8 @@ mirador/
 │   ├── README.md
 │   ├── install.sh                  ← one-line installer
 │   ├── package.json                ← @mirador/cli
+│   ├── command/
+│   │   └── mirador.md              ← /mirador slash command
 │   ├── src/                        ← CLI source (TypeScript)
 │   │   ├── index.ts                ← entrypoint, command routing
 │   │   ├── commands/
@@ -199,9 +202,43 @@ Each unit must be understandable on its own: a one-paragraph header in the file 
 
 ---
 
-## 6. The Skill
+## 6. The Skill & the Slash Command
 
-`SKILL.md` description (draft):
+Mirador exposes itself to Claude Code through **two** surfaces that share the same underlying skill behavior:
+
+- **Skill** (`~/.claude/skills/mirador/SKILL.md`) — Claude decides when to suggest it. Triggered passively after the agent produces HTML in the session.
+- **Slash command** (`~/.claude/commands/mirador.md`) — the user explicitly types `/mirador` (optionally with a file path). Triggered actively.
+
+Both delegate to the same conversational flow described below. The slash command is just a deterministic entry point so the user doesn't have to wait for Claude to "notice" the opportunity.
+
+### `/mirador` slash command
+
+```markdown
+---
+description: Publish an HTML artifact to your Mirador (your own Vercel) and get a shareable link.
+---
+
+The user invoked `/mirador $ARGUMENTS`.
+
+If `$ARGUMENTS` is a path to an HTML file, use that file. Otherwise, look back in the
+conversation for the most recently produced HTML artifact and offer to publish it
+(asking the user to confirm if the choice is ambiguous).
+
+Then drive the Mirador share flow:
+1. Ask the user for a name (suggest one from the file's <title> or filename).
+2. Ask which theme — list installed themes; offer to generate one from a URL,
+   screenshot, or description if they want something custom.
+3. Ask whether to password-protect (warn it's a soft client-side gate).
+4. Ask visibility (unlisted by default).
+
+Then run:
+  mirador share <absolute path> --non-interactive \
+    --name <slug> --theme <name> --visibility <unlisted|public> [--password "<pw>"]
+
+Print the resulting URL in chat with a one-line confirmation.
+```
+
+### `SKILL.md` description (draft):
 
 > Use this skill when you have just produced an HTML artifact in the session — a report, dashboard, presentation, document, prototype, or mini-app — and the user might want to view or share it. Wraps the `mirador` CLI to publish the file to the user's own Vercel and return a shareable URL. The skill is conversational: it asks the user about name, theme (with the option to generate one from a URL, screenshot, or description), and optional password protection.
 

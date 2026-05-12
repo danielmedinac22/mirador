@@ -47,7 +47,7 @@ The alpha lives entirely under `alpha/` in the same repo as the (future) V1 work
   "type": "module",
   "engines": { "node": ">=20" },
   "bin": { "mirador": "./dist/index.js" },
-  "files": ["dist", "themes", "templates", "skill"],
+  "files": ["dist", "themes", "templates", "skill", "command"],
   "scripts": {
     "build": "tsup src/index.ts --format esm --target node20 --shims --no-splitting --clean",
     "dev": "tsup src/index.ts --format esm --target node20 --shims --watch",
@@ -2097,13 +2097,14 @@ git commit -m "feat(alpha): list command with copy/open/delete"
 
 ---
 
-## Phase 10: Claude Code skill
+## Phase 10: Claude Code skill + `/mirador` slash command
 
-### Task 10.1: SKILL.md manifest
+### Task 10.1: SKILL.md manifest + slash command
 
 **Files:**
 - Create: `alpha/skill/SKILL.md`
 - Create: `alpha/skill/README.md`
+- Create: `alpha/command/mirador.md`
 
 - [ ] **Step 1: Write `SKILL.md`**
 
@@ -2162,11 +2163,41 @@ If the CLI errors with "Not initialized", the user needs to run `mirador share` 
 
 - [ ] **Step 2: Write `alpha/skill/README.md`** (short, points at the spec)
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 3: Write `alpha/command/mirador.md`** (the slash command)
+
+```markdown
+---
+description: Publish an HTML artifact to your Mirador (your own Vercel) and get a shareable link.
+---
+
+The user invoked `/mirador $ARGUMENTS`.
+
+If `$ARGUMENTS` is a path to an HTML file, use that file. Otherwise, look back in the
+conversation for the most recently produced HTML artifact and offer to publish it.
+If the candidate is ambiguous, ask the user to confirm which file before proceeding.
+
+Then drive the Mirador share flow conversationally:
+1. **Name** — suggest a slug from the file's `<title>` or filename; let the user override. Validate: lowercase letters, digits, dashes.
+2. **Theme** — list installed themes (from `~/.mirador/themes/` and the shipped ones). Offer `+ generate from a reference…` for custom themes (URL / screenshot / natural-language description). If they choose to generate, ask them to run the share flow themselves once and pick that option from the interactive picker — generation is interactive in the alpha.
+3. **Password** — optional. If yes, take it in chat. Tell them: client-side gate, disuasive only, not authentication.
+4. **Visibility** — default `unlisted`. Only `public` if they want it listed on their Mirador index.
+
+Then run:
+
+    mirador share <absolute-path> --non-interactive \
+      --name <slug> --theme <name> --visibility <unlisted|public> \
+      [--password "<password>"]
+
+Capture stdout — the first line is the URL. Print it back to the user with a one-line confirmation.
+
+If the CLI errors with "Not initialized", ask the user to run `mirador share` themselves once from a terminal to complete the Vercel link, then retry.
+```
+
+- [ ] **Step 4: Commit**
 
 ```bash
-git add alpha/skill
-git commit -m "feat(alpha): Claude Code skill manifest"
+git add alpha/skill alpha/command
+git commit -m "feat(alpha): Claude Code skill manifest + /mirador slash command"
 ```
 
 ### Task 10.2: `mirador skill install` (hidden command)
@@ -2179,22 +2210,28 @@ git commit -m "feat(alpha): Claude Code skill manifest"
 ```ts
 import { cp, mkdir, rm } from 'node:fs/promises';
 import { homedir } from 'node:os';
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const SKILL_DIR = `${homedir()}/.claude/skills/mirador`;
-const SRC = resolve(fileURLToPath(import.meta.url), '../../../skill');
+const SKILL_DIR = join(homedir(), '.claude', 'skills', 'mirador');
+const COMMAND_FILE = join(homedir(), '.claude', 'commands', 'mirador.md');
+const SKILL_SRC = resolve(fileURLToPath(import.meta.url), '../../../skill');
+const COMMAND_SRC = resolve(fileURLToPath(import.meta.url), '../../../command/mirador.md');
 
 export async function runSkill(action: string): Promise<void> {
   if (action === 'install') {
     await mkdir(SKILL_DIR, { recursive: true });
-    await cp(SRC, SKILL_DIR, { recursive: true });
+    await cp(SKILL_SRC, SKILL_DIR, { recursive: true });
+    await mkdir(join(homedir(), '.claude', 'commands'), { recursive: true });
+    await cp(COMMAND_SRC, COMMAND_FILE);
     console.log(`Installed Mirador skill to ${SKILL_DIR}`);
+    console.log(`Installed /mirador command to ${COMMAND_FILE}`);
     return;
   }
   if (action === 'uninstall') {
     await rm(SKILL_DIR, { recursive: true, force: true });
-    console.log(`Removed ${SKILL_DIR}`);
+    await rm(COMMAND_FILE, { force: true });
+    console.log('Removed skill and /mirador command.');
     return;
   }
   console.error(`unknown action: ${action}. use install | uninstall.`);
@@ -2202,16 +2239,24 @@ export async function runSkill(action: string): Promise<void> {
 }
 ```
 
-- [ ] **Step 2: Manual test**
+- [ ] **Step 2: Update `package.json` `files` field**
+
+Add `command` to the included files so it ships in the npm package:
+
+```json
+"files": ["dist", "themes", "templates", "skill", "command"]
+```
+
+- [ ] **Step 3: Manual test**
 
 Run: `node dist/index.js skill install`
-Expected: copies `alpha/skill/` to `~/.claude/skills/mirador/`.
+Expected: copies `alpha/skill/` to `~/.claude/skills/mirador/` AND copies `alpha/command/mirador.md` to `~/.claude/commands/mirador.md`. Verify both exist. In Claude Code, typing `/` shows `/mirador` in the picker.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add alpha/src/flows/skill.ts
-git commit -m "feat(alpha): mirador skill install (hidden command)"
+git add alpha/src/flows/skill.ts alpha/package.json
+git commit -m "feat(alpha): mirador skill install — copies skill + /mirador command"
 ```
 
 ---
