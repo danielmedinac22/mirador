@@ -12,7 +12,9 @@ const { values } = parseArgs({
 });
 
 if (!values.in || !values.out || !values.password || !values.template) {
-  console.error('usage: encrypt.mjs --in <file> --out <file> --password <pw> --template <gate.html>');
+  console.error(
+    'usage: encrypt.mjs --in <file> --out <file> --password <pw> --template <gate.html>',
+  );
   process.exit(2);
 }
 

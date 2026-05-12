@@ -1,8 +1,8 @@
-import * as p from '@clack/prompts';
 import { cp, mkdir, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import * as p from '@clack/prompts';
 import type { AgentKey, Config, PasswordPolicy, Visibility } from '../config.js';
 import { readConfig, writeConfig } from '../config.js';
 import { pointerPath } from '../paths.js';
@@ -74,7 +74,8 @@ export async function runInit(opts: RunOptions): Promise<void> {
 
   let vercelInfo = cur?.vercel;
   // Only re-link when starting fresh or when the user changed the project name.
-  const shouldRelink = opts.mode === 'init' || !vercelInfo || vercelInfo.projectName !== projectName;
+  const shouldRelink =
+    opts.mode === 'init' || !vercelInfo || vercelInfo.projectName !== projectName;
   if (shouldRelink) {
     const linked = await vercel.linkProject(projectName);
     vercelInfo = {
