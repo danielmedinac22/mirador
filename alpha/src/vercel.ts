@@ -34,7 +34,9 @@ export interface LinkResult {
 
 export async function linkProject(projectName: string): Promise<LinkResult> {
   const stage = mkdtempSync(join(tmpdir(), 'mirador-link-'));
-  const r = spawnSync('vercel', ['link', '--yes', '--name', projectName], {
+  // Vercel CLI ≥ 50 uses `--project`. With `--yes`, the project is created if it
+  // does not exist, using default scope and settings.
+  const r = spawnSync('vercel', ['link', '--yes', '--project', projectName], {
     cwd: stage,
     stdio: 'inherit',
   });
