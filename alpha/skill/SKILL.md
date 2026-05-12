@@ -1,6 +1,6 @@
 ---
 name: mirador
-description: Use after producing an HTML artifact in the session (report, dashboard, presentation, document, prototype, or mini-app) and the user wants to share it. Publishes the file to the user's own Vercel project. Walks the user through name, theme (with optional theme-from-reference generation done by your own model), and password protection, then deploys via `vercel` CLI and prints the URL.
+description: Publish an HTML artifact to your Mirador (your own Vercel) and get a shareable link. Use after producing HTML in the session (report, dashboard, deck, document, prototype, mini-app) and the user wants to share it. Walks the user through name, theme (with optional theme-from-reference generation), and password protection, then deploys via `vercel` CLI.
 ---
 
 # Mirador — share an HTML artifact

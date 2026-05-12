@@ -12,13 +12,23 @@ export async function installAgents(agents: AgentKey[], pkgDir: string): Promise
 }
 
 async function installClaudeCode(pkgDir: string): Promise<void> {
+  // The skill's frontmatter `name: mirador` already registers `/mirador` in
+  // Claude Code; no separate slash-command file is needed (it would duplicate
+  // the entry in the picker).
   const skillDir = join(homedir(), '.claude', 'skills', 'mirador');
-  const cmdFile = join(homedir(), '.claude', 'commands', 'mirador.md');
   await mkdir(skillDir, { recursive: true });
   await cp(join(pkgDir, 'skill'), skillDir, { recursive: true, force: true });
-  await mkdir(join(homedir(), '.claude', 'commands'), { recursive: true });
-  await cp(join(pkgDir, 'command', 'mirador.md'), cmdFile);
-  console.log(`Claude Code: installed skill to ${skillDir} and /mirador to ${cmdFile}`);
+
+  // Clean up legacy slash command from earlier alphas, if present.
+  const legacyCmd = join(homedir(), '.claude', 'commands', 'mirador.md');
+  try {
+    const { rm } = await import('node:fs/promises');
+    await rm(legacyCmd, { force: true });
+  } catch {
+    // ignore
+  }
+
+  console.log(`Claude Code: installed skill to ${skillDir}`);
 }
 
 async function installCodex(pkgDir: string): Promise<void> {
@@ -39,10 +49,9 @@ async function installOther(pkgDir: string): Promise<void> {
   const hints = join(homedir(), '.mirador', 'install-hints', 'other');
   await mkdir(hints, { recursive: true });
   await cp(join(pkgDir, 'skill'), hints, { recursive: true, force: true });
-  await cp(join(pkgDir, 'command'), join(hints, 'command'), { recursive: true, force: true });
   await writeFile(
     join(hints, 'README.md'),
-    "Copy SKILL.md to your agent platform's skills directory and command/mirador.md to its slash-commands directory.\n",
+    "Copy SKILL.md to your agent platform's skills directory.\n",
     'utf8',
   );
   console.log(`Manual install: files in ${hints}`);

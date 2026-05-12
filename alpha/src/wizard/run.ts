@@ -7,6 +7,7 @@ import type { AgentKey, Config, PasswordPolicy, Visibility } from '../config.js'
 import { readConfig, writeConfig } from '../config.js';
 import { pointerPath } from '../paths.js';
 import * as vercel from '../vercel.js';
+import { printBanner } from './banner.js';
 import { installAgents } from './install-agents.js';
 
 // dist/index.js → package root is two segments up (../..).
@@ -17,6 +18,7 @@ export interface RunOptions {
 }
 
 export async function runInit(opts: RunOptions): Promise<void> {
+  if (opts.mode === 'init') printBanner();
   p.intro(opts.mode === 'init' ? 'mirador init' : 'mirador config');
 
   const cur = await readConfig();

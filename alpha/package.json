@@ -6,7 +6,7 @@
   "type": "module",
   "engines": { "node": ">=20" },
   "bin": { "mirador": "./dist/index.js" },
-  "files": ["dist", "themes", "templates", "scripts", "skill", "command"],
+  "files": ["dist", "themes", "templates", "scripts", "skill"],
   "scripts": {
     "build": "tsup src/index.ts --format esm --target node20 --shims --no-splitting --clean",
     "dev": "tsup src/index.ts --format esm --target node20 --shims --watch",
