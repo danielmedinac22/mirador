@@ -2,7 +2,7 @@
 
 Publish AI-generated HTML to your own Vercel project. One setup command; everything else happens inside your AI agent.
 
-> **Status:** alpha. Skill-only product, no managed runtime yet. The V1 SaaS lives in [its own spec](../docs/superpowers/specs/2026-05-12-mirador-design.md).
+> **Status:** alpha. Skill-only product, no managed runtime yet.
 
 ## What Mirador is
 
@@ -98,8 +98,3 @@ rm -rf ~/.mirador ~/.claude/skills/mirador ~/.claude/commands/mirador.md ~/.code
 
 (Adjust the `.codex` line if you didn't install for Codex.)
 
-## Links
-
-- [Alpha design spec](../docs/superpowers/specs/2026-05-12-mirador-alpha-design.md)
-- [Implementation plan](../docs/superpowers/plans/2026-05-12-mirador-alpha.md)
-- [V1 (managed runtime) spec](../docs/superpowers/specs/2026-05-12-mirador-design.md)
