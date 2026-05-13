@@ -30,7 +30,7 @@ npm i -g mirador-cli
 > [!IMPORTANT]
 > **Status: public alpha.**
 >
-> The CLI and skill work today. The V1 managed runtime (multiplayer, hosted, real auth) is designed but not built — see [`docs/superpowers/specs/2026-05-12-mirador-design.md`](docs/superpowers/specs/2026-05-12-mirador-design.md). Expect rough edges; please file issues.
+> The CLI and skill work today. The V1 managed runtime (multiplayer, hosted, real auth) is designed but not built. Expect rough edges; please file issues.
 
 ---
 
@@ -52,12 +52,6 @@ Four steps. The first three happen once.
 
 ```bash
 npm i -g mirador-cli
-```
-
-Or via the install script:
-
-```bash
-curl -fsSL https://mirador.dev/install.sh | sh
 ```
 
 You also need the Vercel CLI and a free Vercel account:
@@ -147,9 +141,6 @@ For real auth, wait for V1, or use Vercel Pro's project-level password protectio
 | Path | What's in it |
 |------|--------------|
 | [`alpha/`](alpha/) | The public alpha — CLI, skill, themes. See [`alpha/README.md`](alpha/README.md) for the deep dive. |
-| [`docs/superpowers/specs/2026-05-12-mirador-alpha-design.md`](docs/superpowers/specs/2026-05-12-mirador-alpha-design.md) | Alpha design spec (skill-only, BYO Vercel) |
-| [`docs/superpowers/specs/2026-05-12-mirador-design.md`](docs/superpowers/specs/2026-05-12-mirador-design.md) | V1 design spec (managed runtime, multiplayer) |
-| [`docs/superpowers/plans/2026-05-12-mirador-alpha.md`](docs/superpowers/plans/2026-05-12-mirador-alpha.md) | Alpha implementation plan |
 
 ---
 
