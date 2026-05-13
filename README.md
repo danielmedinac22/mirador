@@ -54,12 +54,6 @@ Four steps. The first three happen once.
 npm i -g mirador-cli
 ```
 
-Or via the install script:
-
-```bash
-curl -fsSL https://mirador.dev/install.sh | sh
-```
-
 You also need the Vercel CLI and a free Vercel account:
 
 ```bash
