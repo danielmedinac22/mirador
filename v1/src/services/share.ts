@@ -4,7 +4,7 @@ import { ensureDir, pathExists, writeFileAtomic } from '../adapters/fs.js';
 import * as git from '../adapters/git.js';
 import * as github from '../adapters/github.js';
 import * as vercel from '../adapters/vercel.js';
-import { readConfig } from '../shared/config.js';
+import { readConfig, writeConfig } from '../shared/config.js';
 import { MiradorError } from '../shared/errors.js';
 import { paths } from '../shared/paths.js';
 import { resolveArtifactPath } from './artifact.js';
@@ -118,46 +118,53 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
     }
   }
 
-  // 2. Compose the invitation seed
+  // 2. Compose the invitation seed (provisional — URLs may be re-derived after first deploy)
   const sent = new Date().toISOString();
-  const vercelBase = `https://${config.vercel.domain}`;
-  const previewUrl = `${vercelBase}/d/${input.slug}/`;
-  const landingUrl = `${vercelBase}/i/${input.slug}/`;
-  const seedText = composeSeed({
-    kind: 'invitation',
-    from: `${config.github.handle} <${config.github.handle}@users.noreply.github.com>`,
-    artifact: input.slug,
-    repo: `https://github.com/${fullName}`,
-    roleExpected: input.role,
-    note: input.note,
-    sent,
-    preview: previewUrl,
-    landing: landingUrl,
-  });
+  let activeDomain = config.vercel.domain;
+  const composeSeedFor = (domain: string): string => {
+    const base = `https://${domain}`;
+    return composeSeed({
+      kind: 'invitation',
+      from: `${config.github.handle} <${config.github.handle}@users.noreply.github.com>`,
+      artifact: input.slug,
+      repo: `https://github.com/${fullName}`,
+      roleExpected: input.role,
+      note: input.note,
+      sent,
+      preview: `${base}/d/${input.slug}/`,
+      landing: `${base}/i/${input.slug}/`,
+    });
+  };
+  let seedText = composeSeedFor(activeDomain);
 
   // 3. Render + publish static preview + landing locally
   const siteRoot = join(paths.workspaceClone(), 'site');
   await ensureDir(siteRoot);
   const previewHtml = await renderPreview(artifactPath, config.defaults.theme || 'default');
   const { localPath: previewLocal } = await publishPreview(siteRoot, input.slug, previewHtml);
-  const landingHtml = renderLanding({
-    kind: 'invitation',
-    slug: input.slug,
-    from: config.github.handle,
-    role: input.role,
-    note: input.note,
-    seedText,
-    previewUrl,
-  });
-  const { localPath: landingLocal } = await publishLanding(
-    siteRoot,
-    input.slug,
-    'invitation',
-    landingHtml,
-  );
+  const renderLandingFor = (seed: string, domain: string): string =>
+    renderLanding({
+      kind: 'invitation',
+      slug: input.slug,
+      from: config.github.handle,
+      role: input.role,
+      note: input.note,
+      seedText: seed,
+      previewUrl: `https://${domain}/d/${input.slug}/`,
+    });
+  let landingLocal = (
+    await publishLanding(
+      siteRoot,
+      input.slug,
+      'invitation',
+      renderLandingFor(seedText, activeDomain),
+    )
+  ).localPath;
 
-  // 3b. Deploy to Vercel
+  // 3b. Deploy to Vercel (first attempt — may re-deploy if the production URL
+  //     pattern differs from the configured domain)
   let deployedUrl: string | undefined;
+  let redeployed = false;
   if (!input.offline && !input.noPublish) {
     try {
       const result = await vercel.deploySite(siteRoot, config.vercel.project);
@@ -166,7 +173,46 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
       const { logActivity } = await import('../shared/log.js');
       await logActivity(`share deploy-failed ${(err as Error).message}`);
     }
+
+    // Derive the real production URL from the deploy response and compare
+    // against config. If different, update config + re-render + re-deploy so
+    // the landing's embedded seed points at the correct stable URL.
+    if (deployedUrl) {
+      const derivedProdUrl = vercel.deriveProductionUrl(deployedUrl, config.vercel.project);
+      const derivedHost = (() => {
+        try {
+          return new URL(derivedProdUrl).host;
+        } catch {
+          return null;
+        }
+      })();
+      if (derivedHost && derivedHost !== activeDomain) {
+        process.stderr.write(
+          `ℹ  Vercel production domain detected as "${derivedHost}" — updating config (was "${activeDomain}") and re-deploying with corrected seed URLs.\n`,
+        );
+        await writeConfig({ ...config, vercel: { ...config.vercel, domain: derivedHost } });
+        activeDomain = derivedHost;
+        seedText = composeSeedFor(activeDomain);
+        landingLocal = (
+          await publishLanding(
+            siteRoot,
+            input.slug,
+            'invitation',
+            renderLandingFor(seedText, activeDomain),
+          )
+        ).localPath;
+        try {
+          const result2 = await vercel.deploySite(siteRoot, config.vercel.project);
+          deployedUrl = result2.deployedUrl;
+          redeployed = true;
+        } catch (err) {
+          const { logActivity } = await import('../shared/log.js');
+          await logActivity(`share redeploy-failed ${(err as Error).message}`);
+        }
+      }
+    }
   }
+  void redeployed; // retained for potential future use in result
 
   // 4. Extract artifact to shared clone path + push (snapshot mode only for now)
   if (input.keepHistory) {
