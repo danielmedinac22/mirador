@@ -137,12 +137,13 @@ describe('Mirador v1 — end-to-end', () => {
     expect(collabOpen.brief).toContain('role: reviewer');
     expect(collabOpen.brief).toMatch(/Brain flag.*scope/i);
 
-    // 7. Request flow
+    // 7. Request flow (offline to skip Vercel deploy)
     const req = await createRequest({
       title: 'Q3 forecast',
       toEmail: 'maria@simetrik.com',
       by: '2026-05-29',
       context: 'Board presentation, 1 page, with chart.',
+      offline: true,
     });
     expect(req.seedText).toContain('@mirador-request');
     expect(req.slug).toBe('q3-forecast');
