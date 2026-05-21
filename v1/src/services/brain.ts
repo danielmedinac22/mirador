@@ -1,6 +1,10 @@
+import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { writeFileAtomic } from '../adapters/fs.js';
+import { pathExists, writeFileAtomic } from '../adapters/fs.js';
+import { MiradorError } from '../shared/errors.js';
 import { paths } from '../shared/paths.js';
+
+// --- VS-01 scaffolding ---
 
 export interface BrainSeedAnswers {
   role: string;
@@ -62,4 +66,57 @@ metadata:
 
 When I review, I check ${a.reviewFocus || 'scope, timelines, and failure modes'} first.
 `;
+}
+
+// --- VS-08 read primitives ---
+
+export interface BrainFile {
+  topic: string;
+  description: string;
+  appliesToRole?: string;
+  body: string;
+  path: string;
+}
+
+export async function brainRoot(): Promise<string> {
+  const root = join(paths.workspaceClone(), 'brain');
+  if (!(await pathExists(root))) {
+    throw new MiradorError('BRAIN_MISSING', 'No brain found. Run `mirador-v1 init` first.');
+  }
+  return root;
+}
+
+export async function listBrain(): Promise<BrainFile[]> {
+  const root = await brainRoot();
+  const files = await readdir(root);
+  const out: BrainFile[] = [];
+  for (const f of files) {
+    if (!f.endsWith('.md') || f === 'MEMORY.md') continue;
+    const parsed = await loadBrain(f.replace(/\.md$/, ''));
+    out.push(parsed);
+  }
+  out.sort((a, b) => a.topic.localeCompare(b.topic));
+  return out;
+}
+
+export async function loadBrain(topic: string): Promise<BrainFile> {
+  const root = await brainRoot();
+  const filePath = join(root, `${topic}.md`);
+  if (!(await pathExists(filePath))) {
+    throw new MiradorError('BRAIN_TOPIC_MISSING', `No brain topic "${topic}".`);
+  }
+  const raw = await readFile(filePath, 'utf8');
+  return parseBrain(topic, raw, filePath);
+}
+
+export function parseBrain(topic: string, raw: string, path: string): BrainFile {
+  const fmMatch = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (!fmMatch) {
+    return { topic, description: '', body: raw, path };
+  }
+  const frontmatter = fmMatch[1] ?? '';
+  const body = fmMatch[2] ?? '';
+  const description = frontmatter.match(/^description:\s*(.+)$/m)?.[1]?.trim() ?? '';
+  const appliesToRole = frontmatter.match(/^\s*applies_to_role:\s*(\S+)$/m)?.[1]?.trim();
+  return { topic, description, appliesToRole, body, path };
 }

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
+import { registerBrain } from './commands/brain.js';
 import { registerInit } from './commands/init.js';
 import { registerNew } from './commands/new.js';
 import { registerOpen } from './commands/open.js';
@@ -15,6 +16,7 @@ program
 registerInit(program);
 registerNew(program);
 registerOpen(program);
+registerBrain(program);
 
 program.parseAsync().catch((err) => {
   console.error(err instanceof Error ? err.message : String(err));
