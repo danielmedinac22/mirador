@@ -8,6 +8,10 @@ export function registerShare(program: Command): void {
     .command('share <slug>')
     .description('Promote a workspace artifact to a shared repo and invite collaborators.')
     .requiredOption('--with <emails>', 'Comma-separated invitee emails.')
+    .option(
+      '--handle <handles>',
+      'Comma-separated GitHub handles, parallel to --with (skips email resolution).',
+    )
     .option('--role <role>', 'Role expected from collaborators (reviewer, author, ...).')
     .option('--note <text>', 'Note to include in the invitation.')
     .option('--keep-history', 'Preserve git history (default: snapshot-clean).')
@@ -19,6 +23,7 @@ export function registerShare(program: Command): void {
         slug: string,
         opts: {
           with: string;
+          handle?: string;
           role?: string;
           note?: string;
           keepHistory?: boolean;
@@ -32,12 +37,25 @@ export function registerShare(program: Command): void {
           .split(',')
           .map((s) => s.trim())
           .filter(Boolean);
+        const withHandles = opts.handle
+          ? opts.handle
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : undefined;
+        if (withHandles && withHandles.length !== withEmails.length) {
+          process.stderr.write(
+            `--handle list length (${withHandles.length}) must match --with list length (${withEmails.length}).\n`,
+          );
+          process.exit(1);
+        }
         const noPublish = opts.publish === false;
 
         if (opts.dryRun) {
           const result = await shareArtifact({
             slug,
             withEmails,
+            withHandles,
             role: opts.role,
             note: opts.note,
             keepHistory: opts.keepHistory,
@@ -68,6 +86,7 @@ export function registerShare(program: Command): void {
         const result = await shareArtifact({
           slug,
           withEmails,
+          withHandles,
           role: opts.role,
           note: opts.note,
           keepHistory: opts.keepHistory,

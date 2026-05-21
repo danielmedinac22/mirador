@@ -15,6 +15,8 @@ import { publishPreview, renderPreview } from './staticPreview.js';
 export interface ShareInput {
   slug: string;
   withEmails: string[];
+  /** Explicit GitHub handles, parallel to withEmails. If set, skips email→handle resolution. */
+  withHandles?: string[];
   role?: string;
   note?: string;
   keepHistory?: boolean;
@@ -83,11 +85,30 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
       });
       cloneUrl = repo.cloneUrl;
     }
-    for (const email of input.withEmails) {
-      const { handle } = await resolveEmail(email);
+    for (let i = 0; i < input.withEmails.length; i++) {
+      const email = input.withEmails[i] ?? '';
+      const explicit = input.withHandles?.[i];
+      let handle: string;
+      if (explicit) {
+        handle = explicit;
+      } else {
+        const resolved = await resolveEmail(email);
+        handle = resolved.handle;
+        if (resolved.warning) {
+          process.stderr.write(`⚠  ${resolved.warning}\n`);
+        }
+      }
       await github.addCollaborator(fullName, handle).catch((err) => {
-        // Non-fatal if collaborator already added (422 = already exists)
-        if (!String(err).includes('422')) throw err;
+        const msg = String(err);
+        if (msg.includes('422')) return; // already a collaborator
+        if (msg.includes('404')) {
+          throw new MiradorError(
+            'COLLAB_HANDLE_NOT_FOUND',
+            `GitHub user "${handle}" not found.`,
+            `Pass \`--handle ${handle === email.split('@')[0] ? '<correct-github-handle>' : handle}\` (or comma-separated, parallel to --with) to specify directly.`,
+          );
+        }
+        throw err;
       });
     }
   }
