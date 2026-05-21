@@ -41,3 +41,36 @@ export async function deploySite(
     );
   }
 }
+
+/**
+ * Vercel free-tier accounts get URLs shaped like:
+ *   https://<project>-<deployHash>-<scope>.vercel.app  ← deployment-specific
+ *   https://<project>-<scope>.vercel.app               ← stable production alias
+ *   https://<project>.vercel.app                       ← only on paid/single-account setups
+ *
+ * Derive the stable production URL by stripping the deployment-hash segment.
+ * Returns the original deployUrl when we can't confidently parse it.
+ */
+export function deriveProductionUrl(deployUrl: string, projectName: string): string {
+  let url: URL;
+  try {
+    url = new URL(deployUrl);
+  } catch {
+    return deployUrl;
+  }
+  const host = url.hostname;
+  const tld = '.vercel.app';
+  if (!host.endsWith(tld)) return deployUrl;
+  const prefix = host.slice(0, -tld.length);
+  if (!prefix.startsWith(`${projectName}-`)) {
+    return prefix === projectName ? deployUrl : deployUrl;
+  }
+  const rest = prefix.slice(projectName.length + 1);
+  const dashIdx = rest.indexOf('-');
+  if (dashIdx === -1) {
+    // No scope segment — fall back to bare project URL.
+    return `https://${projectName}.vercel.app`;
+  }
+  const scope = rest.slice(dashIdx + 1);
+  return `https://${projectName}-${scope}.vercel.app`;
+}

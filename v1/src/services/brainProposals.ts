@@ -1,5 +1,6 @@
 import { join } from 'node:path';
 import * as p from '@clack/prompts';
+import { editInEditor } from '../adapters/externalEditor.js';
 import { pathExists, readText, writeFileAtomic } from '../adapters/fs.js';
 import { brainRoot } from './brain.js';
 
@@ -44,13 +45,19 @@ export async function proposeBrainUpdate(input: ProposeInput): Promise<ProposeRe
     return { applied: false, reason: 'rejected' };
   }
 
+  let bodyToApply = input.proposedBody;
   if (choice === 'edit') {
-    p.log.warn(
-      `Editor opening not yet wired — applying as proposed. Edit later via \`${filePath}\` directly.`,
-    );
+    const editor = process.env.VISUAL ?? process.env.EDITOR ?? 'vi';
+    p.log.info(`Opening ${editor}...`);
+    const result = await editInEditor(input.proposedBody);
+    if (result.cancelled) {
+      p.outro('Edit cancelled — brain unchanged.');
+      return { applied: false, reason: 'edit-cancelled' };
+    }
+    bodyToApply = result.edited;
   }
 
-  await writeFileAtomic(filePath, ensureFrontmatter(input.topic, input.proposedBody));
+  await writeFileAtomic(filePath, ensureFrontmatter(input.topic, bodyToApply));
   p.outro(`Brain updated: ${filePath}`);
   return { applied: true };
 }

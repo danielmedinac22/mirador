@@ -121,14 +121,9 @@ describe('Mirador v1 — end-to-end', () => {
     // 6b. Now simulate a collaborator perspective by rewriting the manifest's
     //     owner to a different handle, so our config.handle === 'danielm' is
     //     no longer the owner and the role flips to reviewer.
-    const manifestPath = join(
-      tmp,
-      'workspace',
-      'artifacts',
-      'q2-draft',
-      '.mirador',
-      'manifest.json',
-    );
+    // After extraction (#21), the manifest lives in the shared clone, not the
+    // workspace artifact dir.
+    const manifestPath = join(tmp, 'shared', 'q2-draft', '.mirador', 'manifest.json');
     const m = JSON.parse(await readFile(manifestPath, 'utf8'));
     m.owner = 'alice';
     await writeFile(manifestPath, JSON.stringify(m, null, 2));
@@ -136,6 +131,15 @@ describe('Mirador v1 — end-to-end', () => {
     expect(collabOpen.role).toBe('reviewer');
     expect(collabOpen.brief).toContain('role: reviewer');
     expect(collabOpen.brief).toMatch(/Brain flag.*scope/i);
+
+    // 6c. Verify extraction happened.
+    const wsArtifact = join(tmp, 'workspace', 'artifacts', 'q2-draft');
+    const wsContents = await readdir(wsArtifact);
+    expect(wsContents).toEqual(['.mirador-link']);
+    const cloneContents = await readdir(join(tmp, 'shared', 'q2-draft'));
+    expect(cloneContents).toContain('CONTEXT.md');
+    expect(cloneContents).toContain('notes.md');
+    expect(cloneContents).toContain('.mirador');
 
     // 7. Request flow (offline to skip Vercel deploy)
     const req = await createRequest({

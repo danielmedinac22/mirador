@@ -9,6 +9,7 @@ import { registerNew } from './commands/new.js';
 import { registerOpen } from './commands/open.js';
 import { registerRequest } from './commands/request.js';
 import { registerShare } from './commands/share.js';
+import { registerUpgrade } from './commands/upgrade.js';
 import { computeInbox, renderInbox } from './services/inbox.js';
 import { VERSION } from './version.js';
 
@@ -28,6 +29,7 @@ registerRequest(program);
 registerAccept(program);
 registerDecline(program);
 registerInbox(program);
+registerUpgrade(program);
 
 // Default action: when called with no args, show inbox
 program.action(async () => {
