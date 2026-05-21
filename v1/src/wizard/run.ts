@@ -51,10 +51,15 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
   const repoName = `${ghUser}-mirador`;
 
   // Brain seed Qs
-  p.log.step('Quick brain bootstrap (5 questions — skippable)');
+  p.log.step('Brain bootstrap');
+  p.log.info(
+    'Your brain is private notes that shape how Claude Code reads artifacts you open\n' +
+      'with Mirador. Answer briefly — or press Enter to skip any. Edit later via\n' +
+      '`mirador-v1 brain`.',
+  );
   const role = await p.text({
     message: 'Your primary role at work?',
-    placeholder: 'PM / Engineer / ...',
+    placeholder: 'e.g. Product Engineering Manager / Senior Backend / CFO',
     defaultValue: '',
   });
   if (p.isCancel(role)) {
@@ -62,7 +67,8 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
     return;
   }
   const reviewFocus = await p.text({
-    message: 'When reviewing, what do you check first?',
+    message: "When reviewing someone else's work, what do you check first?",
+    placeholder: 'e.g. scope creep, missing timelines, failure modes',
     defaultValue: '',
   });
   if (p.isCancel(reviewFocus)) {
@@ -70,7 +76,8 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
     return;
   }
   const authorAudience = await p.text({
-    message: 'When authoring, your default audience size?',
+    message: "When you author something, who's your typical audience?",
+    placeholder: 'e.g. my team, the whole company, the board, external clients',
     defaultValue: '',
   });
   if (p.isCancel(authorAudience)) {
@@ -79,7 +86,7 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
   }
   const domain = await p.text({
     message: 'Domain language you work in?',
-    placeholder: 'e.g. fintech, LatAm, B2B',
+    placeholder: 'e.g. fintech LatAm B2B; healthcare HIPAA; e-commerce checkout',
     defaultValue: '',
   });
   if (p.isCancel(domain)) {
@@ -87,7 +94,8 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
     return;
   }
   const preferences = await p.text({
-    message: 'Anything else? (free text)',
+    message: 'Any preferences? (anything that shapes how you like to work)',
+    placeholder: 'e.g. tables not prose; avoid jargon; flag missing dates',
     defaultValue: '',
   });
   if (p.isCancel(preferences)) {
