@@ -1,6 +1,11 @@
+import * as p from '@clack/prompts';
 import type { Command } from 'commander';
 import { listBrain, loadBrain } from '../services/brain.js';
-import { detectExistingContext } from '../services/brainImport.js';
+import {
+  type ExistingContext,
+  detectExistingContext,
+  importContext,
+} from '../services/brainImport.js';
 import { proposeBrainUpdate } from '../services/brainProposals.js';
 
 export function registerBrain(program: Command): void {
@@ -61,11 +66,86 @@ export function registerBrain(program: Command): void {
     .action(async () => {
       const found = await detectExistingContext();
       if (found.length === 0) {
-        process.stdout.write('(no existing context detected)\n');
+        process.stdout.write('(no existing context detected, or all already imported)\n');
         return;
       }
       const lines = found.map((f) => `${f.source}  (${f.body.length} chars)`);
       process.stdout.write(`${lines.join('\n')}\n`);
-      process.stdout.write('\nImport flow not yet wired — see issue #15 for the full UX.\n');
+      process.stdout.write('\nRun `mirador-v1 brain import` to interactively bring these in.\n');
     });
+
+  brain
+    .command('import')
+    .description('Interactively import detected existing contexts into your brain.')
+    .action(async () => {
+      const found = await detectExistingContext();
+      if (found.length === 0) {
+        process.stdout.write('(no existing context detected, or all already imported)\n');
+        return;
+      }
+      p.intro('Mirador · brain import');
+      const picks = (await p.multiselect({
+        message: 'Which sources do you want to import?',
+        options: found.map((f) => ({
+          value: f.path,
+          label: f.source,
+          hint: `${f.body.length} chars`,
+        })),
+        required: false,
+      })) as string[] | symbol;
+      if (p.isCancel(picks) || !Array.isArray(picks) || picks.length === 0) {
+        p.cancel('Nothing imported.');
+        return;
+      }
+
+      const picked = found.filter((f) => picks.includes(f.path));
+      for (const ctx of picked) {
+        await importOne(ctx);
+      }
+      p.outro(`Imported ${picked.length} file(s) into your brain.`);
+    });
+}
+
+async function importOne(ctx: ExistingContext): Promise<void> {
+  const suggestedTopic =
+    ctx.source
+      .split('/')
+      .pop()
+      ?.replace(/\.md$/, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '-')
+      .replace(/^-+|-+$/g, '') ?? 'imported';
+
+  const topic = await p.text({
+    message: `Topic name for ${ctx.source}?`,
+    placeholder: suggestedTopic,
+    defaultValue: suggestedTopic,
+  });
+  if (p.isCancel(topic)) return;
+
+  const description = await p.text({
+    message: 'Short description?',
+    placeholder: `(imported from ${ctx.source})`,
+    defaultValue: `(imported from ${ctx.source})`,
+  });
+  if (p.isCancel(description)) return;
+
+  const role = await p.select({
+    message: 'Does this brain apply to a specific role?',
+    options: [
+      { value: '', label: 'No — cross-role / preferences' },
+      { value: 'author', label: 'author' },
+      { value: 'reviewer', label: 'reviewer' },
+      { value: 'stakeholder', label: 'stakeholder' },
+    ],
+  });
+  if (p.isCancel(role)) return;
+
+  const { path } = await importContext({
+    context: ctx,
+    topic: String(topic) || suggestedTopic,
+    description: String(description) || undefined,
+    appliesToRole: role ? String(role) : undefined,
+  });
+  p.log.success(`Imported → ${path}`);
 }

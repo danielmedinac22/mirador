@@ -2,6 +2,7 @@ import { join } from 'node:path';
 import { ensureDir, pathExists, writeFileAtomic } from '../adapters/fs.js';
 import { MiradorError } from '../shared/errors.js';
 import { paths } from '../shared/paths.js';
+import { readLinkFile } from './linkFile.js';
 
 export interface NewArtifactInput {
   slug: string;
@@ -29,6 +30,18 @@ export async function resolveArtifactPath(slug: string): Promise<string> {
       `Artifact "${slug}" not found in workspace.`,
       'Run `mirador-v1 list` to see your artifacts.',
     );
+  }
+  // If the workspace folder is a link-only stub, follow the link to the shared clone.
+  const link = await readLinkFile(dir);
+  if (link?.clone_path) {
+    if (!(await pathExists(link.clone_path))) {
+      throw new MiradorError(
+        'SHARED_CLONE_MISSING',
+        `Shared artifact "${slug}" was extracted but the local clone at ${link.clone_path} is missing.`,
+        `Run \`git clone ${link.repo} ${link.clone_path}\` and retry, or \`mirador-v1 unshare ${slug}\` to re-absorb if you have a backup.`,
+      );
+    }
+    return link.clone_path;
   }
   return dir;
 }
