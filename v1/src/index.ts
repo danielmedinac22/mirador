@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
+import { registerInit } from './commands/init.js';
 import { VERSION } from './version.js';
 
 const program = new Command();
 
 program
   .name('mirador-v1')
-  .description('Mirador v1 — collaborative artifacts on git, brain-aware Claude Code sessions.')
+  .description('Mirador v1 CLI — collaborative AI artifacts on git.')
   .version(VERSION);
 
-// Commands wire up here as vertical slices land.
-// See docs/superpowers/specs/2026-05-21-mirador-v2-design.md §8 for the surface.
+registerInit(program);
 
 program.parseAsync().catch((err) => {
   console.error(err instanceof Error ? err.message : String(err));
