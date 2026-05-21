@@ -14,8 +14,30 @@ export async function vercelWhoami(): Promise<{ user: string }> {
   }
 }
 
-// Lazy: actual project creation happens on first deploy in VS-04.
-// At init time we just commit to the intended project name.
 export async function ensureProject(name: string): Promise<{ projectName: string }> {
   return { projectName: name };
+}
+
+export async function deploySite(
+  localDir: string,
+  projectName: string,
+): Promise<{ deployedUrl: string }> {
+  try {
+    const { stdout } = await execa('vercel', [
+      'deploy',
+      '--prod',
+      localDir,
+      '--yes',
+      '--no-clipboard',
+      `--name=${projectName}`,
+    ]);
+    const url = stdout.trim().split(/\s+/).pop() ?? '';
+    return { deployedUrl: url };
+  } catch (err) {
+    throw new MiradorError(
+      ERRORS.VERCEL_DEPLOY,
+      `Vercel deploy failed: ${(err as Error).message}`,
+      'Re-run with `mirador-v1 config --diagnose` to inspect.',
+    );
+  }
 }

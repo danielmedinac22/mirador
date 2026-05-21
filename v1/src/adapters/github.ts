@@ -38,3 +38,46 @@ export async function repoExists(fullName: string): Promise<boolean> {
     return false;
   }
 }
+
+export async function addCollaborator(repo: string, handle: string): Promise<void> {
+  try {
+    await execa('gh', [
+      'api',
+      '-X',
+      'PUT',
+      `/repos/${repo}/collaborators/${handle}`,
+      '-f',
+      'permission=push',
+    ]);
+  } catch (err) {
+    throw new MiradorError(
+      ERRORS.GITHUB_API,
+      `Failed to add collaborator ${handle}: ${(err as Error).message}`,
+    );
+  }
+}
+
+export async function archiveRepo(repo: string): Promise<void> {
+  try {
+    await execa('gh', ['api', '-X', 'PATCH', `/repos/${repo}`, '-F', 'archived=true']);
+  } catch (err) {
+    throw new MiradorError(
+      ERRORS.GITHUB_API,
+      `Failed to archive ${repo}: ${(err as Error).message}`,
+    );
+  }
+}
+
+export async function resolveEmailToHandle(email: string): Promise<string | null> {
+  // GitHub search by email. Falls back to using the local-part as handle.
+  try {
+    const { stdout } = await execa('gh', [
+      'api',
+      `/search/users?q=${encodeURIComponent(`${email} in:email`)}`,
+    ]);
+    const data = JSON.parse(stdout) as { items?: Array<{ login: string }> };
+    return data.items?.[0]?.login ?? null;
+  } catch {
+    return null;
+  }
+}
