@@ -1,5 +1,6 @@
 import { join } from 'node:path';
 import { ensureDir, writeFileAtomic } from '../adapters/fs.js';
+import * as vercel from '../adapters/vercel.js';
 import { readConfig } from '../shared/config.js';
 import { MiradorError } from '../shared/errors.js';
 import { paths } from '../shared/paths.js';
@@ -9,17 +10,23 @@ import { publishLanding, renderLanding } from './landingPage.js';
 import { type RequestSeed, type ResponseSeed, composeSeed } from './promptSeed.js';
 
 export interface CreateRequestInput {
-  title: string; // becomes the slug after kebab-casing
+  title: string;
   toEmail: string;
   by?: string;
   context?: string;
   role?: string;
+  offline?: boolean; // INTERNAL: skip Vercel deploy (tests).
+  noPublish?: boolean; // USER-FACING: skip Vercel deploy only.
+  dryRun?: boolean;
 }
 
 export interface CreateRequestResult {
   slug: string;
   seedText: string;
   landingPath: string;
+  deployedUrl?: string;
+  dryRun?: boolean;
+  plan?: string[];
 }
 
 export async function createRequest(input: CreateRequestInput): Promise<CreateRequestResult> {
@@ -29,6 +36,23 @@ export async function createRequest(input: CreateRequestInput): Promise<CreateRe
   const slug = toSlug(input.title);
   const sent = new Date().toISOString();
   const expires = computeRequestExpiry(input.by);
+
+  if (input.dryRun) {
+    return {
+      slug,
+      seedText: '(dry run — seed not generated)',
+      landingPath: '(dry run)',
+      dryRun: true,
+      plan: [
+        `Would write outgoing-requests/${slug}.md stub`,
+        `Would render landing to workspace/site/r/${slug}/index.html`,
+        input.noPublish
+          ? 'Would NOT deploy to Vercel (--no-publish)'
+          : `Would deploy workspace/site/ to Vercel project: ${config.vercel.project}`,
+        `Would copy seed text to clipboard for sending to ${input.toEmail}`,
+      ],
+    };
+  }
 
   const seed: RequestSeed = {
     kind: 'request',
@@ -44,7 +68,6 @@ export async function createRequest(input: CreateRequestInput): Promise<CreateRe
   };
   const seedText = composeSeed(seed);
 
-  // Stub in workspace outgoing-requests
   const stubDir = join(paths.workspaceClone(), 'outgoing-requests');
   await ensureDir(stubDir);
   await writeFileAtomic(
@@ -52,7 +75,6 @@ export async function createRequest(input: CreateRequestInput): Promise<CreateRe
     `# Request: ${input.title}\n\nTo: ${input.toEmail}\nBy: ${input.by ?? '(unset)'}\nExpires: ${expires}\nStatus: pending\n\n${input.context ?? ''}\n`,
   );
 
-  // Landing page
   const siteRoot = join(paths.workspaceClone(), 'site');
   await ensureDir(siteRoot);
   const landingHtml = renderLanding({
@@ -65,7 +87,18 @@ export async function createRequest(input: CreateRequestInput): Promise<CreateRe
   });
   const { localPath } = await publishLanding(siteRoot, slug, 'request', landingHtml);
 
-  return { slug, seedText, landingPath: localPath };
+  let deployedUrl: string | undefined;
+  if (!input.offline && !input.noPublish) {
+    try {
+      const result = await vercel.deploySite(siteRoot, config.vercel.project);
+      deployedUrl = result.deployedUrl;
+    } catch (err) {
+      const { logActivity } = await import('../shared/log.js');
+      await logActivity(`request deploy-failed ${(err as Error).message}`);
+    }
+  }
+
+  return { slug, seedText, landingPath: localPath, deployedUrl };
 }
 
 export async function acceptRequest(seed: RequestSeed): Promise<{

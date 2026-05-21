@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import { ensureDir, pathExists, writeFileAtomic } from '../adapters/fs.js';
 import * as github from '../adapters/github.js';
+import * as vercel from '../adapters/vercel.js';
 import { readConfig } from '../shared/config.js';
 import { MiradorError } from '../shared/errors.js';
 import { paths } from '../shared/paths.js';
@@ -17,7 +18,9 @@ export interface ShareInput {
   role?: string;
   note?: string;
   keepHistory?: boolean;
-  offline?: boolean; // when true, skip GitHub create + Vercel deploy
+  offline?: boolean; // INTERNAL: skip GitHub + Vercel calls (for tests).
+  noPublish?: boolean; // USER-FACING: skip Vercel deploy only (local files still rendered).
+  dryRun?: boolean; // USER-FACING: print what would happen, write nothing.
 }
 
 export interface ShareResult {
@@ -26,6 +29,9 @@ export interface ShareResult {
   invitationSeed: string;
   landingPath: string;
   previewPath: string;
+  deployedUrl?: string;
+  dryRun?: boolean;
+  plan?: string[];
 }
 
 export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
@@ -39,9 +45,32 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
     config.github.sharedReposNamespace === 'personal'
       ? config.github.handle
       : config.github.sharedReposNamespace;
-
-  // 1. Create repo (offline = stub)
   const fullName = `${owner}/${input.slug}`;
+
+  // Dry-run: describe the plan, do nothing.
+  if (input.dryRun) {
+    const plan = [
+      `Would create private GitHub repo: ${fullName}`,
+      ...input.withEmails.map((e) => `Would invite collaborator: ${e}`),
+      `Would render preview to: workspace/site/d/${input.slug}/index.html`,
+      `Would render landing to: workspace/site/i/${input.slug}/index.html`,
+      input.noPublish
+        ? 'Would NOT deploy to Vercel (--no-publish)'
+        : `Would deploy workspace/site/ to Vercel project: ${config.vercel.project}`,
+      `Would replace ${input.slug}/ with .mirador-link pointing at ${fullName}`,
+    ];
+    return {
+      sharedRepo: fullName,
+      cloneUrl: `https://github.com/${fullName}.git`,
+      invitationSeed: '(dry run — seed not generated)',
+      landingPath: '(dry run)',
+      previewPath: '(dry run)',
+      dryRun: true,
+      plan,
+    };
+  }
+
+  // 1. Create repo + invite collaborators (skipped if offline)
   let cloneUrl = `https://github.com/${fullName}.git`;
   if (!input.offline) {
     const existing = await github.repoExists(fullName);
@@ -57,13 +86,13 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
     for (const email of input.withEmails) {
       const { handle } = await resolveEmail(email);
       await github.addCollaborator(fullName, handle).catch((err) => {
-        // Non-fatal if collaborator already added
+        // Non-fatal if collaborator already added (422 = already exists)
         if (!String(err).includes('422')) throw err;
       });
     }
   }
 
-  // 2. Compose the invitation seed (used in landing + clipboard)
+  // 2. Compose the invitation seed
   const sent = new Date().toISOString();
   const vercelBase = `https://${config.vercel.domain}`;
   const previewUrl = `${vercelBase}/d/${input.slug}/`;
@@ -80,7 +109,7 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
     landing: landingUrl,
   });
 
-  // 3. Render + publish static preview + landing (local; deploy is offline-skipped)
+  // 3. Render + publish static preview + landing locally
   const siteRoot = join(paths.workspaceClone(), 'site');
   await ensureDir(siteRoot);
   const previewHtml = await renderPreview(artifactPath, config.defaults.theme || 'default');
@@ -101,9 +130,20 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
     landingHtml,
   );
 
-  // 4. Replace workspace folder with .mirador-link (only the link file inside)
-  // Strategy: keep the existing artifact folder intact but add the link file alongside.
-  // (Full extraction to a separate shared/<slug> clone is a follow-up — see TODO below.)
+  // 3b. Deploy to Vercel (skipped if offline or --no-publish)
+  let deployedUrl: string | undefined;
+  if (!input.offline && !input.noPublish) {
+    try {
+      const result = await vercel.deploySite(siteRoot, config.vercel.project);
+      deployedUrl = result.deployedUrl;
+    } catch (err) {
+      // Deploy failure is logged but doesn't fail the share — local files exist.
+      const { logActivity } = await import('../shared/log.js');
+      await logActivity(`share deploy-failed ${(err as Error).message}`);
+    }
+  }
+
+  // 4. Link file
   await writeLinkFile(artifactPath, {
     kind: 'mirador-link',
     artifact: input.slug,
@@ -114,7 +154,7 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
     clone_path: join(paths.sharedClonesRoot(), input.slug),
   });
 
-  // 5. Persist manifest in the artifact for VS-09 role override
+  // 5. Manifest
   const manifestDir = join(artifactPath, '.mirador');
   await ensureDir(manifestDir);
   await writeFileAtomic(
@@ -138,6 +178,7 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
     invitationSeed: seedText,
     landingPath: landingLocal,
     previewPath: previewLocal,
+    deployedUrl,
   };
 }
 
@@ -146,7 +187,6 @@ export async function unshareArtifact(
   opts: { offline?: boolean } = {},
 ): Promise<void> {
   const artifactPath = await resolveArtifactPath(slug);
-  // Remove link file
   const linkPath = join(artifactPath, '.mirador-link');
   if (await pathExists(linkPath)) {
     const { rm } = await import('node:fs/promises');
