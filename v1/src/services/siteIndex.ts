@@ -58,7 +58,7 @@ export function renderSiteIndex(entries: SiteIndexEntry[], owner: string): strin
   </main>
 
   <footer class="shell-foot">
-    <a href="https://mirador.dev">mirador.dev</a>
+    <a href="https://github.com/danielmedinac22/mirador" target="_blank" rel="noopener">github.com/danielmedinac22/mirador</a>
   </footer>
 </div>
 </body>

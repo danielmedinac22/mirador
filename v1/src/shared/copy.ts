@@ -72,7 +72,7 @@ export const copy = {
     ctaPrimary: 'Open in Claude Code',
     ctaPrimaryClicked: 'Copied. Paste it in.',
     ctaSecondary: 'Or just read it.',
-    footer: "What's this? mirador.dev.",
+    footer: "What's this? github.com/danielmedinac22/mirador.",
   },
 
   gate: {
@@ -86,7 +86,7 @@ export const copy = {
   siteIndex: {
     heading: 'mirador',
     empty: 'Nothing here yet.',
-    footer: 'mirador.dev',
+    footer: 'github.com/danielmedinac22/mirador',
   },
 } as const;
 

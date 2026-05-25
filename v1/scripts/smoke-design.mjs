@@ -43,7 +43,7 @@ const LOCKUP = `<a href="/" class="lockup" aria-label="mirador">
 </a>`;
 
 const SHELL_HEAD = `<header class="shell-head">${LOCKUP}</header>`;
-const SHELL_FOOT = `<footer class="shell-foot">What’s this? <a href="https://mirador.dev">mirador.dev</a>.</footer>`;
+const SHELL_FOOT = `<footer class="shell-foot">What’s this? <a href="https://github.com/danielmedinac22/mirador" target="_blank" rel="noopener">github.com/danielmedinac22/mirador</a>.</footer>`;
 
 /* ─── Landing ──────────────────────────────────────────────────────── */
 
