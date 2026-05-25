@@ -12,9 +12,10 @@ import { resolveEmail } from './inviteResolver.js';
 import { publishLanding, renderLanding } from './landingPage.js';
 import { writeLinkFile } from './linkFile.js';
 import { composeSeed } from './promptSeed.js';
+import { readRegistry, removeEntry, upsertEntry } from './shareRegistry.js';
 import { installSiteChrome } from './siteChrome.js';
-import { discoverPublishedSlugs, publishSiteIndex } from './siteIndex.js';
-import { publishPreview, renderPreview } from './staticPreview.js';
+import { publishSiteIndex } from './siteIndex.js';
+import { normaliseTheme, publishPreview, renderPreview } from './staticPreview.js';
 
 export interface ShareInput {
   slug: string;
@@ -165,9 +166,22 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
     )
   ).localPath;
 
-  // Refresh site index to include the newly published artifact
-  const indexEntries = await discoverPublishedSlugs(siteRoot);
-  await publishSiteIndex(siteRoot, config.github.handle, indexEntries);
+  // Record the share in the registry — source of truth for the dashboard.
+  await upsertEntry(siteRoot, {
+    slug: input.slug,
+    kind: 'share',
+    publishedAt: sent,
+    theme: normaliseTheme(config.defaults.theme ?? 'page'),
+    sharedWith: input.withEmails,
+    role: input.role,
+    note: input.note,
+  });
+
+  // Refresh site index from the registry (with baseUrl for action URLs).
+  const registry = await readRegistry(siteRoot);
+  await publishSiteIndex(siteRoot, config.github.handle, registry.shares, {
+    baseUrl: `https://${activeDomain}`,
+  });
 
   // 3b. Deploy to Vercel (first attempt — may re-deploy if the production URL
   //     pattern differs from the configured domain)
@@ -209,6 +223,11 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
             renderLandingFor(seedText, activeDomain),
           )
         ).localPath;
+        // Re-render site index with corrected baseUrl so dashboard action links match.
+        const refreshed = await readRegistry(siteRoot);
+        await publishSiteIndex(siteRoot, config.github.handle, refreshed.shares, {
+          baseUrl: `https://${activeDomain}`,
+        });
         try {
           const result2 = await vercel.deploySite(siteRoot, config.vercel.project);
           deployedUrl = result2.deployedUrl;
@@ -399,6 +418,19 @@ export async function unshareArtifact(
       }
     }
     await rm(linkPath);
+  }
+
+  // Drop the entry from the share registry + refresh site index.
+  const siteRoot = join(paths.workspaceClone(), 'site');
+  if (await pathExists(siteRoot)) {
+    await removeEntry(siteRoot, slug);
+    const config = await readConfig();
+    if (config) {
+      const registry = await readRegistry(siteRoot);
+      await publishSiteIndex(siteRoot, config.github.handle, registry.shares, {
+        baseUrl: `https://${config.vercel.domain}`,
+      });
+    }
   }
 
   if (!opts.offline) {
