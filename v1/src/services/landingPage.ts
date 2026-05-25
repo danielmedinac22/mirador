@@ -85,7 +85,7 @@ export function renderLanding(input: LandingInput): string {
   </main>
 
   <footer class="shell-foot">
-    What’s this? <a href="https://mirador.dev">mirador.dev</a>.
+    What’s this? <a href="https://github.com/danielmedinac22/mirador" target="_blank" rel="noopener">github.com/danielmedinac22/mirador</a>.
   </footer>
 </div>
 
