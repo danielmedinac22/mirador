@@ -23,7 +23,7 @@ function renderSessionSkill(input: SessionSkillInput): string {
 name: mirador-session-${input.slug}
 description: |
   Mirador session skill for the artifact "${input.slug}". Renders the session
-  brief produced by \`mirador-v1 open\` and guides the conversation around the
+  brief produced by \`mirador open\` and guides the conversation around the
   artifact files at ${input.artifactPath}.
 ---
 
@@ -33,7 +33,7 @@ Artifact path: ${input.artifactPath}
 ${input.expectedRole ? `Expected role: ${input.expectedRole}\n` : ''}
 ## How to respond
 
-The user invoked \`mirador-v1 open ${input.slug}\`. The CLI has printed a
+The user invoked \`mirador open ${input.slug}\`. The CLI has printed a
 session brief. **Your first turn must render that brief verbatim** (table
 format from PRD §11.1) — do not paraphrase, do not add narrative summary,
 do not add bullets. After the brief, wait for the user's next message.
@@ -44,8 +44,8 @@ You have access to the user's private brain — their notes on how they think
 and work. Query on demand:
 
 \`\`\`
-mirador-v1 brain list                  # see available topics
-mirador-v1 brain topic <topic-name>    # fetch a specific topic's body
+mirador brain list                  # see available topics
+mirador brain topic <topic-name>    # fetch a specific topic's body
 \`\`\`
 
 **Use the brain when:**
@@ -57,7 +57,7 @@ mirador-v1 brain topic <topic-name>    # fetch a specific topic's body
 **Don't:**
 - Pre-load all brain topics at session start (it wastes context).
 - Quote brain content into shared comments without the user's explicit OK.
-- Write directly to brain files — go through \`mirador-v1 brain update\`.
+- Write directly to brain files — go through \`mirador brain update\`.
 
 ## Proposing a brain update
 
@@ -65,7 +65,7 @@ When you notice a pattern in the user's choices that's worth remembering,
 propose an update:
 
 \`\`\`
-mirador-v1 brain update --topic <existing-or-new> --propose "<full body>" --reason "<why>"
+mirador brain update --topic <existing-or-new> --propose "<full body>" --reason "<why>"
 \`\`\`
 
 The CLI prompts the user y/n/edit interactively. The user always decides.

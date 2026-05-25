@@ -37,7 +37,7 @@ export async function deploySite(
     throw new MiradorError(
       ERRORS.VERCEL_DEPLOY,
       `Vercel deploy failed: ${(err as Error).message}`,
-      'Re-run with `mirador-v1 config --diagnose` to inspect.',
+      'Re-run with `mirador config --diagnose` to inspect.',
     );
   }
 }

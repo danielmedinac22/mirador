@@ -1,0 +1,9 @@
+{
+  "name": "console",
+  "thesis": "Code is content.",
+  "primaryFont": "JetBrains Mono",
+  "lightDefault": false,
+  "darkSupport": true,
+  "contentMaxWidth": 880,
+  "distinguishing": "$ > # prompt-style headings; opt-in line numbers; mono-everywhere."
+}

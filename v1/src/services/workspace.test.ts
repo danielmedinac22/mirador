@@ -121,7 +121,7 @@ describe('services/workspace', () => {
       const readme = await readFile(join(root, 'README.md'), 'utf8');
       const gitignore = await readFile(join(root, '.gitignore'), 'utf8');
 
-      expect(readme).toContain('Mirador workspace');
+      expect(readme).toContain('mirador workspace');
       expect(gitignore).toContain('logs/');
 
       const { access } = await import('node:fs/promises');

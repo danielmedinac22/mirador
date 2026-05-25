@@ -78,7 +78,7 @@ function renderBrief(
   if (!lastSeenIso) {
     const header = `${slug}  ·  ${headerCtx}${roleSuffix}  ·  newly created`;
     return composeBrief(header, '(fresh artifact — this is your starting point)', ctx.brainFlag, [
-      `Next: open ${artifactPath}  |  mirador-v1 share ${slug} --with <email>`,
+      `Next: open ${artifactPath}  |  mirador share ${slug} --with <email>`,
     ]);
   }
 
@@ -86,16 +86,16 @@ function renderBrief(
 
   if (changes.length === 0) {
     return composeBrief(header, '(no changes since you last opened)', ctx.brainFlag, [
-      `Next: open ${artifactPath}  |  mirador-v1 share ${slug} --with <email>`,
+      `Next: open ${artifactPath}  |  mirador share ${slug} --with <email>`,
     ]);
   }
 
   const table = renderChangeTable(changes.slice(0, 8));
   const overflow =
-    changes.length > 8 ? `\n+ ${changes.length - 8} more — \`mirador-v1 diff ${slug}\`` : '';
+    changes.length > 8 ? `\n+ ${changes.length - 8} more — \`mirador diff ${slug}\`` : '';
 
   return composeBrief(header, table + overflow, ctx.brainFlag, [
-    `Next: open ${artifactPath}  |  mirador-v1 share ${slug} --with <email>`,
+    `Next: open ${artifactPath}  |  mirador share ${slug} --with <email>`,
   ]);
 }
 

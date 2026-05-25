@@ -27,7 +27,7 @@ describe('services/skill', () => {
     await installClaudeSkill();
     const content = await readFile(join(tmp, 'claude', 'skills', 'mirador', 'SKILL.md'), 'utf8');
     expect(content).toContain('name: mirador');
-    expect(content).toContain('placeholder');
+    expect(content).toContain('@mirador-invitation');
   });
 
   it('installSlashCommand writes the /mirador command file', async () => {

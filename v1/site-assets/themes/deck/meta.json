@@ -1,0 +1,10 @@
+{
+  "name": "deck",
+  "thesis": "Slides that scroll.",
+  "primaryFont": "IBM Plex Sans",
+  "lightDefault": false,
+  "darkSupport": true,
+  "fullBleed": true,
+  "distinguishing": "scroll-snap sections; slide counter; arrow-key navigation.",
+  "scripts": ["deck.js"]
+}

@@ -1,0 +1,185 @@
+/* Theme: deck — Real slides.
+   Full-bleed sections with scroll-snap. Plex Sans Bold huge. Dark by default.
+   Slide counter, arrow-key nav.
+   Thesis: slides that scroll. */
+
+@import url('../../fonts.css');
+
+:root {
+  --deck-bg: #0a0a0a;
+  --deck-fg: #fafafa;
+  --deck-fg-muted: #a0a0a0;
+  --deck-accent: #4F7DF3;
+  --deck-rule: #1f1f1f;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --deck-bg: #fafafa;
+    --deck-fg: #0a0a0a;
+    --deck-fg-muted: #555555;
+    --deck-accent: #2541B2;
+    --deck-rule: #e5e5e5;
+  }
+}
+
+html { scroll-behavior: smooth; }
+
+body, .mirador-content {
+  background: var(--deck-bg);
+  color: var(--deck-fg);
+  margin: 0;
+}
+
+.mirador-content {
+  font-family: 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
+  scroll-snap-type: y mandatory;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.mirador-content > section,
+.mirador-content > .slide,
+.mirador-content > h1 + *,
+.mirador-content > h2 + *,
+.mirador-content > h1,
+.mirador-content > h2 {
+  /* base — overridden by .slide if present */
+}
+
+/* The canonical slide unit — wrap content in <section class="slide"> or <section> */
+.mirador-content > section,
+.mirador-content > .slide {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6rem clamp(2rem, 8vw, 8rem);
+  box-sizing: border-box;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  border-top: 1px solid var(--deck-rule);
+}
+.mirador-content > section:first-child { border-top: 0; }
+
+.mirador-content h1 {
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  margin: 0 0 1.5rem;
+  max-width: 22ch;
+}
+.mirador-content h2 {
+  font-size: clamp(2rem, 5vw, 3.75rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 1.25rem;
+}
+.mirador-content h3 {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  margin: 0 0 1rem;
+  color: var(--deck-fg-muted);
+}
+
+.mirador-content p {
+  font-size: clamp(1.125rem, 1.75vw, 1.5rem);
+  line-height: 1.45;
+  color: var(--deck-fg);
+  margin: 0 0 1rem;
+  max-width: 60ch;
+}
+
+.mirador-content ul, .mirador-content ol {
+  font-size: clamp(1.125rem, 1.5vw, 1.4rem);
+  line-height: 1.5;
+  padding-left: 1.5rem;
+  margin: 0;
+  max-width: 56ch;
+}
+.mirador-content li { margin: 0.5rem 0; }
+.mirador-content li::marker { color: var(--deck-accent); font-weight: 600; }
+
+.mirador-content a {
+  color: var(--deck-accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.mirador-content code {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+@media (prefers-color-scheme: light) {
+  .mirador-content code { background: rgba(0,0,0,0.06); }
+}
+
+.mirador-content pre {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: clamp(0.85rem, 1.2vw, 1.05rem);
+  line-height: 1.55;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--deck-rule);
+  padding: 1.5rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  max-width: 100%;
+}
+@media (prefers-color-scheme: light) {
+  .mirador-content pre { background: rgba(0,0,0,0.03); }
+}
+
+/* Slide counter — injected by JS, see deck.js */
+.deck-counter {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 2rem;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.85rem;
+  color: var(--deck-fg-muted);
+  letter-spacing: 0.05em;
+  z-index: var(--z-overlay, 100);
+  user-select: none;
+}
+.deck-counter .sep { margin: 0 0.3em; opacity: 0.5; }
+
+/* Progress indicator */
+.deck-progress {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 2px;
+  background: var(--deck-accent);
+  z-index: calc(var(--z-overlay, 100) + 1);
+  transition: width 120ms linear;
+}
+
+/* Hint for first-time visitors */
+.deck-hint {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: var(--deck-fg-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  z-index: var(--z-overlay, 100);
+  pointer-events: none;
+  animation: deck-hint-pulse 4s ease-in-out infinite;
+}
+@keyframes deck-hint-pulse {
+  0%, 100% { opacity: 0; }
+  20%, 80% { opacity: 0.7; }
+}

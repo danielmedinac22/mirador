@@ -1,10 +1,12 @@
 <div align="center">
 
-# MIRADOR
+<img src="v1/site-assets/assets/lockup-readme.svg" alt="mirador" width="220"/>
 
-**A place to share AI-generated HTML.**
+<br><br>
 
-**A Claude Code skill + CLI that turns any HTML your agent produces into a shareable link — published to your own Vercel, in under a minute.**
+**Share AI-generated HTML in under a minute.**
+
+A Claude Code skill + CLI that turns any HTML your agent produces into a shareable link — published to your own Vercel.
 
 [![npm version](https://img.shields.io/npm/v/mirador-cli?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mirador-cli)
 [![npm downloads](https://img.shields.io/npm/dm/mirador-cli?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mirador-cli)
@@ -17,11 +19,11 @@
 npm i -g mirador-cli
 ```
 
-**Works on macOS, Linux, and Windows. Requires Node 20+ and the Vercel CLI.**
+macOS, Linux, Windows. Node 20+, Vercel CLI required.
 
 <br>
 
-*"My agent made the report. Mirador made the link."*
+*"My agent made the report. mirador made the link."*
 
 </div>
 
@@ -34,13 +36,13 @@ npm i -g mirador-cli
 
 ---
 
-## Why Mirador
+## Why mirador
 
-Your AI agent is great at producing HTML — reports, dashboards, decks, prototypes, one-off mini-apps. Sharing that HTML is annoying: zip it, upload it somewhere, fight with a static host, paste a URL.
+Your agent is great at producing HTML — reports, dashboards, decks, prototypes, mini-apps. Sharing it is annoying: zip it, upload it somewhere, fight with a static host, paste a URL.
 
-Mirador removes the loop. You type `/mirador` (or your agent suggests it once it notices the HTML), answer three or four chat questions, and 15–30 seconds later you have a link. There's no Mirador server in the loop: your file deploys to **your own Vercel** account, on a project you control.
+mirador removes the loop. You type `/mirador` — or wait for your agent to suggest it once it notices the HTML — answer three or four chat questions, and 15–30 seconds later you have a link. No mirador server in the path: your file deploys to **your own Vercel** account, on a project you control.
 
-The complexity lives in the skill — theming, optional client-side password gate, Vercel orchestration. What you see is one command.
+The complexity lives in the skill: theming, optional client-side password gate, Vercel orchestration. What you see is one command.
 
 ---
 
@@ -105,16 +107,19 @@ That's it. The URL lives on your Vercel project. You own it; you can take it dow
 
 ## Themes
 
-Four built in:
+Alpha ships four (`default`, `memo`, `deck`, `none`). V1 introduces a redesigned theme system — five purpose-built canvases with shared design tokens, light + dark intrinsic, voice-aligned chrome:
 
-| Theme | What it's for |
-|-------|---------------|
-| `default` | Neutral, works for most pages |
-| `memo` | Serif, document-style — reports, write-ups, long-form |
-| `deck` | Presentation, dark — slide-like content |
-| `none` | Publish verbatim, no wrapping |
+| Theme | Thesis | What it's for |
+|---|---|---|
+| `page` | The safe canvas. | General-purpose content. The default that does not apologize. |
+| `memo` | Long-form, read with intention. | Reports, write-ups, letters. Drop cap, signature block. |
+| `deck` | Slides that scroll. | Presentations. `scroll-snap`, arrow-key nav, slide counter. |
+| `console` | Code is content. | Postmortems, scripts, CLI dumps. `$ > #` prompt headings. |
+| `atlas` | Numbers earn the spotlight. | Dashboards, data. Tabular figures, KPI cards, sticky tables. |
 
-You can also ask for a **custom theme generated from a reference** during the share flow:
+Plus `none` (publish verbatim, no wrapping).
+
+Or ask for a **custom theme generated from a reference** during the share flow:
 
 - **URL** — *"make it look like vercel.com"*
 - **Screenshot** — attach an image
@@ -139,8 +144,10 @@ For real auth, wait for V1, or use Vercel Pro's project-level password protectio
 ## What's In This Repo
 
 | Path | What's in it |
-|------|--------------|
-| [`alpha/`](alpha/) | The public alpha — CLI, skill, themes. See [`alpha/README.md`](alpha/README.md) for the deep dive. |
+|---|---|
+| [`alpha/`](alpha/) | The public alpha — CLI, skill, themes. Ships on npm as `mirador-cli`. See [`alpha/README.md`](alpha/README.md). |
+| [`v1/`](v1/) | V1 — multiplayer surface (in development) with the new theme system, brain, share/request/inbox commands, brand chrome. See [`v1/README.md`](v1/README.md). |
+| [`docs/design/`](docs/design/) | V1 design system: tokens, voice spec, every locked decision. |
 
 ---
 
@@ -163,6 +170,6 @@ MIT. See [LICENSE](LICENSE).
 
 <div align="center">
 
-**Your agent made the artifact. Mirador makes the link.**
+**Your agent made the artifact. mirador makes the link.**
 
 </div>

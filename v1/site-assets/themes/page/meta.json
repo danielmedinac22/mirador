@@ -1,0 +1,8 @@
+{
+  "name": "page",
+  "thesis": "The safe canvas. The default that does not apologize.",
+  "primaryFont": "IBM Plex Sans",
+  "lightDefault": true,
+  "darkSupport": true,
+  "contentMaxWidth": 680
+}
