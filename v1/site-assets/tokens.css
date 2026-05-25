@@ -3,10 +3,10 @@
 
 :root {
   /* Brand */
-  --mirador-cobalt: #2541B2;
-  --mirador-cobalt-bright: #4F7DF3;
+  --mirador-cobalt: #2541b2;
+  --mirador-cobalt-bright: #4f7df3;
   --mirador-cobalt-soft: rgba(79, 125, 243, 0.12);
-  --mirador-cobalt-gradient: linear-gradient(135deg, #2541B2 0%, #4F7DF3 100%);
+  --mirador-cobalt-gradient: linear-gradient(135deg, #2541b2 0%, #4f7df3 100%);
   --mirador-cobalt-shadow: 0 8px 24px rgba(37, 65, 178, 0.18);
 
   /* Neutrals — light */
@@ -25,26 +25,26 @@
 
   /* Spacing — 4pt grid, 11 steps */
   --space-0: 0;
-  --space-1: 0.25rem;   /* 4px */
-  --space-2: 0.5rem;    /* 8px */
-  --space-3: 0.75rem;   /* 12px */
-  --space-4: 1rem;      /* 16px */
-  --space-5: 1.5rem;    /* 24px */
-  --space-6: 2rem;      /* 32px */
-  --space-7: 2.5rem;    /* 40px */
-  --space-8: 3rem;      /* 48px */
-  --space-9: 4rem;      /* 64px */
-  --space-10: 6rem;     /* 96px */
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.5rem; /* 24px */
+  --space-6: 2rem; /* 32px */
+  --space-7: 2.5rem; /* 40px */
+  --space-8: 3rem; /* 48px */
+  --space-9: 4rem; /* 64px */
+  --space-10: 6rem; /* 96px */
 
   /* Type scale — chrome */
-  --type-xs: 0.75rem;     /* 12 */
-  --type-sm: 0.8125rem;   /* 13 */
+  --type-xs: 0.75rem; /* 12 */
+  --type-sm: 0.8125rem; /* 13 */
   --type-base: 0.9375rem; /* 15 */
-  --type-md: 1rem;        /* 16 */
-  --type-lg: 1.25rem;     /* 20 */
-  --type-xl: 1.5rem;      /* 24 */
-  --type-2xl: 2rem;       /* 32 */
-  --type-3xl: 2.5rem;     /* 40 */
+  --type-md: 1rem; /* 16 */
+  --type-lg: 1.25rem; /* 20 */
+  --type-xl: 1.5rem; /* 24 */
+  --type-2xl: 2rem; /* 32 */
+  --type-3xl: 2.5rem; /* 40 */
   --type-display: clamp(2.5rem, 5vw, 4rem);
 
   /* Line heights */

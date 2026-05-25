@@ -45,10 +45,7 @@ export async function installSiteChrome(siteRoot: string): Promise<void> {
 
   if (copied === 0) {
     throw new Error(
-      `installSiteChrome: no chrome assets found at "${source}". ` +
-        `Check that v1/site-assets/ ships with the install ` +
-        `(package.json "files" must include "site-assets"), or set ` +
-        `MIRADOR_SITE_ASSETS_OVERRIDE to the absolute path.`,
+      `installSiteChrome: no chrome assets found at "${source}". Check that v1/site-assets/ ships with the install (package.json "files" must include "site-assets"), or set MIRADOR_SITE_ASSETS_OVERRIDE to the absolute path.`,
     );
   }
 }

@@ -1,8 +1,8 @@
-import { execa } from 'execa';
 import type { Command } from 'commander';
+import { execa } from 'execa';
+import { cobalt } from '../shared/ansi.js';
 import { readConfig } from '../shared/config.js';
 import { MiradorError } from '../shared/errors.js';
-import { cobalt } from '../shared/ansi.js';
 
 export function registerDashboard(program: Command): void {
   program
@@ -21,11 +21,12 @@ export function registerDashboard(program: Command): void {
       }
       process.stdout.write(`Opening ${cobalt(url)}\n`);
       // Fire and forget — the binary just dispatches to the OS handler.
-      const opener = process.platform === 'darwin'
-        ? 'open'
-        : process.platform === 'win32'
-          ? 'start'
-          : 'xdg-open';
+      const opener =
+        process.platform === 'darwin'
+          ? 'open'
+          : process.platform === 'win32'
+            ? 'start'
+            : 'xdg-open';
       await execa(opener, [url], { detached: true, stdio: 'ignore' }).catch(() => {
         // If the opener is missing (rare), fall back to printing the URL.
         process.stdout.write(`Open it manually: ${url}\n`);

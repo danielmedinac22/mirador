@@ -1,12 +1,12 @@
 import { join } from 'node:path';
 import type { Command } from 'commander';
 import { pathExists } from '../adapters/fs.js';
-import { readConfig } from '../shared/config.js';
-import { MiradorError } from '../shared/errors.js';
-import { paths } from '../shared/paths.js';
 import { readRegistry } from '../services/shareRegistry.js';
 import { discoverPublishedSlugs } from '../services/siteIndex.js';
 import { cobalt, dim, muted } from '../shared/ansi.js';
+import { readConfig } from '../shared/config.js';
+import { MiradorError } from '../shared/errors.js';
+import { paths } from '../shared/paths.js';
 
 export function registerList(program: Command): void {
   program
@@ -20,7 +20,9 @@ export function registerList(program: Command): void {
       }
       const siteRoot = join(paths.workspaceClone(), 'site');
       const haveSite = await pathExists(siteRoot);
-      const registry = haveSite ? await readRegistry(siteRoot) : { version: 1 as const, shares: [] };
+      const registry = haveSite
+        ? await readRegistry(siteRoot)
+        : { version: 1 as const, shares: [] };
       const known = new Set(registry.shares.map((s) => s.slug));
       const legacy = haveSite
         ? (await discoverPublishedSlugs(siteRoot)).filter((s) => !known.has(s))
@@ -34,7 +36,9 @@ export function registerList(program: Command): void {
       const base = `https://${config.vercel.domain}`;
       const lines: string[] = [];
 
-      lines.push(`${muted('SLUG'.padEnd(28))}${muted('KIND'.padEnd(10))}${muted('DATE'.padEnd(12))}${muted('PRODUCTION URL')}`);
+      lines.push(
+        `${muted('SLUG'.padEnd(28))}${muted('KIND'.padEnd(10))}${muted('DATE'.padEnd(12))}${muted('PRODUCTION URL')}`,
+      );
       lines.push(dim('─'.repeat(88)));
 
       for (const s of registry.shares) {
@@ -54,7 +58,11 @@ export function registerList(program: Command): void {
       }
       if (legacy.length > 0) {
         lines.push('');
-        lines.push(muted(`${legacy.length} legacy item${legacy.length === 1 ? '' : 's'} — re-share to track with dates.`));
+        lines.push(
+          muted(
+            `${legacy.length} legacy item${legacy.length === 1 ? '' : 's'} — re-share to track with dates.`,
+          ),
+        );
       }
       lines.push('');
       lines.push(`${dim('dashboard')}  ${cobalt(`${base}/`)}`);

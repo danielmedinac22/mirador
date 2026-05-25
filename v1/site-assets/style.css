@@ -1,7 +1,7 @@
 /* Mirador chrome bundle entry — referenced by landing, gate, site-index.
    Single CSS file the browser loads. */
 
-@import url('./fonts.css');
-@import url('./tokens.css');
-@import url('./reset.css');
-@import url('./chrome.css');
+@import url("./fonts.css");
+@import url("./tokens.css");
+@import url("./reset.css");
+@import url("./chrome.css");

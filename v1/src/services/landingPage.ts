@@ -61,20 +61,28 @@ export function renderLanding(input: LandingInput): string {
 
       <p class="cta-hint">Copies a prompt to your clipboard. Paste it into <a href="https://claude.ai/code" target="_blank" rel="noopener">Claude Code</a> to start.</p>
 
-      ${noteOrContext ? `
+      ${
+        noteOrContext
+          ? `
       <div class="note" style="margin-top: var(--space-6);">
         <span class="note-label">${escapeHtml(noteLabel)}</span>
         ${escapeHtml(noteOrContext)}
-      </div>` : ''}
+      </div>`
+          : ''
+      }
 
-      ${input.previewUrl ? `
+      ${
+        input.previewUrl
+          ? `
       <section class="preview-frame-section">
         <div class="preview-frame-header">
           <span class="preview-label">preview</span>
           <a href="${escapeHtml(input.previewUrl)}" target="_blank" rel="noopener">open in new tab ↗</a>
         </div>
         <iframe class="preview-frame" src="${escapeHtml(input.previewUrl)}" loading="lazy" referrerpolicy="no-referrer" title="${escapeHtml(input.slug)} preview"></iframe>
-      </section>` : ''}
+      </section>`
+          : ''
+      }
 
       <details class="seed-fallback">
         <summary>Use a different agent?</summary>
@@ -146,15 +154,15 @@ function composeCopy(input: LandingInput): {
       eyebrow: input.role ? `invitation · ${input.role}` : 'invitation',
       hero: `${input.from} sent you ${input.slug}.`,
       sub: input.role
-        ? `Open in Claude Code to read it with context.`
-        : `Open in Claude Code to read it with context.`,
+        ? 'Open in Claude Code to read it with context.'
+        : 'Open in Claude Code to read it with context.',
       primaryCta: 'Open in Claude Code',
     };
   }
   return {
     eyebrow: 'request to author',
     hero: `${input.from} wants you to write ${input.slug}.`,
-    sub: `Open in Claude Code to begin.`,
+    sub: 'Open in Claude Code to begin.',
     primaryCta: 'Open in Claude Code',
   };
 }

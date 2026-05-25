@@ -26,10 +26,7 @@ const THEMES_WITH_SCRIPTS: Partial<Record<ThemeName, string[]>> = {
  *
  * Themes catalogued in docs/design/spec.md.
  */
-export async function renderPreview(
-  artifactPath: string,
-  theme: string = 'page',
-): Promise<string> {
+export async function renderPreview(artifactPath: string, theme = 'page'): Promise<string> {
   const themeName = normaliseTheme(theme);
   const indexHtml = await findIndexHtml(artifactPath);
   if (!indexHtml) return renderNoPreview(themeName);
