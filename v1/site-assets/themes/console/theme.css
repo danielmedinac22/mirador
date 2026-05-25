@@ -1,0 +1,189 @@
+/* Theme: console — Code as content.
+   JetBrains Mono everywhere. Prompt-style headings ($ heading, > heading).
+   Line numbers on code blocks. Dark by default.
+   Thesis: code is content. */
+
+@import url('../../fonts.css');
+
+:root {
+  --console-bg: #0a0a0a;
+  --console-fg: #e5e5e5;
+  --console-fg-muted: #888888;
+  --console-fg-subtle: #555555;
+  --console-accent: #4F7DF3;
+  --console-prompt: #4F7DF3;
+  --console-rule: #1a1a1a;
+  --console-success: #50d090;
+  --console-warn: #f0c060;
+  --console-error: #ff7866;
+  --console-code-bg: #131313;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --console-bg: #fafafa;
+    --console-fg: #1a1a1a;
+    --console-fg-muted: #555555;
+    --console-fg-subtle: #888888;
+    --console-accent: #2541B2;
+    --console-prompt: #2541B2;
+    --console-rule: #e5e5e5;
+    --console-success: #0a6d3c;
+    --console-warn: #a86800;
+    --console-error: #c0392b;
+    --console-code-bg: #f2f2f2;
+  }
+}
+
+body, .mirador-content {
+  background: var(--console-bg);
+  color: var(--console-fg);
+}
+
+.mirador-content {
+  font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 14.5px;
+  line-height: 1.65;
+  max-width: 880px;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+  font-feature-settings: 'liga' 1, 'calt' 1;
+}
+
+.mirador-content h1,
+.mirador-content h2,
+.mirador-content h3,
+.mirador-content h4 {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 500;
+  color: var(--console-fg);
+  letter-spacing: -0.005em;
+  line-height: 1.35;
+}
+
+/* Prompt-style headings — the signature of console theme */
+.mirador-content h1::before,
+.mirador-content h2::before,
+.mirador-content h3::before {
+  color: var(--console-prompt);
+  font-weight: 500;
+  margin-right: 0.75em;
+  user-select: none;
+}
+.mirador-content h1::before { content: '$'; }
+.mirador-content h2::before { content: '>'; }
+.mirador-content h3::before { content: '#'; }
+
+.mirador-content h1 {
+  font-size: 1.75rem;
+  margin: 0 0 1.5rem;
+  font-weight: 600;
+}
+.mirador-content h2 {
+  font-size: 1.25rem;
+  margin: 2.5rem 0 1rem;
+}
+.mirador-content h3 {
+  font-size: 1.1rem;
+  margin: 2rem 0 0.75rem;
+  color: var(--console-fg-muted);
+}
+
+.mirador-content p {
+  margin: 0.75rem 0;
+}
+
+.mirador-content a {
+  color: var(--console-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.mirador-content a:hover { color: var(--console-fg); }
+
+.mirador-content code {
+  background: var(--console-code-bg);
+  color: var(--console-fg);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-size: 0.95em;
+  font-family: inherit;
+}
+
+/* Code blocks with line numbers */
+.mirador-content pre {
+  background: var(--console-code-bg);
+  border: 1px solid var(--console-rule);
+  border-left: 2px solid var(--console-accent);
+  padding: 1rem 1.25rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 1.25rem 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  position: relative;
+  counter-reset: line;
+}
+.mirador-content pre code {
+  background: transparent;
+  padding: 0;
+  display: block;
+}
+/* Line numbers per code line — opt-in via <pre data-lines> */
+.mirador-content pre[data-lines] code {
+  white-space: pre;
+  counter-reset: line;
+}
+.mirador-content pre[data-lines] code > span {
+  display: block;
+  counter-increment: line;
+  padding-left: 3em;
+  position: relative;
+}
+.mirador-content pre[data-lines] code > span::before {
+  content: counter(line);
+  position: absolute;
+  left: 0;
+  width: 2em;
+  text-align: right;
+  color: var(--console-fg-subtle);
+  user-select: none;
+}
+
+.mirador-content blockquote {
+  border-left: 2px solid var(--console-accent);
+  padding-left: 1rem;
+  margin: 1.25rem 0;
+  color: var(--console-fg-muted);
+}
+
+.mirador-content ul, .mirador-content ol {
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+.mirador-content ul li::marker { content: '— '; color: var(--console-fg-subtle); }
+.mirador-content ol li::marker { color: var(--console-accent); font-weight: 500; }
+
+.mirador-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+}
+.mirador-content th, .mirador-content td {
+  border-bottom: 1px solid var(--console-rule);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.mirador-content th { color: var(--console-fg-muted); font-weight: 500; }
+
+.mirador-content hr {
+  border: 0;
+  border-top: 1px solid var(--console-rule);
+  margin: 2.5rem 0;
+}
+
+.mirador-content::selection,
+.mirador-content *::selection {
+  background: var(--console-accent);
+  color: var(--console-bg);
+}

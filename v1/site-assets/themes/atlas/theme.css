@@ -1,0 +1,212 @@
+/* Theme: atlas — Data as protagonist.
+   Plex Sans + tabular nums. Sticky table headers, zebra rows.
+   KPI card primitives. Full-width layout.
+   Thesis: numbers earn the spotlight. */
+
+@import url('../../fonts.css');
+
+:root {
+  --atlas-bg: #ffffff;
+  --atlas-bg-elevated: #fafafa;
+  --atlas-fg: #0a0a0a;
+  --atlas-fg-muted: #555555;
+  --atlas-fg-subtle: #888888;
+  --atlas-border: #e5e5e5;
+  --atlas-border-strong: #d0d0d0;
+  --atlas-accent: #2541B2;
+  --atlas-positive: #0a6d3c;
+  --atlas-negative: #c0392b;
+  --atlas-row-alt: #fafafa;
+  --atlas-row-hover: rgba(37, 65, 178, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --atlas-bg: #0a0a0a;
+    --atlas-bg-elevated: #131313;
+    --atlas-fg: #fafafa;
+    --atlas-fg-muted: #a0a0a0;
+    --atlas-fg-subtle: #707070;
+    --atlas-border: #1f1f1f;
+    --atlas-border-strong: #2a2a2a;
+    --atlas-accent: #4F7DF3;
+    --atlas-positive: #50d090;
+    --atlas-negative: #ff7866;
+    --atlas-row-alt: #121212;
+    --atlas-row-hover: rgba(79, 125, 243, 0.08);
+  }
+}
+
+body, .mirador-content {
+  background: var(--atlas-bg);
+  color: var(--atlas-fg);
+}
+
+.mirador-content {
+  font-family: 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
+  font-size: 14.5px;
+  line-height: 1.5;
+  max-width: 1200px;
+  margin: 2.5rem auto;
+  padding: 0 2rem;
+  font-feature-settings: 'tnum' 1, 'lnum' 1, 'kern' 1;
+}
+
+.mirador-content h1 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+}
+.mirador-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 2.5rem 0 1rem;
+}
+.mirador-content h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--atlas-fg-muted);
+  margin: 1.5rem 0 0.75rem;
+}
+
+.mirador-content p {
+  margin: 0.75rem 0;
+  color: var(--atlas-fg-muted);
+  max-width: 64ch;
+}
+
+.mirador-content a {
+  color: var(--atlas-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ─── Tables — atlas signature ─────────────────────────────────────── */
+
+.mirador-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+  font-variant-numeric: tabular-nums;
+  font-size: 13.5px;
+}
+.mirador-content thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--atlas-bg);
+}
+.mirador-content thead::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  border-bottom: 1px solid var(--atlas-border-strong);
+}
+.mirador-content th {
+  text-align: left;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--atlas-fg-muted);
+  padding: 0.6rem 0.85rem;
+  white-space: nowrap;
+}
+.mirador-content td {
+  padding: 0.55rem 0.85rem;
+  border-bottom: 1px solid var(--atlas-border);
+}
+.mirador-content tbody tr:nth-child(odd) td { background: var(--atlas-row-alt); }
+.mirador-content tbody tr:hover td { background: var(--atlas-row-hover); }
+
+/* Right-align numeric columns — opt-in via class="num" on th and td */
+.mirador-content th.num, .mirador-content td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Status pills */
+.mirador-content .pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1em 0.55em;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: var(--atlas-bg-elevated);
+  color: var(--atlas-fg-muted);
+  border: 1px solid var(--atlas-border);
+}
+.mirador-content .pill.up { color: var(--atlas-positive); border-color: color-mix(in srgb, var(--atlas-positive) 30%, transparent); }
+.mirador-content .pill.down { color: var(--atlas-negative); border-color: color-mix(in srgb, var(--atlas-negative) 30%, transparent); }
+
+/* ─── KPI cards — primitives the artifact can use ──────────────────── */
+
+.mirador-content .kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.mirador-content .kpi {
+  padding: 1.25rem 1.5rem;
+  background: var(--atlas-bg-elevated);
+  border: 1px solid var(--atlas-border);
+  border-radius: 8px;
+}
+.mirador-content .kpi-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--atlas-fg-subtle);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+.mirador-content .kpi-value {
+  font-size: 1.875rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--atlas-fg);
+  font-variant-numeric: tabular-nums lining-nums;
+  line-height: 1.1;
+}
+.mirador-content .kpi-delta {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--atlas-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+.mirador-content .kpi-delta.up { color: var(--atlas-positive); }
+.mirador-content .kpi-delta.down { color: var(--atlas-negative); }
+.mirador-content .kpi-delta::before {
+  font-weight: 500;
+  margin-right: 0.25em;
+}
+.mirador-content .kpi-delta.up::before { content: '↑'; }
+.mirador-content .kpi-delta.down::before { content: '↓'; }
+
+/* ─── Code ─────────────────────────────────────────────────────────── */
+
+.mirador-content code {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  background: var(--atlas-bg-elevated);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+.mirador-content pre {
+  background: var(--atlas-bg-elevated);
+  border: 1px solid var(--atlas-border);
+  padding: 1rem 1.25rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.mirador-content hr {
+  border: 0;
+  border-top: 1px solid var(--atlas-border);
+  margin: 2.5rem 0;
+}

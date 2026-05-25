@@ -12,6 +12,8 @@ import { resolveEmail } from './inviteResolver.js';
 import { publishLanding, renderLanding } from './landingPage.js';
 import { writeLinkFile } from './linkFile.js';
 import { composeSeed } from './promptSeed.js';
+import { installSiteChrome } from './siteChrome.js';
+import { discoverPublishedSlugs, publishSiteIndex } from './siteIndex.js';
 import { publishPreview, renderPreview } from './staticPreview.js';
 
 export interface ShareInput {
@@ -140,7 +142,9 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
   // 3. Render + publish static preview + landing locally
   const siteRoot = join(paths.workspaceClone(), 'site');
   await ensureDir(siteRoot);
-  const previewHtml = await renderPreview(artifactPath, config.defaults.theme || 'default');
+  // Install shared chrome (tokens, fonts, themes, mark assets). Idempotent.
+  await installSiteChrome(siteRoot);
+  const previewHtml = await renderPreview(artifactPath, config.defaults.theme || 'page');
   const { localPath: previewLocal } = await publishPreview(siteRoot, input.slug, previewHtml);
   const renderLandingFor = (seed: string, domain: string): string =>
     renderLanding({
@@ -160,6 +164,10 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
       renderLandingFor(seedText, activeDomain),
     )
   ).localPath;
+
+  // Refresh site index to include the newly published artifact
+  const indexEntries = await discoverPublishedSlugs(siteRoot);
+  await publishSiteIndex(siteRoot, config.github.handle, indexEntries);
 
   // 3b. Deploy to Vercel (first attempt — may re-deploy if the production URL
   //     pattern differs from the configured domain)

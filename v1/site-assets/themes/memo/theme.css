@@ -1,0 +1,156 @@
+/* Theme: memo — The Substack memo.
+   Newsreader serif body, Plex Sans for chrome. Sepia warm light + warm dark.
+   Drop cap on first paragraph. Signature block.
+   Thesis: long-form, read with intention. */
+
+@import url('../../fonts.css');
+
+:root {
+  --memo-bg: #fafaf5;
+  --memo-fg: #2a2520;
+  --memo-fg-muted: #6a6055;
+  --memo-fg-subtle: #9a9085;
+  --memo-border: #e8e2d4;
+  --memo-accent: #2541B2;
+  --memo-rule: #d6cebe;
+  --memo-code-bg: #f0e9d6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --memo-bg: #1a1812;
+    --memo-fg: #f0e9d8;
+    --memo-fg-muted: #b8aa90;
+    --memo-fg-subtle: #7a705c;
+    --memo-border: #2a261c;
+    --memo-accent: #4F7DF3;
+    --memo-rule: #3a3324;
+    --memo-code-bg: #25201a;
+  }
+}
+
+body, .mirador-content {
+  background: var(--memo-bg);
+  color: var(--memo-fg);
+}
+
+.mirador-content {
+  max-width: 640px;
+  margin: 5rem auto;
+  padding: 0 1.75rem;
+  font-family: 'Newsreader', 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
+  font-size: 19px;
+  line-height: 1.7;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'onum' 1;
+}
+
+.mirador-content h1,
+.mirador-content h2,
+.mirador-content h3 {
+  font-family: 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--memo-fg);
+  line-height: 1.2;
+}
+
+.mirador-content h1 {
+  font-size: 2rem;
+  margin: 0 0 0.5rem;
+  border-bottom: 1px solid var(--memo-border);
+  padding-bottom: 1rem;
+}
+.mirador-content h2 {
+  font-size: 1.35rem;
+  margin: 3rem 0 0.75rem;
+}
+.mirador-content h3 {
+  font-size: 1.1rem;
+  margin: 2rem 0 0.5rem;
+}
+
+.mirador-content p {
+  margin: 1.25rem 0;
+}
+
+/* Drop cap on first paragraph — the signature memo detail */
+.mirador-content > p:first-of-type::first-letter {
+  font-family: 'IBM Plex Serif', Georgia, serif;
+  font-size: 3.4em;
+  line-height: 0.82;
+  font-weight: 600;
+  float: left;
+  margin: 0.05em 0.1em 0 0;
+  color: var(--memo-fg);
+}
+
+.mirador-content a {
+  color: var(--memo-accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+.mirador-content a:hover { text-decoration-thickness: 2px; }
+
+.mirador-content em, .mirador-content i {
+  font-family: 'Newsreader', Georgia, serif;
+  font-style: italic;
+}
+
+.mirador-content blockquote {
+  border-left: 2px solid var(--memo-rule);
+  padding-left: 1.5rem;
+  margin: 2rem 0;
+  font-style: italic;
+  color: var(--memo-fg-muted);
+}
+
+.mirador-content code {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  background: var(--memo-code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-size: 0.88em;
+}
+
+.mirador-content pre {
+  background: var(--memo-code-bg);
+  border: 1px solid var(--memo-border);
+  padding: 1.25rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  line-height: 1.55;
+  color: var(--memo-fg);
+}
+
+.mirador-content hr {
+  border: 0;
+  text-align: center;
+  margin: 3rem 0;
+}
+.mirador-content hr::before {
+  content: '⁂';
+  font-size: 1.25rem;
+  color: var(--memo-rule);
+  letter-spacing: 0.5em;
+}
+
+/* Signature block — appears if the artifact uses <footer class="signature"> or similar */
+.mirador-content .signature,
+.mirador-content footer.signature {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--memo-border);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.85rem;
+  color: var(--memo-fg-subtle);
+  letter-spacing: 0.02em;
+}
+
+.mirador-content ul, .mirador-content ol {
+  padding-left: 1.75rem;
+  margin: 1.25rem 0;
+}
+.mirador-content li { margin: 0.4rem 0; }
