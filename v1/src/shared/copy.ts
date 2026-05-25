@@ -63,7 +63,7 @@ export const copy = {
     invitation: {
       hero: (from: string, slug: string) => `${from} sent you ${slug}.`,
       sub: (role?: string) =>
-        role ? `He wants your eyes on it. Open in Claude Code.` : `Open in Claude Code to start.`,
+        role ? 'He wants your eyes on it. Open in Claude Code.' : 'Open in Claude Code to start.',
     },
     request: {
       hero: (from: string, slug: string) => `${from} wants you to write ${slug}.`,

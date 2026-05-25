@@ -145,7 +145,8 @@ function mergeForRender(
 }
 
 function renderRow(e: RenderEntry, baseUrl: string): string {
-  const landingPath = e.kind === 'share' ? `/i/${escapeAttr(e.slug)}/` : `/r/${escapeAttr(e.slug)}/`;
+  const landingPath =
+    e.kind === 'share' ? `/i/${escapeAttr(e.slug)}/` : `/r/${escapeAttr(e.slug)}/`;
   const previewPath = `/d/${escapeAttr(e.slug)}/`;
   const landingUrl = `${baseUrl}${landingPath}`;
 
@@ -195,7 +196,8 @@ function renderRecipients(e: RenderEntry): string {
   }
   const list = e.sharedWith ?? [];
   if (list.length === 0) return '';
-  if (list.length === 1) return `<span class="recipients">shared with ${escapeHtml(list[0] ?? '')}</span>`;
+  if (list.length === 1)
+    return `<span class="recipients">shared with ${escapeHtml(list[0] ?? '')}</span>`;
   return `<span class="recipients">shared with ${list.length} people</span>`;
 }
 

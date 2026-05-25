@@ -1,5 +1,5 @@
 import { cp, readdir, rm, stat } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { ensureDir, pathExists, writeFileAtomic } from '../adapters/fs.js';
 import * as git from '../adapters/git.js';
 import * as github from '../adapters/github.js';
@@ -241,12 +241,7 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
   }
   void redeployed; // retained for potential future use in result
 
-  // 4. Extract artifact to shared clone path + push (snapshot mode only for now)
-  if (input.keepHistory) {
-    process.stderr.write(
-      '⚠  --keep-history is not yet implemented (falls back to snapshot). Tracked as a follow-up.\n',
-    );
-  }
+  // 4. Extract artifact to shared clone path
   // Re-share detection: if the workspace folder already holds a .mirador-link,
   // resolveArtifactPath followed it and artifactPath is the shared clone — not
   // the workspace folder. In that case the extract step would copy entries
@@ -255,14 +250,39 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
   const workspaceArtifactPath = join(paths.workspaceClone(), 'artifacts', input.slug);
   const isReshare = artifactPath !== workspaceArtifactPath;
 
-  await extractToSharedClone(artifactPath, clonePath, fullName, cloneUrl, {
-    offline: input.offline,
-    slug: input.slug,
-    owner: config.github.handle,
-    sharedWith: input.withEmails,
-    role: input.role,
-    sent,
-  });
+  // History-preserving path: requires (a) a real git workspace, (b) network for
+  // the push, and (c) a first-time share (re-share has no upstream history to
+  // split — the shared clone IS the history). Otherwise fall back to snapshot.
+  let usedKeepHistory = false;
+  if (input.keepHistory && !input.offline && !isReshare) {
+    try {
+      await extractWithHistory(workspaceArtifactPath, clonePath, fullName, cloneUrl, {
+        slug: input.slug,
+        owner: config.github.handle,
+        sharedWith: input.withEmails,
+        role: input.role,
+        sent,
+      });
+      usedKeepHistory = true;
+    } catch (err) {
+      process.stderr.write(
+        `⚠  --keep-history failed (${(err as Error).message}). Falling back to snapshot.\n`,
+      );
+    }
+  } else if (input.keepHistory && input.offline) {
+    process.stderr.write('ℹ  --keep-history requires network; falling back to snapshot.\n');
+  }
+
+  if (!usedKeepHistory) {
+    await extractToSharedClone(artifactPath, clonePath, fullName, cloneUrl, {
+      offline: input.offline,
+      slug: input.slug,
+      owner: config.github.handle,
+      sharedWith: input.withEmails,
+      role: input.role,
+      sent,
+    });
+  }
 
   // 5. Replace workspace folder contents with the link file only. Skip on
   //    re-share — the workspace already has its link file from the first share.
@@ -295,6 +315,77 @@ interface ExtractOptions {
   sharedWith: string[];
   role?: string;
   sent: string;
+}
+
+/**
+ * History-preserving extraction (closes issue #26).
+ *
+ * 1. If the workspace has uncommitted changes under `artifacts/<slug>/`, commit
+ *    them with a pre-share message so the split captures the latest state.
+ * 2. `git subtree split --prefix=artifacts/<slug>` produces a SHA whose history
+ *    contains only commits that touched the artifact subtree.
+ * 3. Push that SHA to the new remote as `refs/heads/main`.
+ * 4. Clone the new remote into `clonePath` so the local shared copy carries the
+ *    full preserved history.
+ * 5. Append the mirador manifest as a final commit, push it.
+ */
+async function extractWithHistory(
+  workspaceArtifactPath: string,
+  clonePath: string,
+  _fullName: string,
+  cloneUrl: string,
+  opts: Omit<ExtractOptions, 'offline'>,
+): Promise<void> {
+  const workspaceRoot = paths.workspaceClone();
+
+  if (!(await git.isGitRepo(workspaceRoot))) {
+    throw new Error('workspace is not a git repo — --keep-history needs git history to preserve');
+  }
+
+  // Auto-commit pending changes under the artifact subtree.
+  if (await git.hasUncommittedChanges(workspaceRoot)) {
+    await git.commitAll(
+      workspaceRoot,
+      `artifacts/${opts.slug}`,
+      `Pre-share snapshot of ${opts.slug}`,
+    );
+  }
+
+  const splitSha = await git.subtreeSplit(workspaceRoot, `artifacts/${opts.slug}`);
+  await git.pushRefspec(workspaceRoot, cloneUrl, splitSha, 'refs/heads/main');
+
+  // Now clone the new remote locally so the shared clone has the real history.
+  await ensureDir(dirname(clonePath));
+  if (await pathExists(clonePath)) {
+    // Remove any pre-existing clone (e.g. from a previous failed run) so the
+    // fresh clone starts clean.
+    await rm(clonePath, { recursive: true, force: true });
+  }
+  await git.clone(cloneUrl, clonePath);
+
+  // Append manifest as a final commit and push it.
+  const manifestDir = join(clonePath, '.mirador');
+  await ensureDir(manifestDir);
+  await writeFileAtomic(
+    join(manifestDir, 'manifest.json'),
+    `${JSON.stringify(
+      {
+        slug: opts.slug,
+        owner: opts.owner,
+        shared_with: opts.sharedWith,
+        role_for_collaborators: opts.role,
+        created_at: opts.sent,
+      },
+      null,
+      2,
+    )}\n`,
+  );
+  await git.add(clonePath, ['.mirador/manifest.json']);
+  await git.commit(clonePath, 'mirador: add manifest');
+  await git.push(clonePath, 'main', true).catch(async (err) => {
+    const { logActivity } = await import('../shared/log.js');
+    await logActivity(`share keep-history-manifest-push-failed ${(err as Error).message}`);
+  });
 }
 
 async function extractToSharedClone(

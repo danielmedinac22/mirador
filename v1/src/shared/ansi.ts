@@ -4,8 +4,10 @@
 
 const TTY = process.stdout.isTTY && !process.env.NO_COLOR;
 
-const wrap = (open: string, close = '\x1b[0m') =>
-  (s: string): string => (TTY ? `${open}${s}${close}` : s);
+const wrap =
+  (open: string, close = '\x1b[0m') =>
+  (s: string): string =>
+    TTY ? `${open}${s}${close}` : s;
 
 export const dim = wrap('\x1b[2m');
 export const bold = wrap('\x1b[1m');
@@ -21,6 +23,12 @@ export const warn = wrap('\x1b[38;5;179m');
  */
 export function printSplash(): void {
   if (!TTY) return;
-  const lines = ['', dim('  ┌──┐'), `  ${dim('│')} ${cobalt('▪')}${dim('│')}  ${bold('mirador.')}`, dim('  └──┘'), ''];
+  const lines = [
+    '',
+    dim('  ┌──┐'),
+    `  ${dim('│')} ${cobalt('▪')}${dim('│')}  ${bold('mirador.')}`,
+    dim('  └──┘'),
+    '',
+  ];
   process.stdout.write(`${lines.join('\n')}\n`);
 }

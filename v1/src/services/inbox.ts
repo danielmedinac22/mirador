@@ -128,7 +128,6 @@ function renderModeB(items: InboxItem[]): string {
   });
   const header = `${'WHAT'.padEnd(36)}${'WHO'.padEnd(12)}${'WHERE'.padEnd(12)}WHEN`;
   const sep = '─'.repeat(72);
-  const overflow =
-    items.length > 8 ? `\n+ ${items.length - 8} more · \`mirador inbox --all\`` : '';
+  const overflow = items.length > 8 ? `\n+ ${items.length - 8} more · \`mirador inbox --all\`` : '';
   return `${[header, sep, ...rows].join('\n')}${overflow}\n`;
 }
