@@ -1,47 +1,82 @@
 ---
 name: mirador
 description: |
-  mirador — share AI-generated artifacts on git. Activate when the user pastes
-  an @mirador-invitation, @mirador-request, or @mirador-response prompt-seed;
-  or when starting a session inside a mirador workspace, a shared-artifact
-  folder, or a `.mirador-link` directory. Provides paste-driven onboarding,
-  brain-aware session briefs, and the request/share/inbox surface.
+  mirador — share AI-generated artifacts on git. Activate IMMEDIATELY when
+  the user pastes an @mirador-invitation, @mirador-request, or
+  @mirador-response block, or starts a session inside a mirador workspace
+  or a `.mirador-link` directory. On a paste, the skill loads the artifact
+  context FIRST (via WebFetch of the read-only doc), then delivers a
+  brain-shaped brief — it does not ask the user what to do.
 ---
 
 # mirador
 
-The user has a personal **brain** — private notes that shape how you read
-artifacts they open with mirador. Same artifact, personal lens. Their brain
-lives in their workspace repo at `.mirador/brain/`. Never share its contents
-across users.
+The user's **brain** is private notes — lives in their workspace repo at
+`.mirador/brain/`. It shapes how you read the artifacts they open with
+mirador. Same artifact, personal lens. Never share its contents across users.
 
-## When to activate
+## Activation contract — important
 
-Trigger this skill if **any** of the following:
+**When the user pastes a seed, the skill ACTS. It does not ask which option
+to pick.** Pasting an `@mirador-invitation` is the user telling you: *open
+this for me.* Asking "should I fetch?" or listing 1/2/3 options before
+loading the artifact is wrong — the user already made the decision when
+they pasted.
+
+The right shape:
+
+> *Pasted @mirador-invitation. Loading…*
+> *[fetch the read-only doc, parse the body]*
+> *[surface a one-screen brief, brain-shaped]*
+> *[then, and only then, offer concrete next steps]*
+
+The wrong shape:
+
+> *I see this is an invitation. I could (a) WebFetch, (b) open in browser,
+> (c) wait. Which would you like?*
+
+Never the wrong shape. The pastes are unambiguous; act on them.
+
+## Activation signals
+
+Trigger this skill if **any** of the following fire:
 
 | Signal | What to do |
 |---|---|
-| User pastes a block starting with `@mirador-invitation` | Read the seed → clone the linked repo into `~/.mirador/shared/<slug>/` → open a session as **reviewer** with the sender's note in view |
-| User pastes a block starting with `@mirador-request` | Read the seed → respond `accepted` or `declined` → if accepted, scaffold the artifact in the user's workspace |
-| User pastes a block starting with `@mirador-response` | Update the originating request's state. Surface the response in the next `mirador inbox` |
-| Working directory contains `.mirador-link` | The artifact was promoted to a shared repo. Resolve the link, open the shared clone instead |
-| Working directory is a mirador workspace | Read the brain. Use it to frame the session — what the user usually checks first, who they author for, their domain language |
-| User invokes `/mirador` slash command | Run paste-driven onboarding if no seed is in the buffer, otherwise treat the buffer contents as a seed |
+| User pastes a block starting with `@mirador-invitation` | 1. Parse the seed for `Artifact`, `From`, `Role expected`, `Note`, `Read-only:`, `Repo:`. 2. WebFetch the `Read-only:` URL silently. 3. Read the user's brain at `.mirador/brain/`. 4. Synthesise a one-screen brief in their voice — lead with what they would check first. 5. Then offer concrete next steps (comment, clone-to-edit, decline). |
+| User pastes a block starting with `@mirador-request` | Parse the seed. Surface the ask (what is requested + by when + role). Offer `accepted` / `declined` decision with one-line consequence each. Do not load any external URL — requests do not carry an artifact yet. |
+| User pastes a block starting with `@mirador-response` | Parse the seed. Update the originating request's state in `~/.mirador/workspace/outgoing-requests/<slug>.md`. Surface the response in the next `mirador inbox`. |
+| Working directory contains `.mirador-link` | The artifact was promoted to a shared repo. Resolve the link's `repo` field; open the shared clone at `clone_path` instead of the workspace folder. |
+| Working directory is a mirador workspace | Read the brain. Use it to frame the session — what the user usually checks first, who they author for, their domain language. |
+| User invokes `/mirador` slash command | If the buffer contains a seed, treat it as a seed paste. Otherwise run paste-driven onboarding. |
 
-## Workflow
+## Workflow on an invitation paste
 
-1. **Inspect** — load the brain (`.mirador/brain/`), the artifact manifest
-   (`.mirador/manifest.json`), and any open changes
-2. **Brief** — synthesise a one-screen brief in the user's voice. Lead with
-   what they would check first. No AI-prose summaries
-3. **Act** — run the requested command via the CLI (`mirador share`,
-   `mirador accept`, `mirador inbox`, etc.) — do not re-implement what the
-   CLI does
+The exact sequence, in order:
+
+1. **Parse the seed.** Extract: `Artifact`, `From`, `Role expected`, `Note`, `Read-only:` URL, `Repo:` URL. If any required field is missing, surface the parse error and stop — do not improvise.
+2. **WebFetch the `Read-only:` URL.** The URL serves themed HTML of the artifact. Read it. If it returns 401/403, tell the user the deployment is gated and suggest they open the URL in their browser to inspect the auth requirement.
+3. **Read the brain.** The user's session is inside a mirador workspace, so `.mirador/brain/` is already on disk. Pull the relevant topics (review focus, domain language, preferences).
+4. **Synthesise the brief — voice-aligned.** One screen. Lead with what *this user* (per their brain) would check first. No AI-prose summaries. Use scannable structure when the brain prefers tables. Cite the sender's note explicitly. End with 2–3 concrete next-step actions, not a question.
+
+## Workflow on a request paste
+
+1. Parse the seed.
+2. Read the brain for `author` role context.
+3. Surface: *who's asking*, *what's the deliverable*, *what role does the user play*, *deadline if any*, *the context the sender gave*.
+4. Two-line decision row: *accept* → scaffolds the artifact in the workspace via `mirador accept`. *decline* → sends a polite no via `mirador decline --reason "<text>"`.
+
+## What this skill does NOT do
+
+- **Does not re-implement the CLI.** Cloning, repo creation, deploy, encryption — all of that goes through `mirador <command>`. The skill orchestrates and briefs; the CLI does. If you find yourself writing git or vercel commands inline, route through the CLI instead.
+- **Does not invent metrics or quote the sender's note loosely.** The brief uses exact wording from the seed for any field the sender supplied.
+- **Does not list options before loading the artifact.** See § Activation contract.
+- **Does not personify itself with AI-slop language.** No "I'm here to help", no "Let me assist". The skill is a function; it reports findings, not feelings.
 
 ## Voice
 
 Confident with a wink. English. No filler, no fake enthusiasm, no decorative
-emoji. The full voice spec lives at [`docs/design/voice.md`](../../docs/design/voice.md).
+emoji. Full voice spec at [`docs/design/voice.md`](../../docs/design/voice.md).
 
 Canonical samples:
 
@@ -52,9 +87,9 @@ Canonical samples:
 
 ## What mirador is not
 
-- Not a SaaS — the user owns the repos and the Vercel deploy
-- Not a chat app — the seed is the message; the agent is the runtime
-- Not a Notion-AI rival — git is the substrate; this is collaboration on top
+- Not a SaaS — the user owns the repos and the Vercel deploy.
+- Not a chat app — the seed is the message; the agent is the runtime.
+- Not a Notion-AI rival — git is the substrate; this is collaboration on top.
 
 ## Source of truth
 
