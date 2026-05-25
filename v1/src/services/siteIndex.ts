@@ -26,11 +26,25 @@ export function renderSiteIndex(
 ): string {
   const merged = mergeForRender(entries, legacySlugs);
   const total = merged.length;
+  const registered = merged.filter((m) => !m.legacy);
+  const legacy = merged.filter((m) => m.legacy);
 
   const listHtml =
     total === 0
-      ? `<p class="dashboard-empty">Nothing here yet. Run \`mirador share &lt;slug&gt;\` to publish.</p>`
-      : `<ul class="dashboard">${merged.map((e) => renderRow(e, opts.baseUrl)).join('')}</ul>`;
+      ? `<p class="dashboard-empty">Nothing here yet. Run <code>mirador share &lt;slug&gt;</code> to publish.</p>`
+      : [
+          registered.length > 0
+            ? `<ul class="dashboard">${registered.map((e) => renderRow(e, opts.baseUrl)).join('')}</ul>`
+            : '',
+          legacy.length > 0
+            ? `<h2 class="dashboard-section-head">unregistered — re-share to track</h2>
+               <ul class="dashboard">${legacy.map((e) => renderRow(e, opts.baseUrl)).join('')}</ul>`
+            : '',
+        ]
+          .filter(Boolean)
+          .join('');
+
+  const sub = renderSubtitle(registered.length, legacy.length);
 
   return `<!doctype html>
 <html lang="en">
@@ -57,7 +71,7 @@ export function renderSiteIndex(
   <main class="shell-main">
     <div class="index-page">
       <h1>${escapeHtml(owner)}</h1>
-      <p class="index-sub">${total === 0 ? 'Shared via mirador.' : `${total} published via mirador.`}</p>
+      <p class="index-sub">${escapeHtml(sub)}</p>
       ${listHtml}
     </div>
   </main>
@@ -133,25 +147,31 @@ function renderRow(e: RenderEntry, baseUrl: string): string {
   const landingUrl = `${baseUrl}${landingPath}`;
 
   const date = e.publishedAt ? formatDate(e.publishedAt) : '—';
-  const dateClass = e.legacy ? 'date legacy' : 'date';
 
   return `
 <li class="dashboard-item${e.legacy ? ' is-legacy' : ''}">
   <div class="dashboard-row">
     <a class="slug" href="${escapeAttr(previewPath)}">${escapeHtml(e.slug)}</a>
-    <span class="${dateClass}">${escapeHtml(date)}</span>
+    <span class="date">${escapeHtml(date)}</span>
   </div>
   <div class="dashboard-meta">
     ${renderKindPill(e)}
     ${renderRecipients(e)}
-    ${e.legacy ? '<span class="legacy-note">unregistered · re-share to track</span>' : ''}
   </div>
   <div class="dashboard-actions">
-    ${e.kind === 'share' ? `<a href="${escapeAttr(previewPath)}">open preview ↗</a>` : ''}
-    <a href="${escapeAttr(landingPath)}">open ${e.kind === 'request' ? 'request' : 'landing'} ↗</a>
-    ${e.legacy ? '' : `<button type="button" class="copy-action" data-url="${escapeAttr(landingUrl)}">copy ${e.kind === 'request' ? 'request' : 'invitation'} link</button>`}
+    ${e.kind === 'share' ? `<a href="${escapeAttr(previewPath)}">open preview</a>` : ''}
+    <a href="${escapeAttr(landingPath)}">open ${e.kind === 'request' ? 'request' : 'landing'}</a>
+    ${e.legacy ? '' : `<button type="button" class="copy-action primary" data-url="${escapeAttr(landingUrl)}">copy ${e.kind === 'request' ? 'request' : 'invitation'} link</button>`}
   </div>
 </li>`;
+}
+
+function renderSubtitle(registered: number, legacy: number): string {
+  if (registered === 0 && legacy === 0) return 'Shared via mirador.';
+  const parts: string[] = [];
+  if (registered > 0) parts.push(`${registered} published`);
+  if (legacy > 0) parts.push(`${legacy} unregistered`);
+  return `${parts.join(' · ')} via mirador.`;
 }
 
 function renderKindPill(e: RenderEntry): string {

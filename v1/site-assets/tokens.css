@@ -84,6 +84,9 @@
   --focus-ring: 0 0 0 3px rgba(79, 125, 243, 0.35);
   --focus-outline: 2px solid var(--mirador-cobalt-bright);
 
+  /* Dashboard accent — flips to bright cobalt in dark for contrast */
+  --dashboard-accent: var(--mirador-cobalt);
+
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
@@ -117,6 +120,7 @@
     --mirador-cta-copied-bg: #fafafa;
     --mirador-cta-copied-fg: #0a0a0a;
     --mirador-error: #ff7866;
+    --dashboard-accent: var(--mirador-cobalt-bright);
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
     --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);

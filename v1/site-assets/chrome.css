@@ -409,14 +409,34 @@
   max-width: var(--content-wide);
 }
 .dashboard-item {
-  padding: var(--space-5) 0;
+  position: relative;
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+  margin: 0 calc(-1 * var(--space-4));
   border-top: 1px solid var(--mirador-border);
+  border-radius: var(--radius-2);
   transition: background var(--motion-default) var(--ease-out);
 }
 .dashboard-item:last-child {
   border-bottom: 1px solid var(--mirador-border);
 }
-.dashboard-item.is-legacy .slug { color: var(--mirador-fg-muted); }
+/* Cobalt left bar — only on registered items, signals "I track this" */
+.dashboard-item::before {
+  content: '';
+  position: absolute;
+  left: var(--space-2);
+  top: var(--space-5);
+  bottom: var(--space-5);
+  width: 2px;
+  background: var(--dashboard-accent);
+  border-radius: var(--radius-1);
+  opacity: 0;
+  transition: opacity var(--motion-default) var(--ease-out);
+}
+.dashboard-item:not(.is-legacy)::before { opacity: 1; }
+.dashboard-item:not(.is-legacy):hover { background: var(--mirador-cobalt-soft); }
+.dashboard-item.is-legacy { opacity: 0.55; }
+.dashboard-item.is-legacy:hover { opacity: 0.85; }
+
 .dashboard-row {
   display: flex;
   justify-content: space-between;
@@ -426,18 +446,19 @@
 .dashboard-row .slug {
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 600;
-  font-size: var(--type-lg);
+  font-size: var(--type-md);
   color: var(--mirador-fg);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.005em;
   text-decoration: none;
 }
-.dashboard-row .slug:hover { color: var(--mirador-cobalt); }
+.dashboard-row .slug:hover { color: var(--dashboard-accent); }
 .dashboard-row .date {
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
-  font-size: var(--type-sm);
+  font-size: var(--type-xs);
   color: var(--mirador-fg-subtle);
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
+  letter-spacing: 0.02em;
 }
 .dashboard-meta {
   margin-top: var(--space-2);
@@ -447,13 +468,14 @@
   gap: var(--space-3);
   align-items: center;
   flex-wrap: wrap;
+  line-height: 1.4;
 }
 .dashboard-meta .kind-pill {
   display: inline-flex;
   align-items: center;
-  padding: 0.15em 0.6em;
-  background: var(--mirador-bg-content);
-  border: 1px solid var(--mirador-border);
+  padding: 0.15em 0.55em;
+  background: transparent;
+  border: 1px solid var(--mirador-border-strong);
   border-radius: var(--radius-full);
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
   font-size: var(--type-xs);
@@ -461,9 +483,13 @@
   letter-spacing: 0.02em;
   color: var(--mirador-fg-muted);
 }
+.dashboard-item:not(.is-legacy) .kind-pill {
+  border-color: color-mix(in srgb, var(--dashboard-accent) 35%, transparent);
+  color: var(--dashboard-accent);
+}
 .dashboard-meta .kind-pill.request {
   background: var(--mirador-cobalt-soft);
-  color: var(--mirador-cobalt);
+  color: var(--dashboard-accent);
   border-color: transparent;
 }
 .dashboard-meta .recipients { font-size: var(--type-sm); }
@@ -477,8 +503,9 @@
 .dashboard-actions {
   margin-top: var(--space-3);
   display: flex;
-  gap: var(--space-5);
+  gap: var(--space-4);
   flex-wrap: wrap;
+  align-items: center;
 }
 .dashboard-actions a,
 .dashboard-actions button {
@@ -497,7 +524,16 @@
 .dashboard-actions a:hover,
 .dashboard-actions button:hover {
   color: var(--mirador-fg);
-  border-bottom-color: var(--mirador-cobalt);
+  border-bottom-color: var(--mirador-border-strong);
+}
+.dashboard-actions .primary {
+  color: var(--dashboard-accent);
+  border-bottom-color: color-mix(in srgb, var(--dashboard-accent) 40%, transparent);
+  font-weight: 500;
+}
+.dashboard-actions .primary:hover {
+  color: var(--dashboard-accent);
+  border-bottom-color: var(--dashboard-accent);
 }
 .dashboard-actions button:focus-visible {
   outline: var(--focus-outline);
@@ -505,8 +541,9 @@
   border-radius: var(--radius-1);
 }
 .dashboard-actions button[data-state="copied"] {
-  color: var(--mirador-cobalt);
-  border-bottom-color: var(--mirador-cobalt);
+  color: var(--dashboard-accent);
+  border-bottom-color: var(--dashboard-accent);
+  font-weight: 500;
 }
 .dashboard-empty {
   font-family: 'IBM Plex Sans', sans-serif;
@@ -522,6 +559,17 @@
   border-radius: var(--radius-1);
   padding: 0.1em 0.4em;
   font-size: 0.9em;
+}
+
+/* Section header — separates registered from legacy */
+.dashboard-section-head {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--type-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--mirador-fg-subtle);
+  margin: var(--space-7) 0 var(--space-2);
+  padding: 0 var(--space-1);
 }
 
 /* ─── Password gate ────────────────────────────────────────────────── */
