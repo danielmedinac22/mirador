@@ -228,6 +228,14 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
       '⚠  --keep-history is not yet implemented (falls back to snapshot). Tracked as a follow-up.\n',
     );
   }
+  // Re-share detection: if the workspace folder already holds a .mirador-link,
+  // resolveArtifactPath followed it and artifactPath is the shared clone — not
+  // the workspace folder. In that case the extract step would copy entries
+  // onto themselves (EINVAL), and the replaceWithLinkOnly step would delete
+  // the shared clone entirely. Both must be skipped.
+  const workspaceArtifactPath = join(paths.workspaceClone(), 'artifacts', input.slug);
+  const isReshare = artifactPath !== workspaceArtifactPath;
+
   await extractToSharedClone(artifactPath, clonePath, fullName, cloneUrl, {
     offline: input.offline,
     slug: input.slug,
@@ -237,15 +245,18 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
     sent,
   });
 
-  // 5. Replace workspace folder contents with the link file only
-  await replaceWithLinkOnly(artifactPath, {
-    slug: input.slug,
-    repoUrl: `https://github.com/${fullName}`,
-    sharedAt: sent,
-    sharedWith: input.withEmails,
-    role: input.role,
-    clonePath,
-  });
+  // 5. Replace workspace folder contents with the link file only. Skip on
+  //    re-share — the workspace already has its link file from the first share.
+  if (!isReshare) {
+    await replaceWithLinkOnly(artifactPath, {
+      slug: input.slug,
+      repoUrl: `https://github.com/${fullName}`,
+      sharedAt: sent,
+      sharedWith: input.withEmails,
+      role: input.role,
+      clonePath,
+    });
+  }
 
   return {
     sharedRepo: fullName,
@@ -276,13 +287,20 @@ async function extractToSharedClone(
 ): Promise<void> {
   await ensureDir(clonePath);
 
-  // Copy all artifact files (except .mirador-link which doesn't exist yet) to clone
-  const entries = await readdir(artifactPath);
-  for (const entry of entries) {
-    if (entry === '.mirador-link') continue;
-    const src = join(artifactPath, entry);
-    const dest = join(clonePath, entry);
-    await cp(src, dest, { recursive: true });
+  // Re-share path: when an artifact has already been shared, resolveArtifactPath
+  // follows the .mirador-link and returns the shared clone itself. In that case
+  // artifactPath === clonePath, the content is already in place, and copying
+  // entry-by-entry onto themselves throws EINVAL. Skip the extract step.
+  const isReshare = artifactPath === clonePath;
+  if (!isReshare) {
+    // Copy all artifact files (except .mirador-link which doesn't exist yet)
+    const entries = await readdir(artifactPath);
+    for (const entry of entries) {
+      if (entry === '.mirador-link') continue;
+      const src = join(artifactPath, entry);
+      const dest = join(clonePath, entry);
+      await cp(src, dest, { recursive: true });
+    }
   }
 
   // Write/update manifest inside the shared clone
