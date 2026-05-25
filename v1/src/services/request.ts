@@ -8,6 +8,7 @@ import { createArtifact } from './artifact.js';
 import { computeRequestExpiry } from './expiration.js';
 import { publishLanding, renderLanding } from './landingPage.js';
 import { type RequestSeed, type ResponseSeed, composeSeed } from './promptSeed.js';
+import { installSiteChrome } from './siteChrome.js';
 
 export interface CreateRequestInput {
   title: string;
@@ -77,6 +78,8 @@ export async function createRequest(input: CreateRequestInput): Promise<CreateRe
 
   const siteRoot = join(paths.workspaceClone(), 'site');
   await ensureDir(siteRoot);
+  // Install shared chrome (tokens, fonts, themes, mark assets). Idempotent.
+  await installSiteChrome(siteRoot);
   const landingHtml = renderLanding({
     kind: 'request',
     slug,
