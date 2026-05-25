@@ -1,0 +1,134 @@
+/* Mirador design tokens — shared across all chrome and themes.
+   Source of truth: docs/design/spec.md */
+
+:root {
+  /* Brand */
+  --mirador-cobalt: #2541B2;
+  --mirador-cobalt-bright: #4F7DF3;
+  --mirador-cobalt-soft: rgba(79, 125, 243, 0.12);
+  --mirador-cobalt-gradient: linear-gradient(135deg, #2541B2 0%, #4F7DF3 100%);
+  --mirador-cobalt-shadow: 0 8px 24px rgba(37, 65, 178, 0.18);
+
+  /* Neutrals — light */
+  --mirador-bg: #fafafa;
+  --mirador-bg-content: #ffffff;
+  --mirador-fg: #0a0a0a;
+  --mirador-fg-muted: #666666;
+  --mirador-fg-subtle: #999999;
+  --mirador-border: #e5e5e5;
+  --mirador-border-strong: #d4d4d4;
+
+  /* Semantic — terminal states + feedback */
+  --mirador-cta-copied-bg: #1a1a1a;
+  --mirador-cta-copied-fg: #fafafa;
+  --mirador-error: #c0392b;
+
+  /* Spacing — 4pt grid, 11 steps */
+  --space-0: 0;
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.5rem;    /* 24px */
+  --space-6: 2rem;      /* 32px */
+  --space-7: 2.5rem;    /* 40px */
+  --space-8: 3rem;      /* 48px */
+  --space-9: 4rem;      /* 64px */
+  --space-10: 6rem;     /* 96px */
+
+  /* Type scale — chrome */
+  --type-xs: 0.75rem;     /* 12 */
+  --type-sm: 0.8125rem;   /* 13 */
+  --type-base: 0.9375rem; /* 15 */
+  --type-md: 1rem;        /* 16 */
+  --type-lg: 1.25rem;     /* 20 */
+  --type-xl: 1.5rem;      /* 24 */
+  --type-2xl: 2rem;       /* 32 */
+  --type-3xl: 2.5rem;     /* 40 */
+  --type-display: clamp(2.5rem, 5vw, 4rem);
+
+  /* Line heights */
+  --leading-tight: 1.25;
+  --leading-snug: 1.4;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+  --leading-loose: 1.75;
+
+  /* Tracking */
+  --track-display: -0.02em;
+  --track-heading: -0.015em;
+  --track-wordmark: -0.04em;
+  --track-normal: 0;
+  --track-loose: 0.02em;
+
+  /* Radii */
+  --radius-0: 0;
+  --radius-1: 4px;
+  --radius-2: 8px;
+  --radius-3: 12px;
+  --radius-full: 9999px;
+
+  /* Motion — durations */
+  --motion-fast: 120ms;
+  --motion-default: 200ms;
+  --motion-medium: 280ms;
+  --motion-reveal: 320ms;
+  --motion-slow: 600ms;
+
+  /* Motion — easings */
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-reveal: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Focus ring — signature, constant across themes */
+  --focus-ring: 0 0 0 3px rgba(79, 125, 243, 0.35);
+  --focus-outline: 2px solid var(--mirador-cobalt-bright);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08);
+  --shadow-cobalt: var(--mirador-cobalt-shadow);
+
+  /* Z-index scale */
+  --z-base: 0;
+  --z-elevated: 10;
+  --z-overlay: 100;
+  --z-modal: 1000;
+  --z-toast: 10000;
+
+  /* Layout */
+  --content-narrow: 600px;
+  --content-default: 680px;
+  --content-wide: 880px;
+  --content-full: 1200px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --mirador-bg: #0a0a0a;
+    --mirador-bg-content: #0f0f0f;
+    --mirador-fg: #fafafa;
+    --mirador-fg-muted: #999999;
+    --mirador-fg-subtle: #666666;
+    --mirador-border: #1f1f1f;
+    --mirador-border-strong: #2a2a2a;
+    --mirador-cobalt-soft: rgba(79, 125, 243, 0.18);
+    --mirador-cta-copied-bg: #fafafa;
+    --mirador-cta-copied-fg: #0a0a0a;
+    --mirador-error: #ff7866;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-default: 0ms;
+    --motion-medium: 0ms;
+    --motion-reveal: 0ms;
+    --motion-slow: 0ms;
+  }
+}

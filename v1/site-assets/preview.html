@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mirador — design foundation preview</title>
+<link rel="icon" type="image/svg+xml" href="./assets/aperture-favicon.svg">
+<link rel="stylesheet" href="./fonts.css">
+<link rel="stylesheet" href="./tokens.css">
+<link rel="stylesheet" href="./reset.css">
+<style>
+  body { padding: var(--space-9) var(--space-6); }
+  main { max-width: var(--content-wide); margin: 0 auto; }
+
+  header { margin-bottom: var(--space-9); }
+  .lockup { display: flex; align-items: center; gap: var(--space-3); }
+  .lockup .mark { width: 28px; height: 28px; color: var(--mirador-fg); }
+  .lockup .wordmark {
+    font-weight: 600; font-size: var(--type-xl);
+    letter-spacing: var(--track-wordmark);
+  }
+  .lockup .wordmark .dot { color: var(--mirador-cobalt); }
+  .lead {
+    color: var(--mirador-fg-muted);
+    font-size: var(--type-base);
+    margin-top: var(--space-3);
+    max-width: 56ch;
+  }
+
+  section { margin-bottom: var(--space-9); }
+  section h2 {
+    font-size: var(--type-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--mirador-fg-muted);
+    margin-bottom: var(--space-5);
+    font-weight: 500;
+  }
+
+  /* Mark scale */
+  .scale { display: flex; gap: var(--space-6); align-items: flex-end; }
+  .scale-item { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); color: var(--mirador-fg); }
+  .scale-item .mark { color: var(--mirador-fg); }
+  .scale-item .label { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: var(--type-xs); color: var(--mirador-fg-subtle); }
+
+  /* Color */
+  .swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-3); }
+  .swatch { border: 1px solid var(--mirador-border); border-radius: var(--radius-2); overflow: hidden; }
+  .swatch .chip { height: 80px; }
+  .swatch .meta { padding: var(--space-3); font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: var(--type-xs); }
+  .swatch .meta .name { color: var(--mirador-fg); margin-bottom: var(--space-1); }
+  .swatch .meta .hex { color: var(--mirador-fg-muted); }
+
+  /* Type */
+  .type-spec { display: grid; gap: var(--space-5); }
+  .type-row { display: grid; grid-template-columns: 120px 1fr; gap: var(--space-5); align-items: baseline; }
+  .type-label { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: var(--type-xs); color: var(--mirador-fg-subtle); padding-top: 0.6em; }
+  .type-sample-display { font-size: var(--type-display); font-weight: 600; letter-spacing: var(--track-display); }
+  .type-sample-h1 { font-size: var(--type-2xl); font-weight: 600; letter-spacing: var(--track-heading); }
+  .type-sample-h2 { font-size: var(--type-xl); font-weight: 600; letter-spacing: var(--track-heading); }
+  .type-sample-body { font-size: var(--type-base); line-height: var(--leading-normal); }
+  .type-sample-mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: var(--type-base); }
+  .type-sample-serif { font-family: 'IBM Plex Serif', Georgia, serif; font-size: var(--type-lg); font-style: italic; }
+  .type-sample-newsreader { font-family: 'Newsreader', Georgia, serif; font-size: var(--type-lg); }
+  .type-sample-jbm { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: var(--type-base); }
+
+  /* Components */
+  .cta-primary {
+    display: inline-block;
+    padding: var(--space-3) var(--space-5);
+    background: var(--mirador-cobalt-gradient);
+    color: white;
+    border-radius: var(--radius-2);
+    font-weight: 500;
+    font-size: var(--type-base);
+    box-shadow: var(--shadow-cobalt);
+    transition: transform var(--motion-default) var(--ease-out);
+  }
+  .cta-primary:hover { transform: translateY(-1px); color: white; }
+  .cta-secondary {
+    display: inline-block;
+    margin-left: var(--space-5);
+    color: var(--mirador-fg-muted);
+    text-decoration: underline;
+    font-size: var(--type-sm);
+  }
+
+  .seed {
+    background: var(--mirador-bg);
+    border: 1px solid var(--mirador-border);
+    padding: var(--space-4);
+    border-radius: var(--radius-2);
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: var(--type-sm);
+    color: var(--mirador-fg-muted);
+    margin-top: var(--space-4);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .input {
+    width: 100%;
+    padding: var(--space-3);
+    background: var(--mirador-bg-content);
+    border: 1px solid var(--mirador-border);
+    color: var(--mirador-fg);
+    border-radius: var(--radius-2);
+    font-size: var(--type-base);
+    font-family: inherit;
+    transition: border-color var(--motion-default) var(--ease-out), box-shadow var(--motion-default) var(--ease-out);
+  }
+  .input:focus { outline: none; border-color: var(--mirador-cobalt-bright); box-shadow: var(--focus-ring); }
+
+  /* Aperture animation playground */
+  .aperture-anim {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5);
+    margin-top: var(--space-5);
+  }
+  .anim-cell { border: 1px solid var(--mirador-border); border-radius: var(--radius-2); padding: var(--space-6); text-align: center; }
+  .anim-cell .mark { width: 56px; height: 56px; margin: 0 auto; color: var(--mirador-fg); }
+  .anim-cell .meta {
+    margin-top: var(--space-3); font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: var(--type-xs); color: var(--mirador-fg-subtle);
+  }
+  .anim-cell .live svg rect:nth-child(2) { animation: breathe 2s ease-in-out infinite; transform-origin: center; }
+  .anim-cell .reveal svg rect:nth-child(2) { animation: reveal 0.28s cubic-bezier(.2,.8,.2,1) backwards; }
+  .anim-cell:hover .reveal svg rect:nth-child(2) { animation: reveal 0.28s cubic-bezier(.2,.8,.2,1); }
+  .anim-cell .pulse:hover svg rect:nth-child(2) { animation: pulse 0.32s ease-out; }
+  @keyframes breathe { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+  @keyframes reveal { from { transform: translate(8px, -8px); opacity: 0; } to { transform: translate(0,0); opacity: 1; } }
+  @keyframes pulse { 0% { fill: #2541B2; } 50% { fill: #4F7DF3; } 100% { fill: #2541B2; } }
+
+  footer { margin-top: var(--space-10); padding-top: var(--space-5); border-top: 1px solid var(--mirador-border); color: var(--mirador-fg-subtle); font-size: var(--type-xs); font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<main>
+
+  <header>
+    <div class="lockup">
+      <svg class="mark" viewBox="0 0 24 24" aria-label="mirador">
+        <rect x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="14" y="4" width="6" height="6" fill="#2541B2"/>
+      </svg>
+      <span class="wordmark">m<span style="position:relative;display:inline-block;">i<span class="dot" style="position:absolute;left:50%;top:0.1em;transform:translate(-50%,-110%);font-size:0.7em;line-height:1;">·</span></span>rador<span style="color:var(--mirador-cobalt)">.</span></span>
+    </div>
+    <p class="lead">Design foundation preview. Every token, mark, and component below is canonical. If something looks off here, fix it before B2 starts.</p>
+  </header>
+
+  <section>
+    <h2>The mark — scale</h2>
+    <div class="scale">
+      <div class="scale-item"><svg class="mark" style="width:16px;height:16px" viewBox="0 0 24 24"><rect x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="4" width="6" height="6" fill="#2541B2"/></svg><span class="label">16</span></div>
+      <div class="scale-item"><svg class="mark" style="width:24px;height:24px" viewBox="0 0 24 24"><rect x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="4" width="6" height="6" fill="#2541B2"/></svg><span class="label">24</span></div>
+      <div class="scale-item"><svg class="mark" style="width:32px;height:32px" viewBox="0 0 24 24"><rect x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="4" width="6" height="6" fill="#2541B2"/></svg><span class="label">32</span></div>
+      <div class="scale-item"><svg class="mark" style="width:48px;height:48px" viewBox="0 0 24 24"><rect x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="4" width="6" height="6" fill="#2541B2"/></svg><span class="label">48</span></div>
+      <div class="scale-item"><svg class="mark" style="width:80px;height:80px" viewBox="0 0 24 24"><rect x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="4" width="6" height="6" fill="#2541B2"/></svg><span class="label">80</span></div>
+      <div class="scale-item"><svg class="mark" style="width:128px;height:128px" viewBox="0 0 24 24"><rect x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="4" width="6" height="6" fill="#2541B2"/></svg><span class="label">128</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The mark — animation variants</h2>
+    <div class="aperture-anim">
+      <div class="anim-cell">
+        <svg class="mark" viewBox="0 0 24 24"><rect x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="4" width="6" height="6" fill="#2541B2"/></svg>
+        <div class="meta">static (95% of uses)</div>
+      </div>
+      <div class="anim-cell live">
+        <svg class="mark" viewBox="0 0 24 24"><rect x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="4" width="6" height="6" fill="#2541B2"/></svg>
+        <div class="meta">live breathing — spinner contexts</div>
+      </div>
+      <div class="anim-cell pulse">
+        <svg class="mark" viewBox="0 0 24 24"><rect x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="4" width="6" height="6" fill="#2541B2"/></svg>
+        <div class="meta">pulse on hover — action response</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Color tokens</h2>
+    <div class="swatches">
+      <div class="swatch"><div class="chip" style="background:#2541B2"></div><div class="meta"><div class="name">cobalt</div><div class="hex">#2541B2</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#4F7DF3"></div><div class="meta"><div class="name">cobalt-bright</div><div class="hex">#4F7DF3</div></div></div>
+      <div class="swatch"><div class="chip" style="background:linear-gradient(135deg,#2541B2,#4F7DF3)"></div><div class="meta"><div class="name">cobalt-gradient</div><div class="hex">CTA only</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#0a0a0a"></div><div class="meta"><div class="name">fg</div><div class="hex">#0a0a0a</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#666"></div><div class="meta"><div class="name">fg-muted</div><div class="hex">#666666</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#fafafa;border-bottom:1px solid #e5e5e5"></div><div class="meta"><div class="name">bg</div><div class="hex">#fafafa</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#e5e5e5"></div><div class="meta"><div class="name">border</div><div class="hex">#e5e5e5</div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Typography</h2>
+    <div class="type-spec">
+      <div class="type-row"><span class="type-label">display · 4xl</span><span class="type-sample-display">Daniel sent you q2-report.</span></div>
+      <div class="type-row"><span class="type-label">h1 · 2xl</span><span class="type-sample-h1">He wants your eyes on it.</span></div>
+      <div class="type-row"><span class="type-label">h2 · xl</span><span class="type-sample-h2">Open in Claude Code.</span></div>
+      <div class="type-row"><span class="type-label">body · base</span><span class="type-sample-body">Mirador makes the link. Your agent made the artifact. The complexity lives in the skill — theming, optional password gate, Vercel orchestration. What you see is one command.</span></div>
+      <div class="type-row"><span class="type-label">mono · sm</span><span class="type-sample-mono">slug q2-report · theme memo · published 2026-05-23</span></div>
+      <div class="type-row"><span class="type-label">plex serif · lg</span><span class="type-sample-serif">Editorial accent — not used in chrome.</span></div>
+      <div class="type-row"><span class="type-label">newsreader · lg</span><span class="type-sample-newsreader">Long-form, read with intention. Memo theme body.</span></div>
+      <div class="type-row"><span class="type-label">jbm · base</span><span class="type-sample-jbm">$ console theme heading example</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Components — preview</h2>
+    <div style="display:flex; align-items:center; gap: var(--space-5); margin-bottom: var(--space-6);">
+      <a href="#" class="cta-primary">Open in Claude Code</a>
+      <a href="#" class="cta-secondary">Or just read it.</a>
+    </div>
+    <div style="max-width: 360px;">
+      <input class="input" placeholder="Password" type="password">
+    </div>
+    <div class="seed">@mirador-invitation
+slug: q2-report
+from: danielm
+role: reviewer
+note: take a look before tomorrow's session</div>
+  </section>
+
+  <footer>
+    mirador. design foundation. tokens.css · reset.css · fonts.css · aperture.svg
+  </footer>
+
+</main>
+</body>
+</html>

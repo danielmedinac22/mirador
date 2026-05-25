@@ -58,11 +58,11 @@ function composeInvitation(s: InvitationSeed): string {
     s.note ? `Note: ${s.note}` : undefined,
     `Sent: ${s.sent}`,
     '',
-    'To open: paste this entire block into Claude Code with the Mirador skill installed.',
-    s.preview ? `Read-only preview: ${s.preview}` : undefined,
+    'Paste this whole block into Claude Code to open.',
+    s.preview ? `Read-only: ${s.preview}` : undefined,
     s.landing ? `Landing: ${s.landing}` : undefined,
     '',
-    '— Sent via Mirador',
+    '— mirador.',
   ].filter((l): l is string => l !== undefined);
   return lines.join('\n');
 }
@@ -80,10 +80,10 @@ function composeRequest(s: RequestSeed): string {
     `Sent: ${s.sent}`,
     s.expires ? `Expires: ${s.expires}` : undefined,
     '',
-    'To accept or decline: paste this entire block into Claude Code.',
+    'Paste this whole block into Claude Code to accept or decline.',
     s.landing ? `Landing: ${s.landing}` : undefined,
     '',
-    '— Sent via Mirador',
+    '— mirador.',
   ].filter((l): l is string => l !== undefined);
   return lines.join('\n');
 }
@@ -99,7 +99,7 @@ function composeResponse(s: ResponseSeed): string {
     s.note ? `Note: ${s.note}` : undefined,
     `Sent: ${s.sent}`,
     '',
-    '— Sent via Mirador',
+    '— mirador.',
   ].filter((l): l is string => l !== undefined);
   return lines.join('\n');
 }

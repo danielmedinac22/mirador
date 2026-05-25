@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 24" role="img" aria-label="Mirador">
+  <title>Mirador</title>
+  <rect x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  <rect x="14" y="4" width="6" height="6" fill="#2541B2"/>
+  <text x="34" y="17" font-family="'IBM Plex Sans', -apple-system, system-ui, sans-serif" font-weight="600" font-size="17" letter-spacing="-0.7" fill="currentColor">mirador</text>
+  <circle cx="76.5" cy="6.5" r="1.6" fill="#2541B2"/>
+</svg>

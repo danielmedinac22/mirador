@@ -17,7 +17,7 @@ export function registerBrain(program: Command): void {
     .action(async () => {
       const entries = await listBrain();
       if (entries.length === 0) {
-        process.stdout.write('(brain is empty)\n');
+        process.stdout.write('Brain is empty.\n');
         return;
       }
       const lines = entries.map((e) => {
@@ -66,12 +66,12 @@ export function registerBrain(program: Command): void {
     .action(async () => {
       const found = await detectExistingContext();
       if (found.length === 0) {
-        process.stdout.write('(no existing context detected, or all already imported)\n');
+        process.stdout.write('Nothing to import — no context detected, or all already in.\n');
         return;
       }
       const lines = found.map((f) => `${f.source}  (${f.body.length} chars)`);
       process.stdout.write(`${lines.join('\n')}\n`);
-      process.stdout.write('\nRun `mirador-v1 brain import` to interactively bring these in.\n');
+      process.stdout.write('\nRun `mirador brain import` to bring these in.\n');
     });
 
   brain
@@ -80,10 +80,10 @@ export function registerBrain(program: Command): void {
     .action(async () => {
       const found = await detectExistingContext();
       if (found.length === 0) {
-        process.stdout.write('(no existing context detected, or all already imported)\n');
+        process.stdout.write('Nothing to import — no context detected, or all already in.\n');
         return;
       }
-      p.intro('Mirador · brain import');
+      p.intro('brain import');
       const picks = (await p.multiselect({
         message: 'Which sources do you want to import?',
         options: found.map((f) => ({
@@ -102,7 +102,7 @@ export function registerBrain(program: Command): void {
       for (const ctx of picked) {
         await importOne(ctx);
       }
-      p.outro(`Imported ${picked.length} file(s) into your brain.`);
+      p.outro(`Imported ${picked.length} file${picked.length === 1 ? '' : 's'}.`);
     });
 }
 

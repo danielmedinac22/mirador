@@ -28,7 +28,7 @@ export async function resolveArtifactPath(slug: string): Promise<string> {
     throw new MiradorError(
       'ARTIFACT_NOT_FOUND',
       `Artifact "${slug}" not found in workspace.`,
-      'Run `mirador-v1 list` to see your artifacts.',
+      'Run `mirador list` to see your artifacts.',
     );
   }
   // If the workspace folder is a link-only stub, follow the link to the shared clone.
@@ -38,7 +38,7 @@ export async function resolveArtifactPath(slug: string): Promise<string> {
       throw new MiradorError(
         'SHARED_CLONE_MISSING',
         `Shared artifact "${slug}" was extracted but the local clone at ${link.clone_path} is missing.`,
-        `Run \`git clone ${link.repo} ${link.clone_path}\` and retry, or \`mirador-v1 unshare ${slug}\` to re-absorb if you have a backup.`,
+        `Run \`git clone ${link.repo} ${link.clone_path}\` and retry, or \`mirador unshare ${slug}\` to re-absorb if you have a backup.`,
       );
     }
     return link.clone_path;

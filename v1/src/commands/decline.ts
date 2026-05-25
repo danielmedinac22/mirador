@@ -7,7 +7,7 @@ import { logActivity } from '../shared/log.js';
 export function registerDecline(program: Command): void {
   program
     .command('decline')
-    .description('Decline a Mirador request seed.')
+    .description('Decline a mirador request.')
     .option('--from-request <text>', 'Inline request seed text.')
     .option('--from-file <path>', 'Read seed text from a file.')
     .requiredOption('--reason <text>', 'Reason for declining.')
@@ -15,15 +15,16 @@ export function registerDecline(program: Command): void {
       const raw = opts.fromRequest ?? (opts.fromFile ? await readFile(opts.fromFile, 'utf8') : '');
       const seed = parseSeed(raw);
       if (seed.kind !== 'request') {
-        process.stderr.write('Provided seed is not a @mirador-request block.\n');
+        process.stderr.write('Not a @mirador-request block.\n');
         process.exit(1);
       }
       const { responseSeed } = await declineRequest(seed, opts.reason);
       await logActivity(`decline request=${seed.askingFor}`);
       process.stdout.write(
         [
-          `Declined "${seed.askingFor}".`,
-          `Send this response seed back to ${seed.from}:`,
+          `Declined ${seed.askingFor}.`,
+          '',
+          `Send this back to ${seed.from}:`,
           '',
           responseSeed,
           '',

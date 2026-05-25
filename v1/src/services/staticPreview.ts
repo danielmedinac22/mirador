@@ -2,13 +2,47 @@ import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pathExists, readText, writeFileAtomic } from '../adapters/fs.js';
 
-// Renders the artifact's HTML (if present) wrapped in a minimal themed shell.
-// Falls back to a generic "no preview available" page when there's no html.
-export async function renderPreview(artifactPath: string, theme = 'default'): Promise<string> {
+export type ThemeName = 'page' | 'memo' | 'deck' | 'console' | 'atlas' | 'none';
+
+const KNOWN_THEMES: readonly ThemeName[] = [
+  'page',
+  'memo',
+  'deck',
+  'console',
+  'atlas',
+  'none',
+] as const;
+
+const THEMES_WITH_SCRIPTS: Partial<Record<ThemeName, string[]>> = {
+  deck: ['/themes/deck/deck.js'],
+};
+
+/**
+ * Renders the artifact's HTML wrapped in its theme.
+ *
+ * Wrapper references shared chrome assets at `/style.css` and
+ * `/themes/<theme>/theme.css` — installed under the Vercel site root by
+ * services/siteChrome.ts before publish.
+ *
+ * Themes catalogued in docs/design/spec.md.
+ */
+export async function renderPreview(
+  artifactPath: string,
+  theme: string = 'page',
+): Promise<string> {
+  const themeName = normaliseTheme(theme);
   const indexHtml = await findIndexHtml(artifactPath);
-  if (!indexHtml) return renderNoPreview(theme);
+  if (!indexHtml) return renderNoPreview(themeName);
   const body = await readText(indexHtml);
-  return wrapInTheme(body, theme);
+  return wrapInTheme(body, themeName);
+}
+
+function normaliseTheme(theme: string): ThemeName {
+  const lower = (theme || '').toLowerCase().trim();
+  if ((KNOWN_THEMES as readonly string[]).includes(lower)) return lower as ThemeName;
+  // Legacy alpha names → V1 themes
+  if (lower === 'default') return 'page';
+  return 'page';
 }
 
 async function findIndexHtml(dir: string): Promise<string | null> {
@@ -19,36 +53,60 @@ async function findIndexHtml(dir: string): Promise<string | null> {
   }
   const entries = await readdir(dir).catch(() => []);
   for (const e of entries) {
-    if (e.endsWith('.html')) return join(dir, e);
+    if (typeof e === 'string' && e.endsWith('.html')) return join(dir, e);
   }
   return null;
 }
 
-function renderNoPreview(theme: string): string {
-  return wrapInTheme(
-    '<div class="mirador-content"><p>No HTML preview available for this artifact.</p></div>',
-    theme,
-  );
+function renderNoPreview(theme: ThemeName): string {
+  const body =
+    '<div class="mirador-content"><h1>No preview</h1><p>This artifact has no HTML index.</p></div>';
+  return wrapInTheme(body, theme);
 }
 
-function wrapInTheme(body: string, theme: string): string {
-  // VS-04 placeholder: real theme application carries over from alpha later.
+function wrapInTheme(bodyHtml: string, theme: ThemeName): string {
+  const themeLink =
+    theme === 'none' ? '' : `<link rel="stylesheet" href="/themes/${theme}/theme.css">`;
+
+  const scripts = (THEMES_WITH_SCRIPTS[theme] ?? [])
+    .map((src) => `<script src="${src}" defer></script>`)
+    .join('\n');
+
+  const wrapped = ensureWrapper(bodyHtml, theme);
+
   return `<!doctype html>
-<html lang="en">
+<html lang="en" data-mirador-theme="${theme}">
 <head>
 <meta charset="utf-8">
-<title>Mirador preview</title>
-<meta data-mirador-theme="${theme}">
-<style>
-body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #1a1a1a; }
-.mirador-content { padding: 2rem 0; }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mirador · preview</title>
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: light)" href="/assets/aperture-favicon.svg">
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: dark)" href="/assets/aperture-favicon-dark.svg">
+${themeLink}
+${scripts}
 </head>
 <body>
-${body}
+${wrapped}
 </body>
 </html>
 `;
+}
+
+/**
+ * If the artifact body is a full HTML document, extract its <body> contents.
+ * Then ensure the content is wrapped in `.mirador-content` so theme styles apply.
+ * `none` skips wrapping (publish verbatim).
+ */
+function ensureWrapper(raw: string, theme: ThemeName): string {
+  let inner = raw;
+  const bodyMatch = raw.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+  if (bodyMatch) inner = bodyMatch[1] ?? raw;
+
+  if (theme === 'none') return inner;
+
+  if (/class\s*=\s*["'][^"']*\bmirador-content\b/.test(inner)) return inner;
+
+  return `<div class="mirador-content">${inner}</div>`;
 }
 
 export async function publishPreview(

@@ -27,7 +27,7 @@ export async function createWorkspaceRepo(
     name: input.repoName,
     org: input.owner === input.ghUser ? undefined : input.owner,
     private: true,
-    description: 'My personal Mirador workspace.',
+    description: 'My personal mirador workspace.',
   });
   await git.clone(repo.cloneUrl, paths.workspaceClone());
   return { fullName: repo.fullName };
@@ -44,10 +44,8 @@ export async function scaffoldWorkspace(): Promise<void> {
   await writeFileAtomic(join(root, '.gitignore'), 'logs/\nnode_modules/\n');
 }
 
-const DEFAULT_WORKSPACE_README = `# My Mirador workspace
+const DEFAULT_WORKSPACE_README = `# My mirador workspace
 
-This is my private Mirador workspace. Drafts, brain, and request stubs live here.
+Private workspace. Drafts, brain, and request stubs live here.
 Shared artifacts get promoted to standalone repos when I run \`mirador share\`.
-
-Source of truth for the design: https://github.com/danielmedinac22/mirador
 `;

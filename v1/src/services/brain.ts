@@ -81,7 +81,7 @@ export interface BrainFile {
 export async function brainRoot(): Promise<string> {
   const root = join(paths.workspaceClone(), 'brain');
   if (!(await pathExists(root))) {
-    throw new MiradorError('BRAIN_MISSING', 'No brain found. Run `mirador-v1 init` first.');
+    throw new MiradorError('BRAIN_MISSING', 'No brain found. Run `mirador init` first.');
   }
   return root;
 }

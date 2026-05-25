@@ -1,0 +1,10 @@
+{
+  "name": "memo",
+  "thesis": "Long-form, read with intention.",
+  "primaryFont": "Newsreader",
+  "secondaryFont": "IBM Plex Sans",
+  "lightDefault": true,
+  "darkSupport": true,
+  "contentMaxWidth": 640,
+  "distinguishing": "Drop cap on first paragraph; signature block; warm sepia."
+}
