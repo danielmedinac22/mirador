@@ -30,19 +30,78 @@ macOS, Linux, Windows. Node 20+, Vercel CLI required.
 ---
 
 > [!IMPORTANT]
-> **Status: public alpha.**
+> **Status: V1 public.**
 >
-> The CLI and skill work today. The V1 managed runtime (multiplayer, hosted, real auth) is designed but not built. Expect rough edges; please file issues.
+> CLI, Claude Code skill, themes, and the collaboration layer (share, request, inbox, brain, dashboard) all ship today. Bugs go to [GitHub issues](https://github.com/danielmedinac22/mirador/issues). Telemetry is minimal — please report what breaks.
+
+---
+
+## What it looks like
+
+After `mirador init` (90 seconds, once), publish from inside Claude Code:
+
+```
+> /mirador q2-report.html
+
+slug?       → q2-report
+theme?      → memo
+password?   → no
+
+Live at https://mirador-yourname.vercel.app/d/q2-report/
+```
+
+Share it with a colleague — adds them to the artifact's private GitHub repo and copies an invitation seed to your clipboard:
+
+```
+$ mirador share q2-report --with maria@simetrik.com --role reviewer
+
+Shared q2-report to yourname/q2-report.
+Invitation seed — paste into Claude Code or send to collaborator:
+
+@mirador-invitation
+
+From: yourname
+Artifact: q2-report
+Role expected: reviewer
+Sent: 2026-05-26T09:14:00Z
+
+Paste this whole block into Claude Code to open.
+Read-only: https://mirador-yourname.vercel.app/d/q2-report/
+Landing: https://mirador-yourname.vercel.app/i/q2-report/
+
+— mirador.
+
+Live at https://mirador-yourname.vercel.app/i/q2-report/
+```
+
+Maria pastes the block into her Claude Code. Her Claude reads the invitation directly — fetches the read-only doc, parses the seed, opens a session with full context. No copy-paste of background, no "let me catch you up." She reviews, then responds with a single block:
+
+```
+@mirador-response
+
+From: maria
+Re-request: q2-report
+Status: accepted
+Note: Looks good. Two comments on the timeline.
+
+— mirador.
+```
+
+Everything you've published shows up on your dashboard, with one-click invitation links per artifact:
+
+```
+$ mirador dashboard
+
+Opening https://mirador-yourname.vercel.app/
+```
+
+That's the loop. Three blocks, three commands, your own infrastructure.
 
 ---
 
 ## Why mirador
 
-Your agent is great at producing HTML — reports, dashboards, decks, prototypes, mini-apps. Sharing it is annoying: zip it, upload it somewhere, fight with a static host, paste a URL.
-
-mirador removes the loop. You type `/mirador` — or wait for your agent to suggest it once it notices the HTML — answer three or four chat questions, and 15–30 seconds later you have a link. No mirador server in the path: your file deploys to **your own Vercel** account, on a project you control.
-
-The complexity lives in the skill: theming, optional client-side password gate, Vercel orchestration. What you see is one command.
+Your agent produces HTML. Sharing it manually is the loop that kills momentum — screenshot, paste in Slack, lose hierarchy, lose source. mirador removes that loop in one command: your HTML deploys to **your own Vercel**, your colleagues collaborate via paste-in-chat blocks, nothing touches an external server. The complexity lives in the skill — theming, optional password gate, Vercel orchestration. What you see is one command.
 
 ---
 
@@ -93,7 +152,7 @@ password?   → no
 visibility? → unlisted
 ```
 
-You can also skip `/mirador` entirely and just say *"publish that as a Mirador link"* — the skill triggers itself once Claude notices you've made HTML.
+The skill also auto-activates inside a mirador workspace and when you paste any `@mirador-invitation` / `@mirador-request` / `@mirador-response` block — see [`v1/skill/SKILL.md`](v1/skill/SKILL.md) for the full trigger matrix.
 
 ### 4. Share
 
@@ -137,7 +196,7 @@ The encryption is **client-side only**: AES-GCM with PBKDF2 (200,000 iterations)
 
 But it is **not real authentication**. Anyone who has the page can run unlimited offline password guesses, and someone watching a logged-in user's browser can grab the decrypted content. Treat it as a deterrent for casual viewing — not as protection for confidential data.
 
-For real auth, wait for V1, or use Vercel Pro's project-level password protection.
+For real auth, use Vercel Pro's project-level password protection. Server-side auth on the mirador surface itself is on the V2 roadmap.
 
 ---
 
@@ -146,7 +205,7 @@ For real auth, wait for V1, or use Vercel Pro's project-level password protectio
 | Path | What's in it |
 |---|---|
 | [`alpha/`](alpha/) | The public alpha — CLI, skill, themes. Ships on npm as `mirador-cli`. See [`alpha/README.md`](alpha/README.md). |
-| [`v1/`](v1/) | V1 — multiplayer surface (in development) with the new theme system, brain, share/request/inbox commands, brand chrome. See [`v1/README.md`](v1/README.md). |
+| [`v1/`](v1/) | The current V1 surface — new theme system, brain, share/request/inbox/dashboard, brand chrome. See [`v1/README.md`](v1/README.md). |
 | [`docs/design/`](docs/design/) | V1 design system: tokens, voice spec, every locked decision. |
 
 ---
