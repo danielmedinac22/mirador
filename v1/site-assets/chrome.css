@@ -561,15 +561,34 @@
   font-size: 0.9em;
 }
 
-/* Section header — separates registered from legacy */
+/* Section block — separates registered from legacy with explainer */
+.dashboard-section { margin-top: var(--space-7); }
 .dashboard-section-head {
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
   font-size: var(--type-xs);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--mirador-fg-subtle);
-  margin: var(--space-7) 0 var(--space-2);
+  margin: 0 0 var(--space-2);
   padding: 0 var(--space-1);
+}
+.dashboard-section-sub {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: var(--type-sm);
+  color: var(--mirador-fg-muted);
+  max-width: 64ch;
+  line-height: 1.55;
+  margin: 0 0 var(--space-4);
+  padding: 0 var(--space-1);
+}
+.dashboard-section-sub code {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  background: var(--mirador-bg-content);
+  border: 1px solid var(--mirador-border);
+  border-radius: var(--radius-1);
+  padding: 0.1em 0.4em;
+  font-size: 0.9em;
+  color: var(--mirador-fg);
 }
 
 /* ─── Password gate ────────────────────────────────────────────────── */

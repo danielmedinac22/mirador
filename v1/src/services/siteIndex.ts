@@ -37,8 +37,11 @@ export function renderSiteIndex(
             ? `<ul class="dashboard">${registered.map((e) => renderRow(e, opts.baseUrl)).join('')}</ul>`
             : '',
           legacy.length > 0
-            ? `<h2 class="dashboard-section-head">unregistered — re-share to track</h2>
-               <ul class="dashboard">${legacy.map((e) => renderRow(e, opts.baseUrl)).join('')}</ul>`
+            ? `<div class="dashboard-section">
+                 <h2 class="dashboard-section-head">unregistered</h2>
+                 <p class="dashboard-section-sub">Links work as-is. Run <code>mirador share &lt;slug&gt; --with &lt;email&gt;</code> from your terminal to bring them into the registry with dates and recipients.</p>
+                 <ul class="dashboard">${legacy.map((e) => renderRow(e, opts.baseUrl)).join('')}</ul>
+               </div>`
             : '',
         ]
           .filter(Boolean)
@@ -161,7 +164,7 @@ function renderRow(e: RenderEntry, baseUrl: string): string {
   <div class="dashboard-actions">
     ${e.kind === 'share' ? `<a href="${escapeAttr(previewPath)}">open preview</a>` : ''}
     <a href="${escapeAttr(landingPath)}">open ${e.kind === 'request' ? 'request' : 'landing'}</a>
-    ${e.legacy ? '' : `<button type="button" class="copy-action primary" data-url="${escapeAttr(landingUrl)}">copy ${e.kind === 'request' ? 'request' : 'invitation'} link</button>`}
+    <button type="button" class="copy-action primary" data-url="${escapeAttr(landingUrl)}">copy ${e.kind === 'request' ? 'request' : 'invitation'} link</button>
   </div>
 </li>`;
 }
