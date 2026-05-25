@@ -147,7 +147,7 @@ body, .mirador-content {
   font-size: 0.85rem;
   color: var(--deck-fg-muted);
   letter-spacing: 0.05em;
-  z-index: 100;
+  z-index: var(--z-overlay, 100);
   user-select: none;
 }
 .deck-counter .sep { margin: 0 0.3em; opacity: 0.5; }
@@ -159,7 +159,7 @@ body, .mirador-content {
   top: 0;
   height: 2px;
   background: var(--deck-accent);
-  z-index: 101;
+  z-index: calc(var(--z-overlay, 100) + 1);
   transition: width 120ms linear;
 }
 
@@ -175,7 +175,7 @@ body, .mirador-content {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   opacity: 0.7;
-  z-index: 100;
+  z-index: var(--z-overlay, 100);
   pointer-events: none;
   animation: deck-hint-pulse 4s ease-in-out infinite;
 }

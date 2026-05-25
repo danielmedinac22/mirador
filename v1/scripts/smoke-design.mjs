@@ -34,7 +34,7 @@ async function installChrome() {
 
 const APERTURE_SVG = `<svg class="mark mark-anim" viewBox="0 0 24 24" aria-hidden="true">
   <rect class="outer" x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
-  <rect class="inner" x="14" y="4" width="6" height="6" fill="#2541B2"/>
+  <rect class="inner" x="14" y="4" width="6" height="6" style="fill: var(--mirador-cobalt, #2541B2);"/>
 </svg>`;
 
 const LOCKUP = `<a href="/" class="lockup" aria-label="mirador">
@@ -43,7 +43,7 @@ const LOCKUP = `<a href="/" class="lockup" aria-label="mirador">
 </a>`;
 
 const SHELL_HEAD = `<header class="shell-head">${LOCKUP}</header>`;
-const SHELL_FOOT = `<footer class="shell-foot">What's this? <a href="https://mirador.dev">mirador.dev</a>.</footer>`;
+const SHELL_FOOT = `<footer class="shell-foot">What’s this? <a href="https://mirador.dev">mirador.dev</a>.</footer>`;
 
 /* ─── Landing ──────────────────────────────────────────────────────── */
 
@@ -206,29 +206,29 @@ ${SHELL_FOOT}
 /* ─── Artifact bodies per theme (realistic sample content) ─────────── */
 
 const ARTIFACT_BODIES = {
-  page: `<h1>Q2 product review</h1>
+  page: `<h1>Sample · weekly review</h1>
 <p>This is the safe canvas — Plex Sans, 680px column, the default theme that does not apologize. It should read cleanly for any general-purpose AI-generated content.</p>
-<h2>What we shipped</h2>
-<p>The team closed the design polish track of Mirador V1. Five themes, a self-hosted type system, a custom mark, and a wow moment that lands in under two seconds.</p>
-<h3>Risks</h3>
+<h2>What's in here</h2>
+<p>A representative document so the <code>page</code> theme can be eyeballed at a glance: headings, body prose, lists, a table, a blockquote, a code block. Connect your own content to see how it lands.</p>
+<h3>Three things to check</h3>
 <ul>
-<li>Pricing pressure from incumbent collaboration tools.</li>
-<li>Onboarding friction for receivers who are not Claude Code natives.</li>
-<li>Theme drift if we ship a sixth without re-establishing the system.</li>
+<li>Line length sits inside the comfortable read window.</li>
+<li>Headings descend in scale without crowding their bodies.</li>
+<li>Inline <code>code</code> and block <code>pre</code> sit on the page without breaking rhythm.</li>
 </ul>
-<h2>The math</h2>
-<p>Three KPIs moved this quarter — none decisively. Worth keeping at it.</p>
+<h2>Quarterly numbers</h2>
+<p>Replace with your own. The dashes are placeholders — the table is here to demo cell padding, header treatment, and zebra-row interaction.</p>
 <table>
-<thead><tr><th>Metric</th><th>Q1</th><th>Q2</th><th>Δ</th></tr></thead>
+<thead><tr><th>Metric</th><th>Last period</th><th>This period</th><th>Δ</th></tr></thead>
 <tbody>
-<tr><td>Active workspaces</td><td>1,240</td><td>1,890</td><td>+52%</td></tr>
-<tr><td>Shares per week</td><td>3.1</td><td>5.4</td><td>+74%</td></tr>
-<tr><td>Receivers opening Claude Code</td><td>61%</td><td>68%</td><td>+7pt</td></tr>
+<tr><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>—</td><td>—</td><td>—</td><td>—</td></tr>
 </tbody>
 </table>
 <blockquote>The link is the product. Everything else exists to make the link exist.</blockquote>
-<p>Sample code:</p>
-<pre><code>mirador share q2-review --with daniel@simetrik.com --role reviewer</code></pre>`,
+<p>Sample command:</p>
+<pre><code>mirador share weekly-review --with reviewer@example.com --role reviewer</code></pre>`,
 
   memo: `<h1>A note from danielm</h1>
 <p>Mirador began as a way to publish AI-generated HTML in under a minute. It has, in the months since, become the way I think about the lifecycle of a piece of agent-produced work. Not the act of creating it — that is the agent's domain. But the act of <em>placing it</em>: deciding where it lives, who sees it, and how the receiver should approach it before they read.</p>
@@ -240,36 +240,36 @@ const ARTIFACT_BODIES = {
 <footer class="signature">danielm · 2026-05-25 · q2-letter</footer>`,
 
   deck: `<section>
-<h1>mirador.</h1>
-<h3>The link is the product.</h3>
+<h1>Sample · pitch</h1>
+<h3>Six slides. Replace with your own.</h3>
 </section>
 <section>
-<h2>What it is</h2>
-<p>A CLI + Claude Code skill that turns any AI-generated HTML into a shareable link in under a minute.</p>
+<h2>What this theme is for</h2>
+<p>Full-bleed slides. One idea per screen. Scroll-snap keeps each slide locked to the viewport.</p>
 </section>
 <section>
-<h2>What it is not</h2>
+<h2>Try it</h2>
 <ul>
-<li>A SaaS.</li>
-<li>A document format.</li>
-<li>An attempt to replace Notion.</li>
+<li>Press <code>↓</code> or the spacebar to advance.</li>
+<li>Press <code>↑</code> to go back.</li>
+<li>Watch the slide counter bottom-right and the progress bar up top.</li>
 </ul>
 </section>
 <section>
-<h2>The wedge</h2>
-<p>Your agent already makes HTML.</p>
-<p>Nobody knows what to do with it.</p>
-<p>We make the link.</p>
+<h2>What you'd put here</h2>
+<p>Your wedge.</p>
+<p>Your numbers.</p>
+<p>The decision you need from the room.</p>
 </section>
 <section>
-<h2>Numbers</h2>
-<p>1,890 active workspaces.</p>
-<p>5.4 shares per week, per active user.</p>
-<p>68% of receivers open Claude Code.</p>
+<h2>Placeholder slide</h2>
+<p>Three lines of substance go here.</p>
+<p>Or one big number, if the number is the point.</p>
+<p>Don't fill it with copy you don't believe.</p>
 </section>
 <section>
-<h2>What's next</h2>
-<p>V2: the multiplayer surface.</p>
+<h2>End</h2>
+<p>Press <code>Home</code> to jump back to slide one.</p>
 </section>`,
 
   console: `<h1>setup.sh</h1>
@@ -291,51 +291,55 @@ const ARTIFACT_BODIES = {
 
 <blockquote>If a try/catch swallows a real failure, the try/catch is wrong. Not the failure.</blockquote>`,
 
-  atlas: `<h1>V1 launch — week one</h1>
-<p>Live numbers from the first seven days. Refreshed nightly. Last update: 2026-05-25 03:00 UTC.</p>
+  atlas: `<h1>Sample · Maple Bakery weekly bake report</h1>
+<p>A fictional bakery report — placeholder content so the <code>atlas</code> theme can be eyeballed end to end. KPI cards, tabular figures, sticky table headers, zebra rows, status pills. Replace with your own data.</p>
 
 <h2>Top-line</h2>
 <div class="kpi-grid">
 <div class="kpi">
-  <div class="kpi-label">workspaces created</div>
-  <div class="kpi-value">1,890</div>
-  <div class="kpi-delta up">+52% wow</div>
+  <div class="kpi-label">loaves baked</div>
+  <div class="kpi-value">1,420</div>
+  <div class="kpi-delta up">+6% vs last week</div>
 </div>
 <div class="kpi">
-  <div class="kpi-label">shares per active user</div>
-  <div class="kpi-value">5.4</div>
-  <div class="kpi-delta up">+74% wow</div>
+  <div class="kpi-label">gross sales</div>
+  <div class="kpi-value">$18,540</div>
+  <div class="kpi-delta up">+4% vs last week</div>
 </div>
 <div class="kpi">
-  <div class="kpi-label">activation rate</div>
-  <div class="kpi-value">68%</div>
-  <div class="kpi-delta up">+7 pt</div>
+  <div class="kpi-label">repeat customers</div>
+  <div class="kpi-value">62%</div>
+  <div class="kpi-delta">flat vs last week</div>
 </div>
 <div class="kpi">
-  <div class="kpi-label">p50 publish latency</div>
-  <div class="kpi-value">22.4s</div>
-  <div class="kpi-delta down">-3.1s</div>
+  <div class="kpi-label">avg ticket</div>
+  <div class="kpi-value">$13.06</div>
+  <div class="kpi-delta down">−2% vs last week</div>
 </div>
 </div>
 
-<h2>By cohort</h2>
+<h2>By store</h2>
 <table>
 <thead>
-<tr><th>cohort</th><th class="num">users</th><th class="num">shares</th><th class="num">accept rate</th><th>top theme</th></tr>
+<tr><th>store</th><th class="num">loaves</th><th class="num">sales</th><th class="num">repeat %</th><th>note</th></tr>
 </thead>
 <tbody>
-<tr><td>simetrik internal</td><td class="num">142</td><td class="num">821</td><td class="num">82%</td><td>atlas</td></tr>
-<tr><td>indie devs</td><td class="num">1,012</td><td class="num">3,402</td><td class="num">61%</td><td>page</td></tr>
-<tr><td>solo founders</td><td class="num">456</td><td class="num">2,114</td><td class="num">73%</td><td>memo</td></tr>
-<tr><td>agencies</td><td class="num">280</td><td class="num">1,901</td><td class="num">68%</td><td>deck</td></tr>
+<tr><td>Maple — Greenpoint</td><td class="num">412</td><td class="num">$5,820</td><td class="num">71%</td><td>steady</td></tr>
+<tr><td>Maple — Mission</td><td class="num">388</td><td class="num">$5,140</td><td class="num">64%</td><td>steady</td></tr>
+<tr><td>Maple — Saturday Market</td><td class="num">340</td><td class="num">$4,210</td><td class="num">58%</td><td>new stall</td></tr>
+<tr><td>Maple — Roastery pop-up</td><td class="num">280</td><td class="num">$3,370</td><td class="num">55%</td><td>two days only</td></tr>
 </tbody>
 </table>
 
 <h3>Status</h3>
 <p>
-<span class="pill up">on track</span>
-<span class="pill">monitoring</span>
-<span class="pill down">at risk</span>
+<span class="pill up">Greenpoint on track</span>
+<span class="pill">Mission monitoring</span>
+<span class="pill down">Saturday Market under target</span>
+</p>
+
+<p style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--atlas-fg-subtle);">
+Demo data. Maple Bakery is fictional — replace with your own numbers when you wire a real report.
 </p>`,
 };
 
@@ -367,11 +371,11 @@ ${body}
 /* ─── Main ─────────────────────────────────────────────────────────── */
 
 const SAMPLES = [
-  { slug: 'q2-review', theme: 'page' },
+  { slug: 'weekly-review', theme: 'page' },
   { slug: 'q2-letter', theme: 'memo' },
-  { slug: 'pitch-v1', theme: 'deck' },
+  { slug: 'pitch-sample', theme: 'deck' },
   { slug: 'postmortem', theme: 'console' },
-  { slug: 'launch-week', theme: 'atlas' },
+  { slug: 'weekly-bake', theme: 'atlas' },
 ];
 
 await installChrome();

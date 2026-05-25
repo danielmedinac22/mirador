@@ -144,9 +144,9 @@
   50% { opacity: 0.7; }
 }
 @keyframes aperture-pulse {
-  0% { fill: #2541B2; }
-  50% { fill: #4F7DF3; }
-  100% { fill: #2541B2; }
+  0% { fill: var(--mirador-cobalt); }
+  50% { fill: var(--mirador-cobalt-bright); }
+  100% { fill: var(--mirador-cobalt); }
 }
 .mark-pulsed .inner { animation: aperture-pulse var(--motion-reveal) var(--ease-out); }
 
@@ -163,6 +163,7 @@
   font-weight: 500;
   font-size: var(--type-base);
   font-family: inherit;
+  white-space: nowrap;
   box-shadow: var(--mirador-cobalt-shadow);
   transition: transform var(--motion-default) var(--ease-out),
               box-shadow var(--motion-default) var(--ease-out);
@@ -178,11 +179,8 @@
 .cta-primary:active { transform: translateY(0); }
 .cta-primary:focus-visible { outline: var(--focus-outline); outline-offset: 3px; }
 .cta-primary[data-state="copied"] {
-  background: #1a1a1a;
-  color: #fafafa;
-}
-@media (prefers-color-scheme: dark) {
-  .cta-primary[data-state="copied"] { background: #fafafa; color: #0a0a0a; }
+  background: var(--mirador-cta-copied-bg);
+  color: var(--mirador-cta-copied-fg);
 }
 
 .cta-secondary {
@@ -215,7 +213,6 @@
 .note {
   background: var(--mirador-bg-content);
   border: 1px solid var(--mirador-border);
-  border-left: 2px solid var(--mirador-cobalt);
   border-radius: var(--radius-2);
   padding: var(--space-4) var(--space-5);
   color: var(--mirador-fg-muted);
@@ -226,13 +223,22 @@
   animation: text-reveal var(--motion-reveal) var(--ease-reveal) 0.84s forwards;
 }
 .note .note-label {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
   font-size: var(--type-xs);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--mirador-fg-subtle);
   margin-bottom: var(--space-2);
+}
+.note .note-label::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--mirador-cobalt);
 }
 
 /* ─── Seed block (the pasteable prompt) ────────────────────────────── */
@@ -429,8 +435,7 @@
   border-radius: var(--radius-2);
   font-size: var(--type-base);
   font-family: inherit;
-  transition: border-color var(--motion-default) var(--ease-out),
-              box-shadow var(--motion-default) var(--ease-out);
+  transition: border-color var(--motion-default) var(--ease-out);
 }
 .gate-input:focus {
   outline: none;
@@ -443,12 +448,9 @@
 }
 .gate-error {
   margin-top: var(--space-3);
-  color: #c0392b;
+  color: var(--mirador-error);
   font-size: var(--type-sm);
   min-height: 1.2em;
-}
-@media (prefers-color-scheme: dark) {
-  .gate-error { color: #ff7866; }
 }
 .gate-foot {
   margin-top: var(--space-6);

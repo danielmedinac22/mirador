@@ -43,7 +43,7 @@ export function renderSiteIndex(entries: SiteIndexEntry[], owner: string): strin
     <a href="/" class="lockup" aria-label="mirador">
       <svg class="mark mark-anim" viewBox="0 0 24 24" aria-hidden="true">
         <rect class="outer" x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
-        <rect class="inner" x="14" y="4" width="6" height="6" fill="#2541B2"/>
+        <rect class="inner" x="14" y="4" width="6" height="6" style="fill: var(--mirador-cobalt, #2541B2);"/>
       </svg>
       <span class="wordmark">m<span class="i-stem">i<span class="i-dot" aria-hidden="true">·</span></span>rador<span class="terminator">.</span></span>
     </a>
