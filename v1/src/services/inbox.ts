@@ -101,7 +101,7 @@ function shortenWho(raw: string): string {
 
 export function renderInbox(items: InboxItem[]): string {
   if (items.length === 0) {
-    return '(inbox is empty)\n';
+    return 'Nothing here yet.\n';
   }
   // Mode A: one item dominates (score gap > 30%)
   if (items.length === 1) return renderModeA(items[0] ?? items[0]);
@@ -114,9 +114,9 @@ export function renderInbox(items: InboxItem[]): string {
 }
 
 function renderModeA(item: InboxItem | undefined, otherCount = 0): string {
-  if (!item) return '(inbox is empty)\n';
-  const trailer = otherCount > 0 ? `\n\n+ ${otherCount} more — \`mirador-v1 inbox --all\`\n` : '';
-  return `⚠  ${item.what} — ${item.where} (${item.when})\n   from: ${item.who}\n${trailer}`;
+  if (!item) return 'Nothing here yet.\n';
+  const trailer = otherCount > 0 ? `\n+ ${otherCount} more · \`mirador inbox --all\`\n` : '';
+  return `▪  ${item.what} — ${item.where} (${item.when})\n   from ${item.who}\n${trailer}`;
 }
 
 function renderModeB(items: InboxItem[]): string {
@@ -129,6 +129,6 @@ function renderModeB(items: InboxItem[]): string {
   const header = `${'WHAT'.padEnd(36)}${'WHO'.padEnd(12)}${'WHERE'.padEnd(12)}WHEN`;
   const sep = '─'.repeat(72);
   const overflow =
-    items.length > 8 ? `\n+ ${items.length - 8} more — \`mirador-v1 inbox --all\`` : '';
+    items.length > 8 ? `\n+ ${items.length - 8} more · \`mirador inbox --all\`` : '';
   return `${[header, sep, ...rows].join('\n')}${overflow}\n`;
 }

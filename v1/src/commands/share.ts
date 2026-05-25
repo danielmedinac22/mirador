@@ -1,6 +1,7 @@
 import * as p from '@clack/prompts';
 import type { Command } from 'commander';
 import { shareArtifact, unshareArtifact } from '../services/share.js';
+import { cobalt, dim, muted } from '../shared/ansi.js';
 import { logActivity } from '../shared/log.js';
 
 export function registerShare(program: Command): void {
@@ -45,7 +46,7 @@ export function registerShare(program: Command): void {
           : undefined;
         if (withHandles && withHandles.length !== withEmails.length) {
           process.stderr.write(
-            `--handle list length (${withHandles.length}) must match --with list length (${withEmails.length}).\n`,
+            `--handle list (${withHandles.length}) must match --with list (${withEmails.length}).\n`,
           );
           process.exit(1);
         }
@@ -63,18 +64,20 @@ export function registerShare(program: Command): void {
             dryRun: true,
           });
           process.stdout.write(
-            `Dry run — plan:\n\n${(result.plan ?? []).map((l) => `  • ${l}`).join('\n')}\n`,
+            `Dry run.\n\n${(result.plan ?? []).map((l) => `  ${dim('·')} ${l}`).join('\n')}\n`,
           );
           return;
         }
 
         if (!opts.yes && !opts.offline) {
-          p.intro(`Mirador · share ${slug}`);
+          p.intro(`share ${cobalt(slug)}`);
           p.log.info('This will:');
-          p.log.message(`  • Create a private GitHub repo for "${slug}"`);
-          p.log.message(`  • Invite ${withEmails.join(', ')}`);
+          p.log.message(`  ${dim('·')} Create a private GitHub repo for "${slug}"`);
+          p.log.message(`  ${dim('·')} Invite ${withEmails.join(', ')}`);
           p.log.message(
-            noPublish ? '  • Skip Vercel deploy' : '  • Deploy preview + landing to Vercel',
+            noPublish
+              ? `  ${dim('·')} Skip Vercel deploy`
+              : `  ${dim('·')} Deploy preview + landing to Vercel`,
           );
           const ok = await p.confirm({ message: 'Proceed?', initialValue: true });
           if (p.isCancel(ok) || !ok) {
@@ -96,16 +99,17 @@ export function registerShare(program: Command): void {
         await logActivity(`share slug=${slug} with=${withEmails.join(',')}`);
 
         const lines = [
-          `Shared "${slug}" to ${result.sharedRepo}.`,
-          'Invitation seed (copy and paste to collaborator):',
+          `Shared ${cobalt(slug)} to ${result.sharedRepo}.`,
+          '',
+          muted('Invitation seed — paste into Claude Code or send to collaborator:'),
           '',
           result.invitationSeed,
           '',
-          `Landing: ${result.landingPath}`,
-          `Preview: ${result.previewPath}`,
         ];
-        if (result.deployedUrl) lines.push(`Deployed: ${result.deployedUrl}`);
-        else if (!noPublish && !opts.offline) lines.push('Deploy: skipped (see logs for failure)');
+        if (result.deployedUrl) lines.push(`Live at ${cobalt(result.deployedUrl)}`);
+        else if (!noPublish && !opts.offline) lines.push(muted('Deploy: skipped (see logs).'));
+        lines.push(muted(`landing  ${result.landingPath}`));
+        lines.push(muted(`preview  ${result.previewPath}`));
         lines.push('');
         process.stdout.write(lines.join('\n'));
       },
@@ -118,6 +122,6 @@ export function registerShare(program: Command): void {
     .action(async (slug: string, opts: { offline?: boolean }) => {
       await unshareArtifact(slug, { offline: opts.offline });
       await logActivity(`unshare slug=${slug}`);
-      process.stdout.write(`Unshared "${slug}".\n`);
+      process.stdout.write(`Unshared ${cobalt(slug)}.\n`);
     });
 }

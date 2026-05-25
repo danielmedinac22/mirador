@@ -5,6 +5,7 @@ import { type BrainSeedAnswers, scaffoldBrain } from '../services/brain.js';
 import { installClaudeSkill, installCodexSkill, installSlashCommand } from '../services/skill.js';
 import { ensureUserProject } from '../services/vercel-project.js';
 import { createWorkspaceRepo, scaffoldWorkspace } from '../services/workspace.js';
+import { printSplash } from '../shared/ansi.js';
 import { readConfig, writeConfig } from '../shared/config.js';
 import { logActivity } from '../shared/log.js';
 
@@ -14,19 +15,18 @@ export interface RunInitOptions {
 }
 
 export async function runInit(opts: RunInitOptions = {}): Promise<void> {
-  p.intro('Mirador v1 setup');
+  printSplash();
+  p.intro('setup');
 
-  // Pre-flight
-  p.log.step('Checking environment...');
+  p.log.step('Checking environment.');
   const { user: ghUser } = await ghAuthStatus();
   await vercelWhoami();
   p.log.success(`GitHub: ${ghUser}`);
 
-  // Existing state
   const existing = await readConfig();
   if (existing && !opts.reset) {
     const proceed = await p.confirm({
-      message: 'Mirador is already initialized. Re-run with current values as defaults?',
+      message: 'Already initialized. Re-run with current values as defaults?',
       initialValue: true,
     });
     if (p.isCancel(proceed) || !proceed) {
@@ -35,11 +35,10 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
     }
   }
 
-  // Workspace location
   const useOrg =
     opts.org ??
     (await p.text({
-      message: 'GitHub namespace for your workspace repo (leave blank for personal):',
+      message: 'GitHub namespace for your workspace (blank = personal):',
       placeholder: '',
       defaultValue: '',
     }));
@@ -50,12 +49,11 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
   const owner = (useOrg as string) || ghUser;
   const repoName = `${ghUser}-mirador`;
 
-  // Brain seed Qs
   p.log.step('Brain bootstrap');
   p.log.info(
-    'Your brain is private notes that shape how Claude Code reads artifacts you open\n' +
-      'with Mirador. Answer briefly — or press Enter to skip any. Edit later via\n' +
-      '`mirador-v1 brain`.',
+    'Your brain is private notes that shape how Claude Code reads the artifacts\n' +
+      'you open with mirador. Answer briefly — or press Enter to skip any. Edit\n' +
+      'later with `mirador brain`.',
   );
   const role = await p.text({
     message: 'Your primary role at work?',
@@ -67,7 +65,7 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
     return;
   }
   const reviewFocus = await p.text({
-    message: "When reviewing someone else's work, what do you check first?",
+    message: "Reviewing someone else's work — what do you check first?",
     placeholder: 'e.g. scope creep, missing timelines, failure modes',
     defaultValue: '',
   });
@@ -76,7 +74,7 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
     return;
   }
   const authorAudience = await p.text({
-    message: "When you author something, who's your typical audience?",
+    message: "Authoring something — who's the audience?",
     placeholder: 'e.g. my team, the whole company, the board, external clients',
     defaultValue: '',
   });
@@ -94,7 +92,7 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
     return;
   }
   const preferences = await p.text({
-    message: 'Any preferences? (anything that shapes how you like to work)',
+    message: 'Preferences that shape how you like to work?',
     placeholder: 'e.g. tables not prose; avoid jargon; flag missing dates',
     defaultValue: '',
   });
@@ -111,24 +109,21 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
     preferences: String(preferences),
   };
 
-  // Create workspace
   const spin = p.spinner();
-  spin.start('Creating workspace repo on GitHub...');
+  spin.start('Creating workspace repo on GitHub.');
   const { fullName } = await createWorkspaceRepo({ ghUser, repoName, owner });
   spin.stop(`Workspace repo: ${fullName}`);
 
-  spin.start('Scaffolding workspace...');
+  spin.start('Scaffolding workspace.');
   await scaffoldWorkspace();
   await scaffoldBrain(brainAnswers);
-  spin.stop('Workspace scaffolded.');
+  spin.stop('Workspace ready.');
 
-  // Vercel
-  spin.start('Ensuring Vercel project...');
+  spin.start('Ensuring Vercel project.');
   const { projectName, domain: vercelDomain } = await ensureUserProject(ghUser);
-  spin.stop(`Vercel project: ${projectName} (${vercelDomain})`);
+  spin.stop(`Vercel: ${projectName} (${vercelDomain})`);
 
-  // Skill
-  spin.start('Installing Claude Code skill...');
+  spin.start('Installing the Claude Code skill.');
   await installClaudeSkill();
   await installSlashCommand();
   const installCodex = await p.confirm({
@@ -138,7 +133,6 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
   if (!p.isCancel(installCodex) && installCodex) await installCodexSkill();
   spin.stop('Skills installed.');
 
-  // Persist config
   await writeConfig({
     version: 1,
     github: {
@@ -148,9 +142,9 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
     },
     vercel: { project: projectName, domain: vercelDomain },
     brain: { location: 'workspace' },
-    defaults: { theme: 'default', passwordPolicy: 'always-ask', visibility: 'unlisted' },
+    defaults: { theme: 'page', passwordPolicy: 'always-ask', visibility: 'unlisted' },
     docs: [],
   });
   await logActivity(`init ok user=${ghUser} repo=${fullName}`);
-  p.outro('Mirador ready. Try `mirador-v1 new <slug>`.');
+  p.outro('Ready. Try `mirador new <slug>`.');
 }

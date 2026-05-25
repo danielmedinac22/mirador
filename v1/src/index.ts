@@ -17,7 +17,7 @@ const program = new Command();
 
 program
   .name('mirador-v1')
-  .description('Mirador v1 CLI — collaborative AI artifacts on git.')
+  .description('mirador — share AI-generated artifacts on git.')
   .version(VERSION);
 
 registerInit(program);

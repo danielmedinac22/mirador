@@ -12,7 +12,7 @@ export function registerInbox(program: Command): void {
         const rows = items.map(
           (i) => `[${i.priorityScore}]  ${i.what.padEnd(40)} ${i.who.padEnd(12)} ${i.where}`,
         );
-        process.stdout.write(`${rows.join('\n') || '(empty)'}\n`);
+        process.stdout.write(`${rows.join('\n') || 'Nothing here yet.'}\n`);
         return;
       }
       process.stdout.write(renderInbox(items));

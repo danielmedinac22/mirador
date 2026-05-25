@@ -18,15 +18,15 @@ export function registerUpgrade(program: Command): void {
 
       if (opts.dryRun) {
         process.stdout.write(
-          `Dry run — plan:\n\n${actions.map((a) => `  • [${a.kind}] ${a.detail}`).join('\n')}\n`,
+          `Dry run.\n\n${actions.map((a) => `  · [${a.kind}] ${a.detail}`).join('\n')}\n`,
         );
         return;
       }
 
-      p.intro('Mirador · upgrade alpha → v1');
-      const ok = await p.confirm({ message: 'Proceed with upgrade?', initialValue: true });
+      p.intro('upgrade alpha → v1');
+      const ok = await p.confirm({ message: 'Proceed?', initialValue: true });
       if (p.isCancel(ok) || !ok) {
-        p.cancel('Aborted — alpha install unchanged.');
+        p.cancel('Aborted. Alpha unchanged.');
         return;
       }
 
@@ -40,7 +40,7 @@ export function registerUpgrade(program: Command): void {
       const { migrated, backupPath } = await runUpgrade({ ghHandle: user });
       await logActivity(`upgrade migrated=${migrated.length}`);
       p.outro(
-        `Upgraded.\nMigrated artifacts: ${migrated.length}${migrated.length ? ` (${migrated.join(', ')})` : ''}\nAlpha config backed up to: ${backupPath}`,
+        `Upgraded. Migrated ${migrated.length} artifact${migrated.length === 1 ? '' : 's'}${migrated.length ? ` (${migrated.join(', ')})` : ''}.\nAlpha config backed up to ${backupPath}.`,
       );
     });
 }

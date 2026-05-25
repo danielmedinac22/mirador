@@ -1,6 +1,7 @@
 import * as p from '@clack/prompts';
 import type { Command } from 'commander';
 import { createArtifact } from '../services/artifact.js';
+import { cobalt, muted } from '../shared/ansi.js';
 import { logActivity } from '../shared/log.js';
 
 export function registerNew(program: Command): void {
@@ -12,7 +13,7 @@ export function registerNew(program: Command): void {
     .option('--no-prompts', 'Skip the 2-question wizard.')
     .action(
       async (slug: string, opts: { purpose?: string; audience?: string; prompts: boolean }) => {
-        p.intro(`Mirador · new ${slug}`);
+        p.intro(`new ${cobalt(slug)}`);
         let purpose = opts.purpose;
         let audience = opts.audience;
 
@@ -41,7 +42,7 @@ export function registerNew(program: Command): void {
 
         const { path } = await createArtifact({ slug, purpose, audience });
         await logActivity(`new slug=${slug}`);
-        p.outro(`Created at ${path}.  Open with \`mirador-v1 open ${slug}\`.`);
+        p.outro(`Created at ${muted(path)}.\nOpen with \`mirador open ${slug}\`.`);
       },
     );
 }

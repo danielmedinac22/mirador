@@ -30,7 +30,7 @@ export function registerOpen(program: Command): void {
             'This artifact lives on GitHub:',
             `  ${seed.repo}`,
             '',
-            'To collaborate, clone the repo and re-run `mirador-v1 open` inside it.',
+            'To collaborate, clone the repo and re-run `mirador open` inside it.',
             '',
           ].join('\n'),
         );

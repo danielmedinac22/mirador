@@ -44,7 +44,7 @@ export interface ShareResult {
 export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
   const config = await readConfig();
   if (!config) {
-    throw new MiradorError('CONFIG_MISSING', 'Run `mirador-v1 init` first.');
+    throw new MiradorError('CONFIG_MISSING', 'Run `mirador init` first.');
   }
 
   const artifactPath = await resolveArtifactPath(input.slug);
@@ -88,7 +88,7 @@ export async function shareArtifact(input: ShareInput): Promise<ShareResult> {
         name: input.slug,
         org: owner === config.github.handle ? undefined : owner,
         private: true,
-        description: `Shared via Mirador: ${input.slug}`,
+        description: `Shared via mirador: ${input.slug}`,
       });
       cloneUrl = repo.cloneUrl;
     }
@@ -314,7 +314,7 @@ async function extractToSharedClone(
     await git.init(clonePath);
     await git.setMainBranch(clonePath);
     await git.add(clonePath, ['.']);
-    await git.commit(clonePath, `Initial Mirador snapshot of ${opts.slug}`);
+    await git.commit(clonePath, `Initial mirador snapshot of ${opts.slug}`);
     await git.setRemote(clonePath, 'origin', cloneUrl);
     await git.push(clonePath, 'main', true).catch(async (err) => {
       // Push may fail if the remote already has content (e.g., re-share of an

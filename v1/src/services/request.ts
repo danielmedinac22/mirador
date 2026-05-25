@@ -31,7 +31,7 @@ export interface CreateRequestResult {
 
 export async function createRequest(input: CreateRequestInput): Promise<CreateRequestResult> {
   const config = await readConfig();
-  if (!config) throw new MiradorError('CONFIG_MISSING', 'Run `mirador-v1 init` first.');
+  if (!config) throw new MiradorError('CONFIG_MISSING', 'Run `mirador init` first.');
 
   const slug = toSlug(input.title);
   const sent = new Date().toISOString();
@@ -106,7 +106,7 @@ export async function acceptRequest(seed: RequestSeed): Promise<{
   responseSeed: string;
 }> {
   const config = await readConfig();
-  if (!config) throw new MiradorError('CONFIG_MISSING', 'Run `mirador-v1 init` first.');
+  if (!config) throw new MiradorError('CONFIG_MISSING', 'Run `mirador init` first.');
 
   // Create artifact in recipient's workspace
   const { path: artifactPath } = await createArtifact({
@@ -161,7 +161,7 @@ export async function declineRequest(
   reason: string,
 ): Promise<{ responseSeed: string }> {
   const config = await readConfig();
-  if (!config) throw new MiradorError('CONFIG_MISSING', 'Run `mirador-v1 init` first.');
+  if (!config) throw new MiradorError('CONFIG_MISSING', 'Run `mirador init` first.');
 
   const stubDir = join(paths.workspaceClone(), 'incoming-requests');
   await ensureDir(stubDir);

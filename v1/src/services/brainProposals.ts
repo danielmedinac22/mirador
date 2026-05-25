@@ -20,7 +20,7 @@ export async function proposeBrainUpdate(input: ProposeInput): Promise<ProposeRe
   const filePath = join(root, `${input.topic}.md`);
   const existing = (await pathExists(filePath)) ? await readText(filePath) : '';
 
-  p.intro(`Mirador · brain proposal for "${input.topic}"`);
+  p.intro(`brain proposal · ${input.topic}`);
   if (input.reason) p.log.info(`Reason: ${input.reason}`);
   if (existing) {
     p.log.step('Current:');
