@@ -37,7 +37,7 @@ export async function renderPreview(
   return wrapInTheme(body, themeName);
 }
 
-function normaliseTheme(theme: string): ThemeName {
+export function normaliseTheme(theme: string): ThemeName {
   const lower = (theme || '').toLowerCase().trim();
   if ((KNOWN_THEMES as readonly string[]).includes(lower)) return lower as ThemeName;
   // Legacy alpha names → V1 themes

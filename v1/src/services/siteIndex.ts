@@ -1,31 +1,36 @@
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pathExists, writeFileAtomic } from '../adapters/fs.js';
+import type { ShareEntry } from './shareRegistry.js';
 
-export interface SiteIndexEntry {
-  slug: string;
-  theme?: string;
-  publishedAt?: string;
+export interface PublishSiteIndexOpts {
+  /** Production base URL (e.g. "https://mirador-danielmedinac22.vercel.app"). */
+  baseUrl: string;
 }
 
 /**
- * Renders the Vercel project root — a minimal list of artifacts the user
- * has shared. Chrome-system styled. Voice spec compliant.
+ * Renders the Vercel project root — a dashboard of every artifact the user has
+ * published, sourced from `.shares.json` (the share registry). Each row carries
+ * the slug, the publish date, the theme/role/recipients, and three action
+ * affordances: open preview, open landing, copy invitation link.
+ *
+ * Legacy slugs (directories under /d/ with no registry entry — pre-dashboard
+ * shares) render with "—" for the date so the user can see them and decide
+ * whether to re-share to bring them into the registry.
  */
-export function renderSiteIndex(entries: SiteIndexEntry[], owner: string): string {
-  const sorted = [...entries].sort((a, b) =>
-    (b.publishedAt ?? '').localeCompare(a.publishedAt ?? ''),
-  );
+export function renderSiteIndex(
+  entries: ShareEntry[],
+  owner: string,
+  opts: PublishSiteIndexOpts,
+  legacySlugs: readonly string[] = [],
+): string {
+  const merged = mergeForRender(entries, legacySlugs);
+  const total = merged.length;
 
   const listHtml =
-    sorted.length === 0
-      ? `<p class="index-empty">Nothing here yet.</p>`
-      : `<ul class="index-list">${sorted
-          .map(
-            (e) =>
-              `<li><a class="slug" href="/d/${escapeAttr(e.slug)}/">${escapeHtml(e.slug)}</a><span class="meta">${escapeHtml(e.theme ?? 'page')}${e.publishedAt ? ` · ${escapeHtml(e.publishedAt.slice(0, 10))}` : ''}</span></li>`,
-          )
-          .join('')}</ul>`;
+    total === 0
+      ? `<p class="dashboard-empty">Nothing here yet. Run \`mirador share &lt;slug&gt;\` to publish.</p>`
+      : `<ul class="dashboard">${merged.map((e) => renderRow(e, opts.baseUrl)).join('')}</ul>`;
 
   return `<!doctype html>
 <html lang="en">
@@ -52,7 +57,7 @@ export function renderSiteIndex(entries: SiteIndexEntry[], owner: string): strin
   <main class="shell-main">
     <div class="index-page">
       <h1>${escapeHtml(owner)}</h1>
-      <p class="index-sub">Shared via mirador.</p>
+      <p class="index-sub">${total === 0 ? 'Shared via mirador.' : `${total} published via mirador.`}</p>
       ${listHtml}
     </div>
   </main>
@@ -61,17 +66,129 @@ export function renderSiteIndex(entries: SiteIndexEntry[], owner: string): strin
     <a href="https://github.com/danielmedinac22/mirador" target="_blank" rel="noopener">github.com/danielmedinac22/mirador</a>
   </footer>
 </div>
+
+<script>
+(function () {
+  document.querySelectorAll('.copy-action').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const url = btn.dataset.url;
+      if (!url) return;
+      try { await navigator.clipboard.writeText(url); } catch (e) {}
+      const original = btn.dataset.label || btn.textContent;
+      btn.dataset.label = original;
+      btn.dataset.state = 'copied';
+      btn.textContent = 'Copied.';
+      setTimeout(() => {
+        btn.dataset.state = '';
+        btn.textContent = original;
+      }, 2000);
+    });
+  });
+})();
+</script>
 </body>
 </html>
 `;
 }
 
+interface RenderEntry {
+  slug: string;
+  kind: 'share' | 'request';
+  publishedAt: string;
+  theme?: string;
+  role?: string;
+  sharedWith?: string[];
+  to?: string;
+  by?: string;
+  legacy: boolean;
+}
+
+function mergeForRender(
+  registry: readonly ShareEntry[],
+  legacySlugs: readonly string[],
+): RenderEntry[] {
+  const known = new Set(registry.map((s) => s.slug));
+  const fromRegistry: RenderEntry[] = registry.map((s) => ({
+    slug: s.slug,
+    kind: s.kind,
+    publishedAt: s.publishedAt,
+    theme: s.theme,
+    role: s.role,
+    sharedWith: s.sharedWith,
+    to: s.to,
+    by: s.by,
+    legacy: false,
+  }));
+  const legacy: RenderEntry[] = legacySlugs
+    .filter((slug) => !known.has(slug))
+    .map((slug) => ({ slug, kind: 'share' as const, publishedAt: '', legacy: true }));
+  // Registry entries are already publishedAt DESC; legacy items go to the bottom
+  // (no date to sort on).
+  return [...fromRegistry, ...legacy.sort((a, b) => a.slug.localeCompare(b.slug))];
+}
+
+function renderRow(e: RenderEntry, baseUrl: string): string {
+  const landingPath = e.kind === 'share' ? `/i/${escapeAttr(e.slug)}/` : `/r/${escapeAttr(e.slug)}/`;
+  const previewPath = `/d/${escapeAttr(e.slug)}/`;
+  const landingUrl = `${baseUrl}${landingPath}`;
+
+  const date = e.publishedAt ? formatDate(e.publishedAt) : '—';
+  const dateClass = e.legacy ? 'date legacy' : 'date';
+
+  return `
+<li class="dashboard-item${e.legacy ? ' is-legacy' : ''}">
+  <div class="dashboard-row">
+    <a class="slug" href="${escapeAttr(previewPath)}">${escapeHtml(e.slug)}</a>
+    <span class="${dateClass}">${escapeHtml(date)}</span>
+  </div>
+  <div class="dashboard-meta">
+    ${renderKindPill(e)}
+    ${renderRecipients(e)}
+    ${e.legacy ? '<span class="legacy-note">unregistered · re-share to track</span>' : ''}
+  </div>
+  <div class="dashboard-actions">
+    ${e.kind === 'share' ? `<a href="${escapeAttr(previewPath)}">open preview ↗</a>` : ''}
+    <a href="${escapeAttr(landingPath)}">open ${e.kind === 'request' ? 'request' : 'landing'} ↗</a>
+    ${e.legacy ? '' : `<button type="button" class="copy-action" data-url="${escapeAttr(landingUrl)}">copy ${e.kind === 'request' ? 'request' : 'invitation'} link</button>`}
+  </div>
+</li>`;
+}
+
+function renderKindPill(e: RenderEntry): string {
+  if (e.kind === 'request') {
+    return `<span class="kind-pill request">request</span>`;
+  }
+  if (e.theme) {
+    return `<span class="kind-pill">${escapeHtml(e.theme)}</span>`;
+  }
+  return `<span class="kind-pill">share</span>`;
+}
+
+function renderRecipients(e: RenderEntry): string {
+  if (e.kind === 'request') {
+    const to = e.to ? `to ${escapeHtml(e.to)}` : '';
+    const by = e.by ? ` · by ${escapeHtml(e.by)}` : '';
+    return `<span class="recipients">${to}${by}</span>`;
+  }
+  const list = e.sharedWith ?? [];
+  if (list.length === 0) return '';
+  if (list.length === 1) return `<span class="recipients">shared with ${escapeHtml(list[0] ?? '')}</span>`;
+  return `<span class="recipients">shared with ${list.length} people</span>`;
+}
+
+function formatDate(iso: string): string {
+  // iso like "2026-05-25T17:19:06.228Z" → "2026-05-25"
+  return iso.slice(0, 10);
+}
+
 export async function publishSiteIndex(
   siteRoot: string,
   owner: string,
-  entries: SiteIndexEntry[],
+  entries: ShareEntry[],
+  opts: PublishSiteIndexOpts,
 ): Promise<{ localPath: string }> {
-  const html = renderSiteIndex(entries, owner);
+  const legacySlugs = await discoverPublishedSlugs(siteRoot);
+  const html = renderSiteIndex(entries, owner, opts, legacySlugs);
   const file = join(siteRoot, 'index.html');
   await writeFileAtomic(file, html);
   return { localPath: file };
@@ -79,18 +196,18 @@ export async function publishSiteIndex(
 
 /**
  * Discovers artifact slugs already published at <siteRoot>/d/<slug>/. Used to
- * keep the site index in sync without a persistent registry.
+ * surface pre-dashboard artifacts in the index until they're re-shared.
  */
-export async function discoverPublishedSlugs(siteRoot: string): Promise<SiteIndexEntry[]> {
+export async function discoverPublishedSlugs(siteRoot: string): Promise<string[]> {
   const dRoot = join(siteRoot, 'd');
   if (!(await pathExists(dRoot))) return [];
   const entries = await readdir(dRoot, { withFileTypes: true }).catch(() => []);
-  const out: SiteIndexEntry[] = [];
-  for (const e of entries) {
-    if (!e.isDirectory()) continue;
-    out.push({ slug: e.name });
+  const out: string[] = [];
+  for (const ent of entries) {
+    if (!ent.isDirectory()) continue;
+    out.push(ent.name);
   }
-  return out;
+  return out.sort();
 }
 
 function escapeHtml(s: string): string {

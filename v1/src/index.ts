@@ -2,9 +2,11 @@
 import { Command } from 'commander';
 import { registerAccept } from './commands/accept.js';
 import { registerBrain } from './commands/brain.js';
+import { registerDashboard } from './commands/dashboard.js';
 import { registerDecline } from './commands/decline.js';
 import { registerInbox } from './commands/inbox.js';
 import { registerInit } from './commands/init.js';
+import { registerList } from './commands/list.js';
 import { registerNew } from './commands/new.js';
 import { registerOpen } from './commands/open.js';
 import { registerRequest } from './commands/request.js';
@@ -29,6 +31,8 @@ registerRequest(program);
 registerAccept(program);
 registerDecline(program);
 registerInbox(program);
+registerList(program);
+registerDashboard(program);
 registerUpgrade(program);
 
 // Default action: when called with no args, show inbox

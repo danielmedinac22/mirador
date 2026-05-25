@@ -8,7 +8,9 @@ import { createArtifact } from './artifact.js';
 import { computeRequestExpiry } from './expiration.js';
 import { publishLanding, renderLanding } from './landingPage.js';
 import { type RequestSeed, type ResponseSeed, composeSeed } from './promptSeed.js';
+import { readRegistry, upsertEntry } from './shareRegistry.js';
 import { installSiteChrome } from './siteChrome.js';
+import { publishSiteIndex } from './siteIndex.js';
 
 export interface CreateRequestInput {
   title: string;
@@ -89,6 +91,21 @@ export async function createRequest(input: CreateRequestInput): Promise<CreateRe
     seedText,
   });
   const { localPath } = await publishLanding(siteRoot, slug, 'request', landingHtml);
+
+  // Record the request in the registry + refresh site index.
+  await upsertEntry(siteRoot, {
+    slug,
+    kind: 'request',
+    publishedAt: sent,
+    to: input.toEmail,
+    role: input.role ?? 'author',
+    by: input.by,
+    context: input.context,
+  });
+  const registry = await readRegistry(siteRoot);
+  await publishSiteIndex(siteRoot, config.github.handle, registry.shares, {
+    baseUrl: `https://${config.vercel.domain}`,
+  });
 
   let deployedUrl: string | undefined;
   if (!input.offline && !input.noPublish) {
