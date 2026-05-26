@@ -1,85 +1,224 @@
-# mirador v1 (in development)
+<div align="center">
 
-The implementation of mirador v1 — the first stable, multiplayer release. Runs in parallel with [`alpha/`](../alpha/) until consolidation.
+<img src="https://raw.githubusercontent.com/danielmedinac22/mirador/main/v1/site-assets/assets/lockup-readme.svg" alt="mirador" width="220"/>
 
-> **Status:** all 10 vertical slices landed. Design polish (B1·B2·B3) shipped.
-> What is missing: end-to-end share against a clean Vercel project, more
-> integration tests, mirador.dev marketing site.
+<br><br>
 
-## Design
+**Share AI-generated HTML in under a minute.**
 
-The V1 surface is locked in [`docs/design/spec.md`](../docs/design/spec.md). The voice spec
-lives in [`docs/design/voice.md`](../docs/design/voice.md). Both are canonical.
+A Claude Code skill + CLI that turns any HTML your agent produces into a shareable link — published to your own Vercel.
 
-Implementation spec: [`docs/superpowers/specs/2026-05-21-mirador-v2-design.md`](../docs/superpowers/specs/2026-05-21-mirador-v2-design.md).
+[![npm version](https://img.shields.io/npm/v/mirador-cli?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mirador-cli)
+[![npm downloads](https://img.shields.io/npm/dm/mirador-cli?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mirador-cli)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](https://github.com/danielmedinac22/mirador/blob/main/LICENSE)
 
-(The internal codename is "v2" — second design iteration. What ships is V1.)
+<br>
 
-## What lives in here
+```bash
+npm i -g mirador-cli
+```
 
-| Path | What |
-|---|---|
-| [`src/`](src/) | The CLI source — commands, services, adapters, shared |
-| [`site-assets/`](site-assets/) | The brand chrome that gets installed alongside the Vercel site — tokens, fonts, themes, marks |
-| [`skill/`](skill/) | The Claude Code skill (`SKILL.md`) |
-| [`scripts/`](scripts/) | Dev tools — design preview server, smoke builder |
-| [`tests/`](tests/) | End-to-end suite |
+macOS, Linux, Windows. Node 20+, Vercel CLI required.
 
-## Themes (V1, new system)
+<br>
 
-Five canvases with shared tokens, light + dark intrinsic via `prefers-color-scheme`:
+*"My agent made the report. mirador made the link."*
 
-| Theme | Thesis |
-|---|---|
-| `page` | The safe canvas. |
-| `memo` | Long-form, read with intention. |
-| `deck` | Slides that scroll. |
-| `console` | Code is content. |
-| `atlas` | Numbers earn the spotlight. |
+</div>
 
-Plus `none` (publish verbatim).
+---
 
-## Vertical slices
+> [!IMPORTANT]
+> **Status: V1 public.**
+>
+> CLI, Claude Code skill, themes, and the collaboration layer (share, request, inbox, brain, dashboard) all ship today. Bugs go to [GitHub issues](https://github.com/danielmedinac22/mirador/issues). Telemetry is minimal — please report what breaks.
 
-| Slice | Scope | Status |
+---
+
+## What it looks like
+
+After `mirador init` (90 seconds, once), publish from inside Claude Code:
+
+```
+> /mirador q2-report.html
+
+slug?       → q2-report
+theme?      → memo
+password?   → no
+
+Live at https://mirador-yourname.vercel.app/d/q2-report/
+```
+
+Share it with a colleague — adds them to the artifact's private GitHub repo and copies an invitation seed to your clipboard:
+
+```
+$ mirador share q2-report --with maria@simetrik.com --role reviewer
+
+Shared q2-report to yourname/q2-report.
+Invitation seed — paste into Claude Code or send to collaborator:
+
+@mirador-invitation
+
+From: yourname
+Artifact: q2-report
+Role expected: reviewer
+Sent: 2026-05-26T09:14:00Z
+
+Paste this whole block into Claude Code to open.
+Read-only: https://mirador-yourname.vercel.app/d/q2-report/
+Landing: https://mirador-yourname.vercel.app/i/q2-report/
+
+— mirador.
+
+Live at https://mirador-yourname.vercel.app/i/q2-report/
+```
+
+Maria pastes the block into her Claude Code. Her Claude reads the invitation directly — fetches the read-only doc, parses the seed, opens a session with full context. No copy-paste of background, no "let me catch you up." She reviews, then responds with a single block:
+
+```
+@mirador-response
+
+From: maria
+Re-request: q2-report
+Status: accepted
+Note: Looks good. Two comments on the timeline.
+
+— mirador.
+```
+
+Everything you've published shows up on your dashboard, with one-click invitation links per artifact:
+
+```
+$ mirador dashboard
+
+Opening https://mirador-yourname.vercel.app/
+```
+
+That's the loop. Three blocks, three commands, your own infrastructure.
+
+---
+
+## Why mirador
+
+Your agent produces HTML. Sharing it manually is the loop that kills momentum — screenshot, paste in Slack, lose hierarchy, lose source. mirador removes that loop in one command: your HTML deploys to **your own Vercel**, your colleagues collaborate via paste-in-chat blocks, nothing touches an external server. The complexity lives in the skill — theming, optional password gate, Vercel orchestration. What you see is one command.
+
+---
+
+## How It Works
+
+Four steps. The first three happen once.
+
+### 1. Install
+
+```bash
+npm i -g mirador-cli
+```
+
+You also need the Vercel CLI and a free Vercel account:
+
+```bash
+npm i -g vercel && vercel login
+```
+
+### 2. Set up (~90 seconds)
+
+```bash
+mirador init
+```
+
+The wizard asks which agents you use (Claude Code is first-class, Codex is best-effort, "Otro / manual" gives you copy-paste instructions), where to store files (`~/.mirador/` by default — point it at iCloud or Dropbox for cross-device sync), creates your Vercel project, and sets defaults for theme, password policy, and visibility.
+
+When it's done you'll have:
+
+- `~/.mirador/` — themes, site shell, scripts, config
+- `~/.claude/skills/mirador/SKILL.md` — the Claude Code skill
+- `~/.claude/commands/mirador.md` — the `/mirador` slash command
+
+### 3. Publish from your agent
+
+Inside Claude Code, after producing or referencing an HTML file:
+
+```
+/mirador q2-report.html
+```
+
+Claude asks you, in chat:
+
+```
+slug?       → q2-report
+theme?      → memo
+password?   → no
+visibility? → unlisted
+```
+
+The skill also auto-activates inside a mirador workspace and when you paste any `@mirador-invitation` / `@mirador-request` / `@mirador-response` block.
+
+### 4. Share
+
+```
+Published. https://mirador-<you>.vercel.app/d/q2-report/
+```
+
+That's it. The URL lives on your Vercel project. You own it; you can take it down anytime from your Vercel dashboard.
+
+---
+
+## Themes
+
+Five purpose-built canvases with shared design tokens, light + dark intrinsic, voice-aligned chrome:
+
+| Theme | Thesis | What it's for |
 |---|---|---|
-| VS-01 | `mirador init` v1 (workspace repo + brain scaffold) | ✓ |
-| VS-02 | `mirador new` + `mirador open` (workspace-local, brain-aware first turn) | ✓ |
-| VS-03 | `mirador share` (workspace → shared repo + invite) | ✓ |
-| VS-04 | Static preview + landing page generation | ✓ (rebuilt in B2) |
-| VS-05 | Prompt-seed protocol + skill trigger | ✓ |
-| VS-06 | `mirador request` + `accept` + `decline` | ✓ |
-| VS-07 | `mirador inbox` (Mode A / Mode B) | ✓ |
-| VS-08 | Brain lifecycle | ✓ |
-| VS-09 | Role override | ✓ |
-| VS-10 | `mirador upgrade` (alpha → v1 migration) | ✓ |
-| B1 | Design foundation (tokens, marks, fonts, voice) | ✓ |
-| B2 | Web surfaces (landing wow moment, 5 themes, gate, index) | ✓ |
-| B3 | CLI + skill + README voice alignment | ✓ |
+| `page` | The safe canvas. | General-purpose content. The default that does not apologize. |
+| `memo` | Long-form, read with intention. | Reports, write-ups, letters. Drop cap, signature block. |
+| `deck` | Slides that scroll. | Presentations. `scroll-snap`, arrow-key nav, slide counter. |
+| `console` | Code is content. | Postmortems, scripts, CLI dumps. `$ > #` prompt headings. |
+| `atlas` | Numbers earn the spotlight. | Dashboards, data. Tabular figures, KPI cards, sticky tables. |
 
-## How `v1/` relates to `alpha/`
+Plus `none` (publish verbatim, no wrapping).
 
-- `alpha/`: published as `mirador-cli` on npm. Frozen against new features. Receives only bug fixes.
-- `v1/`: when consolidation happens, `alpha/` is archived, `v1/` becomes `cli/` and publishes as `mirador-cli@1.0.0`.
-- The two share themes (legacy) and templates via copy-now. No premature abstraction.
+Or ask for a **custom theme generated from a reference** during the share flow:
 
-## Local dev
+- **URL** — *"make it look like vercel.com"*
+- **Screenshot** — attach an image
+- **Description** — *"warm earth tones, serif headings, generous whitespace"*
 
-```bash
-cd v1
-npm install
-npm run build
-npm test
-```
+Your agent's own model writes the CSS. Generated themes save to `~/.mirador/themes/<name>/` so you can reuse them.
 
-Binary is `mirador-v1` during dev to avoid colliding with globally-installed `mirador-cli@alpha`.
+---
 
-## Design preview (local)
+## Password Protection
 
-To eyeball the V1 chrome + 5 themes + landing wow moment:
+Mirador can encrypt a page so visitors need a password to view it. **Read this before you trust it with anything sensitive.**
+
+The encryption is **client-side only**: AES-GCM with PBKDF2 (200,000 iterations). The user's password derives the key in the browser at view time. A view-source attacker only sees ciphertext.
+
+But it is **not real authentication**. Anyone who has the page can run unlimited offline password guesses, and someone watching a logged-in user's browser can grab the decrypted content. Treat it as a deterrent for casual viewing — not as protection for confidential data.
+
+For real auth, use Vercel Pro's project-level password protection. Server-side auth on the mirador surface itself is on the roadmap.
+
+---
+
+## Uninstall
 
 ```bash
-node scripts/smoke-design.mjs        # builds /tmp/mirador-design-preview/
-node scripts/serve-design.mjs        # starts http://127.0.0.1:7100/
-open http://127.0.0.1:7100/i/q2-letter/   # the landing
+npm uninstall -g mirador-cli
+rm -rf ~/.mirador ~/.claude/skills/mirador ~/.claude/commands/mirador.md ~/.codex/skills/mirador
 ```
+
+(Drop the `.codex` line if you didn't install for Codex.)
+
+---
+
+## License
+
+MIT. See [LICENSE](https://github.com/danielmedinac22/mirador/blob/main/LICENSE).
+
+---
+
+<div align="center">
+
+**Your agent made the artifact. mirador makes the link.**
+
+</div>

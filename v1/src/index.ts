@@ -18,7 +18,7 @@ import { VERSION } from './version.js';
 const program = new Command();
 
 program
-  .name('mirador-v1')
+  .name('mirador')
   .description('mirador — share AI-generated artifacts on git.')
   .version(VERSION);
 

@@ -1,24 +1,44 @@
 {
-  "name": "mirador-cli-v1-dev",
-  "private": true,
-  "version": "1.0.0-dev.0",
-  "description": "Mirador v1 — collaborative artifacts on git, brain-aware Claude Code sessions.",
+  "name": "mirador-cli",
+  "version": "1.0.0",
+  "description": "Share AI-generated HTML in under a minute — a Claude Code skill + CLI that turns any HTML your agent produces into a shareable link on your own Vercel.",
   "license": "MIT",
   "type": "module",
   "engines": {
     "node": ">=20"
   },
   "bin": {
-    "mirador-v1": "./dist/index.js"
+    "mirador": "./dist/index.js"
   },
-  "files": ["dist", "site-assets", "themes", "templates", "scripts", "skill"],
+  "files": ["dist", "site-assets", "skill"],
+  "keywords": [
+    "claude-code",
+    "claude-code-skill",
+    "mirador",
+    "html",
+    "vercel",
+    "publish",
+    "ai",
+    "agent",
+    "cli"
+  ],
+  "homepage": "https://github.com/danielmedinac22/mirador#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielmedinac22/mirador.git",
+    "directory": "v1"
+  },
+  "bugs": {
+    "url": "https://github.com/danielmedinac22/mirador/issues"
+  },
   "scripts": {
     "build": "tsup src/index.ts --format esm --target node20 --shims --no-splitting --clean",
     "dev": "tsup src/index.ts --format esm --target node20 --shims --watch",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "biome check .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",
