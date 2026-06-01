@@ -4,9 +4,9 @@
 
 <br><br>
 
-**Share AI-generated HTML in under a minute.**
+**Same artifact. Your lens.**
 
-A Claude Code skill + CLI that turns any HTML your agent produces into a shareable link — published to your own Vercel.
+The medium where many minds converge on one living artifact — each through their own AI, guided toward an owned vision. Git-native CLI + agent shim. The HTML is just a view.
 
 [![npm version](https://img.shields.io/npm/v/mirador-cli?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mirador-cli)
 [![npm downloads](https://img.shields.io/npm/dm/mirador-cli?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mirador-cli)
@@ -19,194 +19,152 @@ A Claude Code skill + CLI that turns any HTML your agent produces into a shareab
 npm i -g mirador-cli
 ```
 
-macOS, Linux, Windows. Node 20+, Vercel CLI required.
+macOS, Linux, Windows. Node 20+. Works with Claude Code, Codex, or Gemini.
 
 <br>
 
-*"My agent made the report. mirador made the link."*
+*"My agent read it the way I would. Not the way you wrote it."*
 
 </div>
 
 ---
 
 > [!IMPORTANT]
-> **Status: V1 public.**
+> **Status: V1 — the convergence era.**
 >
-> CLI, Claude Code skill, themes, and the collaboration layer (share, request, inbox, brain, dashboard) all ship today. Bugs go to [GitHub issues](https://github.com/danielmedinac22/mirador/issues). Telemetry is minimal — please report what breaks.
+> Mirador was an HTML publisher. Internal use showed it "felt like an HTML generator with extra steps," and "solo even when shared." So it was redefined: the artifact is now a **document many people refine** — each through their own AI — converging toward a vision. Publish-era users keep everything (`mirador upgrade`). Design + per-slice build plans live in [`docs/superpowers/`](docs/superpowers/). Bugs → [GitHub issues](https://github.com/danielmedinac22/mirador/issues).
 
 ---
 
-## What it looks like
+## The idea
 
-After `mirador init` (90 seconds, once), publish from inside Claude Code:
+Google-Docs-with-AI has multiplayer editing but no per-person lens. Notion sees the shared workspace, not *your* private context. Mirador is the only tool where collaboration is **contextual**: one artifact, many private contexts, each reading and refining it through their own AI, converging toward one owned vision.
 
-```
-> /mirador q2-report.html
-
-slug?       → q2-report
-theme?      → memo
-password?   → no
-
-Live at https://mirador-yourname.vercel.app/d/q2-report/
-```
-
-Share it with a colleague — adds them to the artifact's private GitHub repo and copies an invitation seed to your clipboard:
-
-```
-$ mirador share q2-report --with maria@simetrik.com --role reviewer
-
-Shared q2-report to yourname/q2-report.
-Invitation seed — paste into Claude Code or send to collaborator:
-
-@mirador-invitation
-
-From: yourname
-Artifact: q2-report
-Role expected: reviewer
-Sent: 2026-05-26T09:14:00Z
-
-Paste this whole block into Claude Code to open.
-Read-only: https://mirador-yourname.vercel.app/d/q2-report/
-Landing: https://mirador-yourname.vercel.app/i/q2-report/
-
-— mirador.
-
-Live at https://mirador-yourname.vercel.app/i/q2-report/
-```
-
-Maria pastes the block into her Claude Code. Her Claude reads the invitation directly — fetches the read-only doc, parses the seed, opens a session with full context. No copy-paste of background, no "let me catch you up." She reviews, then responds with a single block:
-
-```
-@mirador-response
-
-From: maria
-Re-request: q2-report
-Status: accepted
-Note: Looks good. Two comments on the timeline.
-
-— mirador.
-```
-
-Everything you've published shows up on your dashboard, with one-click invitation links per artifact:
-
-```
-$ mirador dashboard
-
-Opening https://mirador-yourname.vercel.app/
-```
-
-That's the loop. Three blocks, three commands, your own infrastructure.
+A *mirador* is a lookout. What you see depends on where you stand and the eyes you bring. The artifact is the landscape; your context is your eyes; the vision is the horizon you walk toward together.
 
 ---
 
-## Why mirador
+## What the loop looks like
 
-Your agent produces HTML. Sharing it manually is the loop that kills momentum — screenshot, paste in Slack, lose hierarchy, lose source. mirador removes that loop in one command: your HTML deploys to **your own Vercel**, your colleagues collaborate via paste-in-chat blocks, nothing touches an external server. The complexity lives in the skill — theming, optional password gate, Vercel orchestration. What you see is one command.
+**Daniel (machine A, Claude Code)** drafts and shares:
+
+```bash
+mirador new q3-strategy        # a markdown++ doc + a one-line vision placeholder
+mirador vision q3-strategy --set "board-ready Q3 narrative anchored on NRR"
+mirador watch q3-strategy      # live local mirror — watch the HTML morph as your AI drafts
+mirador share q3-strategy --with maria@simetrik.com   # private repo + an onboarding seed → clipboard
+```
+
+**María (machine B, Codex)** pastes the `@mirador-invitation` block into her agent. It onboards her with **zero manual setup** — installs the CLI if missing, clones, reads *her* brain, briefs her, and leaves her refining. She tightens §Retention; her agent auto-drafts the *why* and pushes:
+
+```bash
+mirador push q3-strategy --intent "Backed the retention claim with the Q2 NRR figure."
+```
+
+**Daniel pulls** — and gets a brief shaped by *his* context, not a raw diff:
+
+```
+$ mirador open q3-strategy
+
+q3-strategy  ·  handoff  ·  since 15f00e7
+vision: board-ready Q3 narrative anchored on NRR
+
+CHANGED SECTIONS
+  §retention  Retention  —  modified
+
+INTENT NOTES
+  e946ed9  maria: Backed the retention claim with the Q2 NRR figure.
+```
+
+His agent reframes that packet through his own memory into a one-screen brief — *what changed → why it matters to him → how it moves toward the vision → what to refine next*. **María's agent and his agent produce visibly different briefs from the same change — because the brains are different.** That difference is the product.
+
+```
+$ mirador status q3-strategy
+
+q3-strategy   ·   vision: board-ready Q3 narrative anchored on NRR   ·   owner: daniel
+  LOCKED     §1 Summary   §4 Risks
+  CONTESTED  §3 Retention (1 open challenge)
+  OPEN       §2 Timeline   §5 Appendix
+```
+
+That's the loop: refine through your own AI, every change carries its intent, each reader gets a brief in their own context, the owner steers toward the vision. Async over git — no servers, no realtime channel between users.
 
 ---
 
-## How It Works
+## Why it's built this way
 
-Four steps. The first three happen once.
+- **Brain = your agent's living memory.** No wizard, no separate store. Mirador reads what your agent already maintains (Claude memory, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`). It's strictly private — **it never enters git or a handoff packet**, only its *effects* (your refinements, your intent notes) are shared.
+- **The artifact is a document, not a page.** markdown++ (stable section anchors + fenced `chart`/`table`/`callout`) behind a format seam; HTML is a render target. Two people editing different sections merge cleanly; same section routes to the owner.
+- **The collaboration intelligence is invisible.** No roles to declare, no vocabulary to learn. The agent shim infers everything. *Having mirador makes you collaborate better without learning a system.*
+- **Model-agnostic, CLI-first.** The CLI is a deterministic engine (no LLM calls); each agent gets a thin shim; manual mode (`mirador handoff` + `mirador push --intent`) is a clean floor for any agent.
+- **No Mirador servers.** Your repos on GitHub, your view on your Vercel. Zero hosting cost. The live cockpit is a local read-only mirror, not a hosted frontend.
 
-### 1. Install
+---
+
+## Setup
 
 ```bash
 npm i -g mirador-cli
+mirador init        # detects your agent's memory as your brain — no brain wizard
 ```
 
-You also need the Vercel CLI and a free Vercel account:
+`init` confirms your brain source, creates your workspace + Vercel project, and installs the shim for your agent (`mirador shim install --agent claude|codex|gemini` to add others).
 
-```bash
-npm i -g vercel && vercel login
-```
+---
 
-### 2. Set up (~90 seconds)
+## The command surface
 
-```bash
-mirador init
-```
-
-The wizard asks which agents you use (Claude Code is first-class, Codex is best-effort, "Otro / manual" gives you copy-paste instructions), where to store files (`~/.mirador/` by default — point it at iCloud or Dropbox for cross-device sync), creates your Vercel project, and sets defaults for theme, password policy, and visibility.
-
-When it's done you'll have:
-
-- `~/.mirador/` — themes, site shell, scripts, config
-- `~/.claude/skills/mirador/SKILL.md` — the Claude Code skill
-- `~/.claude/commands/mirador.md` — the `/mirador` slash command
-
-### 3. Publish from your agent
-
-Inside Claude Code, after producing or referencing an HTML file:
-
-```
-/mirador q2-report.html
-```
-
-Claude asks you, in chat:
-
-```
-slug?       → q2-report
-theme?      → memo
-password?   → no
-visibility? → unlisted
-```
-
-The skill also auto-activates inside a mirador workspace and when you paste any `@mirador-invitation` / `@mirador-request` / `@mirador-response` block — see [`v1/skill/SKILL.md`](v1/skill/SKILL.md) for the full trigger matrix.
-
-### 4. Share
-
-```
-Published. https://mirador-<you>.vercel.app/d/q2-report/
-```
-
-That's it. The URL lives on your Vercel project. You own it; you can take it down anytime from your Vercel dashboard.
+| Command | What it does |
+|---|---|
+| `mirador new <slug>` | Scaffold a markdown++ artifact + a vision placeholder |
+| `mirador preview <slug>` | Render the themed HTML view of the source |
+| `mirador refine <slug>` | Open the artifact for refinement through your agent |
+| `mirador push <slug> --intent "<why>"` | Commit a refinement with an auto-drafted intent note |
+| `mirador open <slug>` | Get the brain-shaped handoff for what changed |
+| `mirador handoff <slug>` | Emit the raw handoff packet (manual mode) |
+| `mirador diff <slug>` | Structured, section-level diff |
+| `mirador vision <slug> [--set]` | Show / evolve the vision (owner-gated) |
+| `mirador status <slug>` | Convergence state — locked / contested / open |
+| `mirador watch <slug>` | Live local cockpit (read-only mirror) |
+| `mirador share <slug> --with <email>` | Promote to a shared repo + an onboarding seed |
+| `mirador comment <slug> --text "<…>"` | Compose a paste-back comment (no clone) |
+| `mirador brain` | Show what Mirador reads as your brain (diagnostic) |
+| `mirador upgrade` | Migrate a publish-era install (keeps old docs as broadcast HTML) |
 
 ---
 
 ## Themes
 
-Alpha ships four (`default`, `memo`, `deck`, `none`). V1 introduces a redesigned theme system — five purpose-built canvases with shared design tokens, light + dark intrinsic, voice-aligned chrome:
+Five purpose-built renderers — shared design tokens, intrinsic light + dark, voice-aligned chrome. They render the markdown++ source; the visual identity is locked in [`docs/design/spec.md`](docs/design/spec.md).
 
-| Theme | Thesis | What it's for |
+| Theme | Thesis | For |
 |---|---|---|
-| `page` | The safe canvas. | General-purpose content. The default that does not apologize. |
-| `memo` | Long-form, read with intention. | Reports, write-ups, letters. Drop cap, signature block. |
-| `deck` | Slides that scroll. | Presentations. `scroll-snap`, arrow-key nav, slide counter. |
-| `console` | Code is content. | Postmortems, scripts, CLI dumps. `$ > #` prompt headings. |
+| `page` | The safe canvas. | General content. The default that doesn't apologize. |
+| `memo` | Read with intention. | Reports, write-ups, letters. Drop cap, signature block. |
+| `deck` | Slides that scroll. | Presentations. `scroll-snap`, arrow-key nav, counter. |
+| `console` | Code is content. | Postmortems, scripts. `$ > #` prompt headings. |
 | `atlas` | Numbers earn the spotlight. | Dashboards, data. Tabular figures, KPI cards, sticky tables. |
 
-Plus `none` (publish verbatim, no wrapping).
-
-Or ask for a **custom theme generated from a reference** during the share flow:
-
-- **URL** — *"make it look like vercel.com"*
-- **Screenshot** — attach an image
-- **Description** — *"warm earth tones, serif headings, generous whitespace"*
-
-Your agent's own model writes the CSS. Generated themes save to `~/.mirador/themes/<name>/` so you can reuse them.
+Plus `none` (publish verbatim).
 
 ---
 
-## Password Protection
+## Password protection
 
-Mirador can encrypt a page so visitors need a password to view it. **Read this before you trust it with anything sensitive.**
+Mirador can encrypt a published view so visitors need a password. **Read this before trusting it with anything sensitive.**
 
-The encryption is **client-side only**: AES-GCM with PBKDF2 (200,000 iterations). The user's password derives the key in the browser at view time. A view-source attacker only sees ciphertext.
-
-But it is **not real authentication**. Anyone who has the page can run unlimited offline password guesses, and someone watching a logged-in user's browser can grab the decrypted content. Treat it as a deterrent for casual viewing — not as protection for confidential data.
-
-For real auth, use Vercel Pro's project-level password protection. Server-side auth on the mirador surface itself is on the V2 roadmap.
+Encryption is **client-side only**: AES-GCM with PBKDF2 (200,000 iterations); the password derives the key in the browser at view time. A view-source attacker sees only ciphertext — but it is **not real authentication**: anyone with the page can run unlimited offline guesses, and someone watching a logged-in browser can grab the decrypted content. Treat it as a deterrent for casual viewing, not protection for confidential data. For real auth, use Vercel Pro's project-level password protection.
 
 ---
 
-## What's In This Repo
+## What's in this repo
 
 | Path | What's in it |
 |---|---|
-| [`alpha/`](alpha/) | The public alpha — CLI, skill, themes. Ships on npm as `mirador-cli`. See [`alpha/README.md`](alpha/README.md). |
-| [`v1/`](v1/) | The current V1 surface — new theme system, brain, share/request/inbox/dashboard, brand chrome. See [`v1/README.md`](v1/README.md). |
-| [`docs/design/`](docs/design/) | V1 design system: tokens, voice spec, every locked decision. |
+| [`v1/`](v1/) | The convergence CLI — document/brain seams, refine + two-brain handoff, vision/owner/state, cockpit, per-agent shims, onboarding, migration. Ships on npm as `mirador-cli`. |
+| [`alpha/`](alpha/) | The publish-era alpha (absorbed, not deprecated). See [`alpha/README.md`](alpha/README.md). |
+| [`docs/design/`](docs/design/) | The design system: tokens, voice spec, locked decisions. |
+| [`docs/superpowers/`](docs/superpowers/) | The convergence design + the CV-00…CV-08 build plan and per-slice sub-plans. |
 
 ---
 
@@ -214,10 +172,9 @@ For real auth, use Vercel Pro's project-level password protection. Server-side a
 
 ```bash
 npm uninstall -g mirador-cli
-rm -rf ~/.mirador ~/.claude/skills/mirador ~/.claude/commands/mirador.md ~/.codex/skills/mirador
+rm -rf ~/.mirador ~/.claude/skills/mirador ~/.claude/commands/mirador.md \
+       ~/.codex/skills/mirador ~/.gemini/skills/mirador
 ```
-
-(Drop the `.codex` line if you didn't install for Codex.)
 
 ---
 
@@ -229,6 +186,6 @@ MIT. See [LICENSE](LICENSE).
 
 <div align="center">
 
-**Your agent made the artifact. mirador makes the link.**
+**Same artifact. Your lens. Our vision.**
 
 </div>
