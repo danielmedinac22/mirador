@@ -67,6 +67,20 @@ function scoreChange(change, intents, lens) {
   return { change, intent: hit, score: matched.length, matched };
 }
 
+// Brain-independent: does this change move toward the artifact's vision? (The
+// handoff is a *vector*, not just a delta — design Q9 / §11.) Heuristic for the
+// demo: keyword overlap between the change/intent and the vision statement.
+function towardVision(change, intent, vision) {
+  if (!vision) return false;
+  const vwords = vision
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w.length >= 3); // keep short anchors like "nrr"
+  const hay =
+    `${change.headingText} ${change.anchor} ${intent?.note.summary ?? ''} ${intent?.note.body ?? ''}`.toLowerCase();
+  return vwords.some((w) => hay.includes(w));
+}
+
 /** Reframe a handoff packet through one brain into a one-screen brief. */
 export function frameBrief(packet, brain) {
   const ranked = packet.diff.changes
@@ -75,13 +89,14 @@ export function frameBrief(packet, brain) {
 
   const lines = [`${packet.slug} — for ${brain.name}`];
   if (packet.vision) lines.push(`vision: ${packet.vision}`);
-  lines.push('', 'WHAT CHANGED  ·  WHY IT MATTERS TO YOU');
+  lines.push('', 'WHAT CHANGED  ·  WHY IT MATTERS TO YOU  ·  VS VISION');
   for (const r of ranked) {
     const why = r.matched.length
       ? `touches ${r.matched.slice(0, 2).join(' / ')} — your lens (${brain.cares})`
       : 'context to weigh';
+    const vector = towardVision(r.change, r.intent, packet.vision) ? ' → toward vision' : ' · neutral';
     const reason = r.intent ? `  ‹${r.intent.note.summary}›` : '';
-    lines.push(`  §${r.change.anchor} ${r.change.headingText} — ${why}${reason}`);
+    lines.push(`  §${r.change.anchor} ${r.change.headingText} — ${why}${vector}${reason}`);
   }
   lines.push('', 'NEXT REFINEMENTS');
   const scored = ranked.filter((r) => r.score > 0);

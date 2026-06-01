@@ -16,7 +16,9 @@ import { registerPush } from './commands/push.js';
 import { registerRefine } from './commands/refine.js';
 import { registerRequest } from './commands/request.js';
 import { registerShare } from './commands/share.js';
+import { registerStatus } from './commands/status.js';
 import { registerUpgrade } from './commands/upgrade.js';
+import { registerVision } from './commands/vision.js';
 import { computeInbox, renderInbox } from './services/inbox.js';
 import { VERSION } from './version.js';
 
@@ -35,6 +37,8 @@ registerDiff(program);
 registerRefine(program);
 registerPush(program);
 registerHandoff(program);
+registerVision(program);
+registerStatus(program);
 registerBrain(program);
 registerShare(program);
 registerRequest(program);
