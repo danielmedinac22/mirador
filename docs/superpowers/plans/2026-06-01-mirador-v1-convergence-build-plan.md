@@ -286,6 +286,8 @@ CV-01 (brain = agent memory) ───────┴─────────
 
 ## 2. Aggregate definition of done
 
+**Status (2026-06-01): all nine slices CV-00…CV-08 built on `feat/v1-cv-00-document-seam` — 127 tests pass, lint + tsc clean, bundle builds, every command smoke-tested.** The single-machine convergence loop (new → vision → refine → push → handoff → status → preview/watch → upgrade) is verified live; the reproducible two-brain payoff is `npm run demo:two-brains`. The remaining items below are the **two-machine / two-agent live demo** — the manual confirmation (different real brains, María's onboarding on a second machine).
+
 All slices merged; this runs end-to-end across **two machines and two agents**:
 
 1. `mirador init` on machine A (Daniel, Claude Code) — no brain wizard; brain resolved from his agent memory.
