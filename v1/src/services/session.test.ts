@@ -8,15 +8,23 @@ import { openSession } from './session.js';
 describe('services/session', () => {
   let tmp: string;
   const original = process.env.MIRADOR_HOME_OVERRIDE;
+  const originalAgent = process.env.MIRADOR_AGENT;
+  const originalProject = process.env.MIRADOR_PROJECT_OVERRIDE;
 
   beforeEach(async () => {
     tmp = await mkdtemp(join(tmpdir(), 'mirador-session-'));
     process.env.MIRADOR_HOME_OVERRIDE = tmp;
+    // Pin brain resolution to an empty generic source so the brief is
+    // deterministic regardless of the machine's real agent memory.
+    process.env.MIRADOR_AGENT = 'generic';
+    process.env.MIRADOR_PROJECT_OVERRIDE = tmp;
   });
 
   afterEach(async () => {
     await rm(tmp, { recursive: true, force: true });
     process.env.MIRADOR_HOME_OVERRIDE = original;
+    process.env.MIRADOR_AGENT = originalAgent;
+    process.env.MIRADOR_PROJECT_OVERRIDE = originalProject;
   });
 
   it('fresh artifact brief reads "newly created"', async () => {

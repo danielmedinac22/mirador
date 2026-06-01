@@ -1,69 +1,62 @@
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { scaffoldBrain } from './brain.js';
+import { brainSummary, listBrain, loadBrain } from './brain.js';
 
-describe('services/brain', () => {
-  let tmp: string;
-  const original = process.env.MIRADOR_HOME_OVERRIDE;
+const ENV_KEYS = ['MIRADOR_PROJECT_OVERRIDE', 'MIRADOR_AGENT'] as const;
+
+describe('services/brain (agent-native, read-only)', () => {
+  let project: string;
+  const saved: Record<string, string | undefined> = {};
 
   beforeEach(async () => {
-    tmp = await mkdtemp(join(tmpdir(), 'mirador-brain-'));
-    process.env.MIRADOR_HOME_OVERRIDE = tmp;
+    for (const k of ENV_KEYS) saved[k] = process.env[k];
+    project = await mkdtemp(join(tmpdir(), 'mirador-brain-'));
+    process.env.MIRADOR_PROJECT_OVERRIDE = project;
+    process.env.MIRADOR_AGENT = 'generic';
   });
 
   afterEach(async () => {
-    await rm(tmp, { recursive: true, force: true });
-    process.env.MIRADOR_HOME_OVERRIDE = original;
+    await rm(project, { recursive: true, force: true });
+    for (const k of ENV_KEYS) {
+      if (saved[k] === undefined) delete process.env[k];
+      else process.env[k] = saved[k];
+    }
   });
 
-  it('writes MEMORY.md + 3 brain files in workspace/brain/', async () => {
-    await scaffoldBrain({
-      role: 'PEM',
-      reviewFocus: 'scope and timelines',
-      authorAudience: 'company-wide',
-      domain: 'fintech LatAm',
-      preferences: 'tables not prose',
-    });
-
-    const root = join(tmp, 'workspace', 'brain');
-    const memory = await readFile(join(root, 'MEMORY.md'), 'utf8');
-    const prefs = await readFile(join(root, 'preferences.md'), 'utf8');
-    const author = await readFile(join(root, 'role-author.md'), 'utf8');
-    const reviewer = await readFile(join(root, 'role-reviewer.md'), 'utf8');
-
-    expect(memory).toContain('preferences');
-    expect(memory).toContain('role-author');
-    expect(memory).toContain('role-reviewer');
-
-    expect(prefs).toContain('fintech LatAm');
-    expect(prefs).toContain('tables not prose');
-    expect(prefs).toMatch(/^---\nname: preferences/);
-
-    expect(author).toContain('company-wide');
-    expect(author).toContain('PEM');
-    expect(author).toMatch(/applies_to_role: author/);
-
-    expect(reviewer).toContain('scope and timelines');
-    expect(reviewer).toMatch(/applies_to_role: reviewer/);
+  it('cold start: listBrain empty, brainSummary reports the generic baseline', async () => {
+    expect(await listBrain()).toEqual([]);
+    const d = await brainSummary();
+    expect(d.agent).toBe('generic');
+    expect(d.topics).toEqual([]);
   });
 
-  it('falls back to defaults when answers are empty', async () => {
-    await scaffoldBrain({
-      role: '',
-      reviewFocus: '',
-      authorAudience: '',
-      domain: '',
-      preferences: '',
-    });
+  it('reads the AGENTS.md convention file as a topic', async () => {
+    await writeFile(
+      join(project, 'AGENTS.md'),
+      '---\ndescription: how I work\n---\nPrefer tables.',
+    );
+    const entries = await listBrain();
+    expect(entries).toHaveLength(1);
+    expect(entries[0]).toMatchObject({ topic: 'agents', description: 'how I work' });
+    expect(entries[0]?.body).toContain('Prefer tables.');
+    expect(entries[0]?.appliesToRole).toBeUndefined(); // roles are inferred now
 
-    const root = join(tmp, 'workspace', 'brain');
-    const prefs = await readFile(join(root, 'preferences.md'), 'utf8');
-    const reviewer = await readFile(join(root, 'role-reviewer.md'), 'utf8');
+    const one = await loadBrain('agents');
+    expect(one.body).toContain('Prefer tables.');
+  });
 
-    expect(prefs).toContain('general knowledge work');
-    expect(prefs).toContain('Prefer tables over prose');
-    expect(reviewer).toContain('scope, timelines, and failure modes');
+  it('loadBrain throws for an unknown topic', async () => {
+    await expect(loadBrain('nope')).rejects.toThrow(/No brain topic/);
+  });
+
+  it('brainSummary lists located files with existence flags', async () => {
+    await writeFile(join(project, 'AGENTS.md'), 'x');
+    const d = await brainSummary();
+    const agentsFile = d.files.find((f) => f.path.endsWith('AGENTS.md'));
+    expect(agentsFile?.exists).toBe(true);
+    const claudeFile = d.files.find((f) => f.path.endsWith('CLAUDE.md'));
+    expect(claudeFile?.exists).toBe(false);
   });
 });
