@@ -69,6 +69,34 @@ export async function repoRoot(dir: string): Promise<string | null> {
   }
 }
 
+/** The current HEAD sha, or null if not a repo / no commits yet. */
+export async function headSha(dir: string): Promise<string | null> {
+  try {
+    const { stdout } = await execa('git', ['rev-parse', 'HEAD'], { cwd: dir });
+    return stdout.trim();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Commit shas in `(since, head]` (newest first). `since=null` → all of `head`'s
+ * history. Returns [] if the range can't be resolved.
+ */
+export async function commitsBetween(
+  dir: string,
+  since: string | null,
+  head = 'HEAD',
+): Promise<string[]> {
+  const range = since ? `${since}..${head}` : head;
+  try {
+    const { stdout } = await execa('git', ['log', '--format=%H', range], { cwd: dir });
+    return stdout.trim() ? stdout.trim().split('\n') : [];
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Contents of `relPathFromRoot` at git `ref` (e.g. `HEAD`), or null if the file
  * does not exist at that ref / the dir is not a repo. `relPathFromRoot` is

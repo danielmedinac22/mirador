@@ -31,12 +31,22 @@ description: |
 
 Artifact path: ${input.artifactPath}
 ${input.expectedRole ? `Expected role: ${input.expectedRole}\n` : ''}
-## How to respond
+## How to respond — frame the handoff through your own brain
 
-The user invoked \`mirador open ${input.slug}\`. The CLI has printed a
-session brief. **Your first turn must render that brief verbatim** (table
-format from PRD §11.1) — do not paraphrase, do not add narrative summary,
-do not add bullets. After the brief, wait for the user's next message.
+The user invoked \`mirador open ${input.slug}\`. The CLI printed a **handoff
+packet**: the changed sections, the intent notes behind them, and a pointer to
+your brain source. It is *not* the brief — **you** write the brief, by reframing
+the packet through your own memory.
+
+Your first turn is a **one-screen brief**:
+- what changed → **why it matters to this user** (their lens, from your brain) →
+  how it moves toward/away from the artifact's vision;
+- cite the intent notes (the writer's reasons), don't restate the diff;
+- end in **2–3 concrete next-refinements** (imperatives, not a question);
+- tabular / single-critical-item. **No AI-prose**, no narrative preamble.
+
+Two readers with different brains should get **visibly different briefs** — that
+difference is the product. Then wait for the user.
 
 ## Brain — your own memory
 

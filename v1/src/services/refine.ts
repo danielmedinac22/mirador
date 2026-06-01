@@ -5,6 +5,7 @@ import { commitAll, hasRemote, push, repoRoot } from '../adapters/git.js';
 import { readConfig } from '../shared/config.js';
 import { MiradorError } from '../shared/errors.js';
 import { resolveArtifactPath } from './artifact.js';
+import { sourceAtRef } from './changeLog.js';
 import * as document from './document/index.js';
 import { type IntentNote, writeIntentNote } from './intentNote.js';
 import { type Move, normalizeMove } from './moves.js';
@@ -89,13 +90,17 @@ export async function commitRefinement(
   const summary = firstLine(input.intent) || 'refine artifact';
   const rel = relPathSpec(root, real);
 
+  // Which sections this refinement touched (working tree vs HEAD) — lets the
+  // next reader's handoff map this intent to the exact sections it explains.
+  const sections = await touchedSections(real);
+
   // 1. The refinement commit — subject is the human-legible intent summary; the
   //    move rides as a machine-readable trailer (never printed to the user).
   const message = `${summary}\n\nMirador-Move: ${move}`;
   const sha = await commitAll(root, rel, message);
 
   // 2. The intent sidecar, keyed by the refinement sha.
-  const note: IntentNote = { move, author, summary, body: input.intent.trim() };
+  const note: IntentNote = { move, author, summary, body: input.intent.trim(), sections };
   const intentFile = await writeIntentNote(real, sha, note);
   const notesSpec = relPathSpec(root, join(real, '.mirador', 'intents'));
   await commitAll(root, notesSpec, `intent: note for ${sha.slice(0, 7)}`);
@@ -124,6 +129,17 @@ export async function pushRefinement(slug: string, input: RefineInput): Promise<
 function relPathSpec(root: string, target: string): string {
   const rel = relative(root, target).split(sep).join('/');
   return rel === '' ? '.' : rel;
+}
+
+/** Section anchors changed between HEAD and the working-tree source (pre-commit). */
+async function touchedSections(artifactRoot: string): Promise<string[] | undefined> {
+  const sourcePath = join(artifactRoot, SOURCE_FILE);
+  if (!(await pathExists(sourcePath))) return undefined;
+  const headText = await sourceAtRef(artifactRoot, SOURCE_FILE, 'HEAD');
+  if (headText === null) return undefined; // first commit — nothing to diff against
+  const workText = await readText(sourcePath);
+  const { changes } = document.diff(document.parse(headText), document.parse(workText));
+  return changes.length ? changes.map((c) => c.anchor) : undefined;
 }
 
 async function resolveAuthor(explicit?: string): Promise<string> {

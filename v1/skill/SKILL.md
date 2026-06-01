@@ -61,6 +61,25 @@ The exact sequence, in order:
 3. **Read your own memory (the brain).** It's already loaded in your session — your memory + the project `CLAUDE.md`/`AGENTS.md`. `mirador brain` shows what Mirador resolves. Pull the relevant context (review focus, domain language, preferences).
 4. **Synthesise the brief — voice-aligned.** One screen. Lead with what *this user* (per their brain) would check first. No AI-prose summaries. Use scannable structure when the brain prefers tables. Cite the sender's note explicitly. End with 2–3 concrete next-step actions, not a question.
 
+## Workflow on open / pull — the handoff
+
+`mirador open <slug>` (and a pull that brings collaborators' refinements) prints a
+**handoff packet**: changed sections + the intent notes behind them + a pointer to
+your brain source. Git gives a diff; the handoff is the product on top of it.
+
+**You write the brief — by reframing the packet through your own memory:**
+
+1. Read your own brain (your memory + `CLAUDE.md`/`AGENTS.md`).
+2. One-screen brief: *what changed* → **why it matters to this user** (their lens)
+   → how it moves toward/away from the artifact's **vision**.
+3. Cite the intent notes (the writer's reasons); don't restate the raw diff.
+4. End in **2–3 concrete next-refinements** — imperatives, not a question.
+5. Tabular / single-critical-item. No AI-prose, no preamble.
+
+Two readers with different brains get **visibly different briefs** — that
+difference, *because of the brain*, is the point. Manual mode: `mirador handoff
+<slug>` emits the same packet for a human with no agent.
+
 ## Refine loop (inside a mirador artifact)
 
 The artifact is a markdown++ `source.md` — wet clay, not a finished page. The
