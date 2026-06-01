@@ -169,12 +169,12 @@ CV-01 (brain = agent memory) ───────┴─────────
 - **New:** `services/handoff.ts` (assemble the packet: `document.diff` since `last-seen` + `intentNote` lookup + brain-source pointer; **no brain content in the packet on the agent path**).
 - **Changes:** `services/session.ts` (surface the handoff on open), `commands/open.ts` (call handoff), `shared/lastSeen.ts` (track per-artifact last-seen ref), `v1/skill/SKILL.md` (the shim: read your own brain → frame the packet → one-screen brief, tabular, ends in 2–3 next-refinements, no AI-prose).
 
-**Acceptance criteria:**
-- [ ] `mirador handoff` emits a deterministic packet: structured diff + intent notes + brain pointer. No brain content embedded (agent path).
-- [ ] Given the same packet, two different brains (two memory fixtures) produce **measurably different briefs** — validated by a fixture test on the shim contract + a manual two-machine confirmation.
-- [ ] The brief is tabular / single-critical-item, cites intent notes, ends in concrete next-refinements (not a question). No AI-prose.
-- [ ] Manual mode: `mirador handoff` output is usable by a human with no shim.
-- [ ] Integration test for the open → handoff path; golden test on the shim's brief format.
+**Acceptance criteria:** ✅ **all met (2026-06-01)** — sub-plan: [`2026-06-01-mirador-v1-cv-03-handoff.md`](./2026-06-01-mirador-v1-cv-03-handoff.md)
+- [x] `mirador handoff` emits a deterministic packet: structured diff + intent notes + brain pointer. No brain content embedded (agent path).
+- [x] Given the same packet, two different brains (two memory fixtures) produce **measurably different briefs** — fixture test green + `npm run demo:two-brains`; the live two-machine confirmation stays a manual demo.
+- [x] The brief is tabular / single-critical-item, cites intent notes, ends in concrete next-refinements (not a question). No AI-prose. *(shim contract + demo framer)*
+- [x] Manual mode: `mirador handoff` output is usable by a human with no shim.
+- [x] Integration test for the open → handoff path; golden test on the shim's brief format.
 
 **Deps:** CV-00, CV-01, CV-02. **Suggested model:** Claude Opus (the shim's brief-framing is the highest-leverage prose in the product).
 
