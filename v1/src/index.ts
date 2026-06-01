@@ -2,6 +2,7 @@
 import { Command } from 'commander';
 import { registerAccept } from './commands/accept.js';
 import { registerBrain } from './commands/brain.js';
+import { registerComment } from './commands/comment.js';
 import { registerDashboard } from './commands/dashboard.js';
 import { registerDecline } from './commands/decline.js';
 import { registerDiff } from './commands/diff.js';
@@ -43,6 +44,7 @@ registerVision(program);
 registerStatus(program);
 registerWatch(program);
 registerShim(program);
+registerComment(program);
 registerBrain(program);
 registerShare(program);
 registerRequest(program);

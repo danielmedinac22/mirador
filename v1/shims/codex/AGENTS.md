@@ -12,6 +12,18 @@ separate store. `mirador brain` shows, read-only, what it resolves. Use it to
 frame artifacts in this user's terms. Never copy brain content into a shared
 artifact or comment without explicit OK; it never enters git or a handoff.
 
+## On an invitation paste — onboard to refine
+
+An `@mirador-invitation` block onboards the recipient to refine, zero setup:
+1. install if missing: `npm i -g mirador-cli`;
+2. `git clone <Repo>` and work inside it;
+3. `mirador open <Artifact>` → reframe the handoff through your brain (below) →
+   leave them in `mirador refine <Artifact>`.
+
+Lighter rungs: T0 read (open the `Read-only:` link), T1 comment (compose an
+`@mirador-response` to paste back — no CLI). Once onboarded, the user can
+`mirador share <slug> --with <email>` onward — convergence is distribution.
+
 ## On open / pull — the handoff
 
 `mirador open <slug>` (and a pull bringing collaborators' refinements) prints a
