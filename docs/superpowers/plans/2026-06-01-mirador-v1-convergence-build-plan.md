@@ -148,12 +148,12 @@ CV-01 (brain = agent memory) ───────┴─────────
 - **New:** `services/refine.ts` (the refine session: open source, expose document interface to the agent), `services/intentNote.ts` (compose/store/read intent notes; storage = sidecar `.mirador/intents/<sha>.md` + a short commit trailer per design §18), `services/moves.ts` (the six internal move tags + inference contract used by the shim; **no user-facing surface**).
 - **Changes:** `services/session.ts` (refine sessions), `adapters/git.ts` (commit with trailer; write intent sidecar), `v1/skill/SKILL.md` (the shim auto-drafts the intent note on push — invisible guidance).
 
-**Acceptance criteria:**
-- [ ] A refinement committed via `mirador push` writes `.mirador/intents/<sha>.md` and a one-line commit trailer; `git log` is legible.
-- [ ] The intent note is **auto-drafted by the agent** (the shim instructs it), editable, never a blocking form.
-- [ ] Each intent note carries an inferred move tag (internal); the tag is never shown to the user.
-- [ ] `document.diff` produces the structured diff the next reader's handoff will consume.
-- [ ] Unit tests for intentNote compose/parse round-trip; integration test for refine → push.
+**Acceptance criteria:** ✅ **all met (2026-06-01)** — sub-plan: [`2026-06-01-mirador-v1-cv-02-refine-intent.md`](./2026-06-01-mirador-v1-cv-02-refine-intent.md)
+- [x] A refinement committed via `mirador push` writes `.mirador/intents/<sha>.md` and a one-line commit trailer; `git log` is legible.
+- [x] The intent note is **auto-drafted by the agent** (the shim instructs it), editable, never a blocking form.
+- [x] Each intent note carries an inferred move tag (internal); the tag is never shown to the user.
+- [x] `document.diff` produces the structured diff the next reader's handoff will consume.
+- [x] Unit tests for intentNote compose/parse round-trip; integration test for refine → push.
 
 **Deps:** CV-00. **Suggested model:** Claude (the shim prose + move inference contract).
 
