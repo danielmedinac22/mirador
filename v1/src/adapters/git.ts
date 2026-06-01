@@ -49,6 +49,16 @@ export async function hasUncommittedChanges(dir: string): Promise<boolean> {
   return stdout.trim().length > 0;
 }
 
+/** True if the repo has at least one configured remote. */
+export async function hasRemote(dir: string): Promise<boolean> {
+  try {
+    const { stdout } = await execa('git', ['remote'], { cwd: dir });
+    return stdout.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
 /** Absolute path of the repo root containing `dir`, or null if not in a repo. */
 export async function repoRoot(dir: string): Promise<string | null> {
   try {

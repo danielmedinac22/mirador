@@ -11,9 +11,11 @@ description: |
 
 # mirador
 
-The user's **brain** is private notes — lives in their workspace repo at
-`.mirador/brain/`. It shapes how you read the artifacts they open with
-mirador. Same artifact, personal lens. Never share its contents across users.
+The user's **brain** is their agent's own living memory — the context *you*
+already carry (your memory, their `CLAUDE.md` / `AGENTS.md`). Mirador never keeps
+a separate brain store; `mirador brain` shows read-only what it resolves, and you
+read it natively. It shapes how you read the artifacts they open. Same artifact,
+personal lens. Never share it across users; it never enters git or a handoff.
 
 ## Activation contract — important
 
@@ -43,7 +45,7 @@ Trigger this skill if **any** of the following fire:
 
 | Signal | What to do |
 |---|---|
-| User pastes a block starting with `@mirador-invitation` | 1. Parse the seed for `Artifact`, `From`, `Role expected`, `Note`, `Read-only:`, `Repo:`. 2. WebFetch the `Read-only:` URL silently. 3. Read the user's brain at `.mirador/brain/`. 4. Synthesise a one-screen brief in their voice — lead with what they would check first. 5. Then offer concrete next steps (comment, clone-to-edit, decline). |
+| User pastes a block starting with `@mirador-invitation` | 1. Parse the seed for `Artifact`, `From`, `Role expected`, `Note`, `Read-only:`, `Repo:`. 2. WebFetch the `Read-only:` URL silently. 3. Read your own memory (the brain). 4. Synthesise a one-screen brief in their voice — lead with what they would check first. 5. Then offer concrete next steps (refine, comment, decline). |
 | User pastes a block starting with `@mirador-request` | Parse the seed. Surface the ask (what is requested + by when + role). Offer `accepted` / `declined` decision with one-line consequence each. Do not load any external URL — requests do not carry an artifact yet. |
 | User pastes a block starting with `@mirador-response` | Parse the seed. Update the originating request's state in `~/.mirador/workspace/outgoing-requests/<slug>.md`. Surface the response in the next `mirador inbox`. |
 | Working directory contains `.mirador-link` | The artifact was promoted to a shared repo. Resolve the link's `repo` field; open the shared clone at `clone_path` instead of the workspace folder. |
@@ -56,8 +58,27 @@ The exact sequence, in order:
 
 1. **Parse the seed.** Extract: `Artifact`, `From`, `Role expected`, `Note`, `Read-only:` URL, `Repo:` URL. If any required field is missing, surface the parse error and stop — do not improvise.
 2. **WebFetch the `Read-only:` URL.** The URL serves themed HTML of the artifact. Read it. If it returns 401/403, tell the user the deployment is gated and suggest they open the URL in their browser to inspect the auth requirement.
-3. **Read the brain.** The user's session is inside a mirador workspace, so `.mirador/brain/` is already on disk. Pull the relevant topics (review focus, domain language, preferences).
+3. **Read your own memory (the brain).** It's already loaded in your session — your memory + the project `CLAUDE.md`/`AGENTS.md`. `mirador brain` shows what Mirador resolves. Pull the relevant context (review focus, domain language, preferences).
 4. **Synthesise the brief — voice-aligned.** One screen. Lead with what *this user* (per their brain) would check first. No AI-prose summaries. Use scannable structure when the brain prefers tables. Cite the sender's note explicitly. End with 2–3 concrete next-step actions, not a question.
+
+## Refine loop (inside a mirador artifact)
+
+The artifact is a markdown++ `source.md` — wet clay, not a finished page. The
+recipient's verb is **refine**, not read.
+
+1. **Refine freeform.** The user talks to you; you edit `source.md` with your
+   normal tools. Edit by *section* — headings carry stable `{#anchor}`s, so touch
+   only the sections you mean to. `mirador preview <slug>` renders the view.
+2. **On push, auto-draft the intent note.** When the user is ready, draft a
+   one-line *what changed and why, in their context* — never make them write it.
+   Silently infer the collaboration move (critique / extend / tighten / reframe /
+   question / endorse) — **never name it to the user** — and run:
+   `mirador push <slug> --intent "<one line>" --move <inferred>`
+3. The CLI writes the intent note + a structured diff the next reader's agent will
+   reframe through *their* brain. The move is invisible scaffolding; never show it.
+
+Never block on a form. The intent note is auto-drafted and editable, not required
+input from the user.
 
 ## Workflow on a request paste
 

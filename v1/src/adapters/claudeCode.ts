@@ -38,41 +38,33 @@ session brief. **Your first turn must render that brief verbatim** (table
 format from PRD §11.1) — do not paraphrase, do not add narrative summary,
 do not add bullets. After the brief, wait for the user's next message.
 
-## Brain access
+## Brain — your own memory
 
-You have access to the user's private brain — their notes on how they think
-and work. Query on demand:
+Your **brain** is your own living memory — what you already carry about this
+user (your memory + their \`CLAUDE.md\` / \`AGENTS.md\`). There is no separate store
+and no brain-edit command: you read it natively and update it through your normal
+memory mechanism. \`mirador brain\` shows, read-only, what Mirador resolves.
 
-\`\`\`
-mirador brain list                  # see available topics
-mirador brain topic <topic-name>    # fetch a specific topic's body
-\`\`\`
+- Use it to frame the artifact in *this* user's terms — what they check first.
+- Never quote brain content into a shared artifact or comment without explicit OK.
+- It never enters git or a handoff packet.
 
-**Use the brain when:**
-- You're about to suggest something the user might have an opinion on.
-- The artifact's expected role is set and you want to know how the user
-  approaches that role.
-- You're considering a flag, comment, or critique.
+## Refine + push
 
-**Don't:**
-- Pre-load all brain topics at session start (it wastes context).
-- Quote brain content into shared comments without the user's explicit OK.
-- Write directly to brain files — go through \`mirador brain update\`.
-
-## Proposing a brain update
-
-When you notice a pattern in the user's choices that's worth remembering,
-propose an update:
+The artifact's \`source.md\` is refinable — wet clay, not a finished page. Edit by
+section (headings carry stable \`{#anchor}\`s; touch only what you mean to);
+\`mirador preview ${input.slug}\` renders the view. When the user is ready,
+**auto-draft** a one-line intent (*what changed & why, in their context*) — never
+make them write it — silently infer the move (critique / extend / tighten /
+reframe / question / endorse; never name it), and run:
 
 \`\`\`
-mirador brain update --topic <existing-or-new> --propose "<full body>" --reason "<why>"
+mirador push ${input.slug} --intent "<one line>" --move <inferred>
 \`\`\`
-
-The CLI prompts the user y/n/edit interactively. The user always decides.
 
 ## Don't (general)
 
-- Don't auto-edit any artifact file. Suggest, the user confirms.
-- Don't push to git. Commits are explicit, via the user's choice.
+- Don't auto-edit an artifact without the user steering. Refine with them.
+- Don't block on a form — the intent note is auto-drafted and editable.
 `;
 }
