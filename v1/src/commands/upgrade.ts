@@ -37,10 +37,15 @@ export function registerUpgrade(program: Command): void {
       }
 
       const { user } = await ghAuthStatus();
-      const { migrated, backupPath } = await runUpgrade({ ghHandle: user });
-      await logActivity(`upgrade migrated=${migrated.length}`);
-      p.outro(
-        `Upgraded. Migrated ${migrated.length} artifact${migrated.length === 1 ? '' : 's'}${migrated.length ? ` (${migrated.join(', ')})` : ''}.\nAlpha config backed up to ${backupPath}.`,
-      );
+      const { migrated, backupPath, shimAgent, brainHarvest } = await runUpgrade({
+        ghHandle: user,
+      });
+      await logActivity(`upgrade migrated=${migrated.length} shim=${shimAgent}`);
+      const lines = [
+        `Upgraded. ${migrated.length} doc${migrated.length === 1 ? '' : 's'} kept as broadcast HTML${migrated.length ? ` (${migrated.join(', ')})` : ''}; new artifacts are markdown++.`,
+        `Shim installed for ${shimAgent}. Alpha config backed up to ${backupPath}.`,
+      ];
+      if (brainHarvest) lines.push(brainHarvest);
+      p.outro(lines.join('\n'));
     });
 }
