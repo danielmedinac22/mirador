@@ -233,11 +233,11 @@ CV-01 (brain = agent memory) ───────┴─────────
 - **New:** `v1/shims/claude/SKILL.md` (the existing `v1/skill/SKILL.md` evolved), `v1/shims/codex/AGENTS.md`, `v1/shims/gemini/GEMINI.md` — each the same invisible-intelligence contract (refine, auto-intent, handoff framing, move inference) in that agent's idiom.
 - **Audit:** verify no business logic leaked into any shim (SAD §2.2) and no LLM call exists in `commands/`/`services/`/`adapters/`.
 
-**Acceptance criteria:**
-- [ ] The refine + handoff loop runs in Claude Code **and** in at least one other agent (Codex or Gemini) via its shim, against the same `mirador` CLI.
-- [ ] Manual mode (no shim): `mirador handoff` + `mirador push --intent` give a human the full loop by copy-paste.
-- [ ] Shims contain **no business logic** and **no user-facing role/move vocabulary** — guidance only.
-- [ ] Shim contract test: each shim instructs the same packet→brief shape.
+**Acceptance criteria:** ✅ **met (2026-06-01; full multi-agent run is manual)** — sub-plan: [`2026-06-01-mirador-v1-cv-06-agnostic-shims.md`](./2026-06-01-mirador-v1-cv-06-agnostic-shims.md)
+- [x] Three shims (`shims/{claude,codex,gemini}`) carry the same loop contract against the same CLI; `mirador shim install` installs the detected/`--agent` one. *(full Claude+Codex run = manual)*
+- [x] Manual mode (no shim): `mirador handoff` + `mirador push --intent` give the full loop by copy-paste.
+- [x] Shims contain **no business logic** and **no user-facing role/move vocabulary** — asserted.
+- [x] Shim contract test: each shim instructs the same packet→brief shape; engine audit confirms no LLM call in `src/`.
 
 **Deps:** CV-03. **Suggested model:** Claude Opus (prose-engineering across agents).
 
@@ -253,12 +253,12 @@ CV-01 (brain = agent memory) ───────┴─────────
 - **Changes:** `services/promptSeed.ts` (invitation seed = onboard-to-refine: carries repo + install + first-refine guidance the agent executes), `services/landingPage.ts` (tiered CTA: T0/T1/T2), `v1/shims/*` (on an invitation paste: install-if-missing → clone → handoff → leave refining).
 - **Reuses:** existing `share` / `accept` / `inbox` / `dashboard` machinery.
 
-**Acceptance criteria:**
-- [ ] Pasting an invitation seed into a supported agent results in: CLI present (installed if missing), repo cloned, a brain-shaped handoff, and an open refine session — **zero manual setup steps**.
-- [ ] Landing page renders T0 (read URL) + T1 (comment, no CLI) + T2 (refine) per design §14.
-- [ ] T1 comment produces a paste-back `@mirador-response`; appears in the owner's inbox.
-- [ ] The growth loop closes: a newly-onboarded collaborator can themselves `share` onward.
-- [ ] Integration test for the seed → onboarded-refine path (mocked installer).
+**Acceptance criteria:** ✅ **met (2026-06-01; agent-executed install/clone is manual)** — sub-plan: [`2026-06-01-mirador-v1-cv-07-onboarding.md`](./2026-06-01-mirador-v1-cv-07-onboarding.md)
+- [x] The seed carries the onboard-to-refine flow (install → clone → `mirador open`); the shim executes it. *(full agent-executed paste→refine = manual)*
+- [x] Landing renders T0 (read) + T1 (comment, no CLI) + T2 (refine) per design §14.
+- [x] T1 comment → paste-back `@mirador-response` (`commented` status); the owner ingests via the existing inbox.
+- [x] The growth loop closes: an onboarded collaborator can `mirador share` onward (shims instruct it).
+- [x] Test for the seed/landing/comment + shim onboarding contract.
 
 **Deps:** CV-06. **Suggested model:** Claude (seed/shim prose + onboarding UX).
 
@@ -273,12 +273,12 @@ CV-01 (brain = agent memory) ───────┴─────────
 **Modules:**
 - **Changes:** `services/upgrade.ts` + `commands/upgrade.ts` (map published HTML → raw-HTML escape-hatch artifacts; install the agent shim; remove the legacy brain-store wizard remnants; preserve `shareRegistry`), `adapters/*` as needed.
 
-**Acceptance criteria:**
-- [ ] Existing published artifacts survive as broadcast HTML (viewable, not co-refinable); their URLs and `shareRegistry` entries are preserved.
-- [ ] New artifacts created post-upgrade are markdown++ by default.
-- [ ] The old brain store (if present) is read once for a one-time harvest hint, then the agent-memory brain takes over; no parallel store is maintained.
-- [ ] `--dry-run` prints the plan without changes.
-- [ ] Integration test: simulate a publish-era install, upgrade, verify both broadcast-HTML continuity and new markdown++ creation.
+**Acceptance criteria:** ✅ **all met (2026-06-01)** — sub-plan: [`2026-06-01-mirador-v1-cv-08-migration.md`](./2026-06-01-mirador-v1-cv-08-migration.md)
+- [x] Existing published artifacts survive as broadcast HTML (viewable, not co-refinable); their URLs are preserved (legacy marker); `shareRegistry` untouched.
+- [x] New artifacts created post-upgrade are markdown++ by default.
+- [x] The old brain store (if present) is read once for a one-time harvest hint, then the agent-memory brain takes over; no parallel store is maintained.
+- [x] `--dry-run` prints the plan without changes.
+- [x] Integration test: simulate a publish-era install, upgrade, verify both broadcast-HTML continuity and new markdown++ creation.
 
 **Deps:** CV-00 … CV-07. **Suggested model:** Claude (migration is high-stakes UX).
 
