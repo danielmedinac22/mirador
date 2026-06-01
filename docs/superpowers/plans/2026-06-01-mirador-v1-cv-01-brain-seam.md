@@ -2,7 +2,7 @@
 
 **Slice:** CV-01 · **Branch:** `feat/v1-cv-00-document-seam` (wave-1, building on the same branch)
 **Parent:** [build plan](./2026-06-01-mirador-v1-convergence-build-plan.md) · **Design:** [convergence design](../specs/2026-06-01-mirador-v1-convergence-design.md) §8
-**Status:** In progress (2026-06-01)
+**Status:** ✅ Complete (2026-06-01) — 94 tests pass · lint + tsc clean · bundle builds · `mirador brain` smoke-tested. All acceptance criteria met.
 
 ## Goal
 

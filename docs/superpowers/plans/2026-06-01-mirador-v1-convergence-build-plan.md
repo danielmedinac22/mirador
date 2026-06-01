@@ -127,12 +127,12 @@ CV-01 (brain = agent memory) ───────┴─────────
 - **Changes:** `services/brain.ts` (from "manage a store" → "resolve + read via adapter"), `commands/init.ts` (drop the 5–10-Q brain wizard; detect agent + confirm brain source instead), `commands/brain.ts` (becomes diagnostic).
 - **Retire / repurpose:** `services/brainImport.ts`, `services/brainProposals.ts` (the "propose an update to the store" flow is obsolete — updates happen in the agent's own memory via the agent's own mechanism). Keep `services/brain.privacy.test.ts`'s intent: assert no path writes brain content into a shared repo or a handoff packet.
 
-**Acceptance criteria:**
-- [ ] On a machine with Claude Code memory, `mirador brain` shows the resolved brain source + a summary of what it would read. Nothing is written to a parallel store.
-- [ ] Codex (`AGENTS.md`) and Gemini (`GEMINI.md`) adapters resolve correctly; unknown agent falls back to the generic convention.
-- [ ] `mirador init` completes with **no brain wizard**; it detects the agent and confirms the brain source.
-- [ ] Privacy assertion test: no code path copies brain content into a shared repo path or into a handoff packet on the agent path.
-- [ ] Cold start (empty memory) degrades gracefully (generic baseline), does not error.
+**Acceptance criteria:** ✅ **all met (2026-06-01)** — sub-plan: [`2026-06-01-mirador-v1-cv-01-brain-seam.md`](./2026-06-01-mirador-v1-cv-01-brain-seam.md)
+- [x] On a machine with Claude Code memory, `mirador brain` shows the resolved brain source + a summary of what it would read. Nothing is written to a parallel store.
+- [x] Codex (`AGENTS.md`) and Gemini (`GEMINI.md`) adapters resolve correctly; unknown agent falls back to the generic convention.
+- [x] `mirador init` completes with **no brain wizard**; it detects the agent and confirms the brain source.
+- [x] Privacy assertion test: no code path copies brain content into a shared repo path or into a handoff packet on the agent path.
+- [x] Cold start (empty memory) degrades gracefully (generic baseline), does not error.
 
 **Deps:** none (parallel with CV-00). **Suggested model:** Claude (privacy boundary + adapter design).
 
