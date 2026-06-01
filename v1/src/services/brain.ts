@@ -1,75 +1,22 @@
-import { readFile, readdir } from 'node:fs/promises';
-import { join } from 'node:path';
-import { pathExists, writeFileAtomic } from '../adapters/fs.js';
+import {
+  type BrainSource,
+  type BrainTopic,
+  resolveBrainSource,
+} from '../adapters/brainSource/index.js';
 import { MiradorError } from '../shared/errors.js';
-import { paths } from '../shared/paths.js';
 
-// --- VS-01 scaffolding ---
+// The brain is the user's agent's living memory (design §8). This service
+// resolves the right adapter and reads it — read-only, never a store. There is
+// no `scaffoldBrain` anymore: the brain is whatever the agent already maintains.
 
-export interface BrainSeedAnswers {
-  role: string;
-  reviewFocus: string;
-  authorAudience: string;
-  domain: string;
-  preferences: string;
-}
+export { resolveBrainSource };
+export type { BrainSource, BrainTopic };
 
-export async function scaffoldBrain(answers: BrainSeedAnswers): Promise<void> {
-  const root = join(paths.workspaceClone(), 'brain');
-  await writeFileAtomic(join(root, 'MEMORY.md'), BRAIN_INDEX);
-  await writeFileAtomic(join(root, 'preferences.md'), brainPrefs(answers));
-  await writeFileAtomic(join(root, 'role-author.md'), brainAuthor(answers));
-  await writeFileAtomic(join(root, 'role-reviewer.md'), brainReviewer(answers));
-}
-
-const BRAIN_INDEX = `- [preferences](preferences.md) — Cross-role defaults
-- [role-author](role-author.md) — How I approach authoring
-- [role-reviewer](role-reviewer.md) — How I approach reviewing
-`;
-
-function brainPrefs(a: BrainSeedAnswers): string {
-  return `---
-name: preferences
-description: My cross-role defaults
-metadata:
-  type: brain
----
-
-I work in ${a.domain || 'general knowledge work'}.
-
-${a.preferences || 'Prefer tables over prose. Avoid jargon.'}
-`;
-}
-
-function brainAuthor(a: BrainSeedAnswers): string {
-  return `---
-name: role-author
-description: How I approach authoring
-metadata:
-  type: brain
-  applies_to_role: author
----
-
-When I author, my default audience is ${a.authorAudience || 'a small team'}.
-My role is ${a.role || 'PM/Engineer'} — I default to scoping clearly and stating assumptions.
-`;
-}
-
-function brainReviewer(a: BrainSeedAnswers): string {
-  return `---
-name: role-reviewer
-description: How I approach reviewing
-metadata:
-  type: brain
-  applies_to_role: reviewer
----
-
-When I review, I check ${a.reviewFocus || 'scope, timelines, and failure modes'} first.
-`;
-}
-
-// --- VS-08 read primitives ---
-
+/**
+ * Back-compat shape for session.ts. Agent memory has no *declared* roles, so
+ * `appliesToRole` is always undefined — roles are inferred now (design §11.4),
+ * and the CLI no longer fabricates a role-matched brain flag.
+ */
 export interface BrainFile {
   topic: string;
   description: string;
@@ -78,45 +25,41 @@ export interface BrainFile {
   path: string;
 }
 
-export async function brainRoot(): Promise<string> {
-  const root = join(paths.workspaceClone(), 'brain');
-  if (!(await pathExists(root))) {
-    throw new MiradorError('BRAIN_MISSING', 'No brain found. Run `mirador init` first.');
-  }
-  return root;
+function toFile(t: BrainTopic): BrainFile {
+  return { topic: t.name, description: t.description ?? '', body: t.body, path: t.path };
+}
+
+/** Read the brain topics from the resolved agent-native source. */
+export async function readBrain(): Promise<BrainTopic[]> {
+  const source = await resolveBrainSource();
+  return source.read();
 }
 
 export async function listBrain(): Promise<BrainFile[]> {
-  const root = await brainRoot();
-  const files = await readdir(root);
-  const out: BrainFile[] = [];
-  for (const f of files) {
-    if (!f.endsWith('.md') || f === 'MEMORY.md') continue;
-    const parsed = await loadBrain(f.replace(/\.md$/, ''));
-    out.push(parsed);
-  }
-  out.sort((a, b) => a.topic.localeCompare(b.topic));
-  return out;
+  return (await readBrain()).map(toFile);
 }
 
 export async function loadBrain(topic: string): Promise<BrainFile> {
-  const root = await brainRoot();
-  const filePath = join(root, `${topic}.md`);
-  if (!(await pathExists(filePath))) {
-    throw new MiradorError('BRAIN_TOPIC_MISSING', `No brain topic "${topic}".`);
-  }
-  const raw = await readFile(filePath, 'utf8');
-  return parseBrain(topic, raw, filePath);
+  const found = (await readBrain()).find((t) => t.name === topic);
+  if (!found) throw new MiradorError('BRAIN_TOPIC_MISSING', `No brain topic "${topic}".`);
+  return toFile(found);
 }
 
-export function parseBrain(topic: string, raw: string, path: string): BrainFile {
-  const fmMatch = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
-  if (!fmMatch) {
-    return { topic, description: '', body: raw, path };
-  }
-  const frontmatter = fmMatch[1] ?? '';
-  const body = fmMatch[2] ?? '';
-  const description = frontmatter.match(/^description:\s*(.+)$/m)?.[1]?.trim() ?? '';
-  const appliesToRole = frontmatter.match(/^\s*applies_to_role:\s*(\S+)$/m)?.[1]?.trim();
-  return { topic, description, appliesToRole, body, path };
+export interface BrainDiagnostic {
+  agent: string;
+  label: string;
+  files: Array<{ kind: string; path: string; exists: boolean }>;
+  topics: Array<{ name: string; description: string }>;
+}
+
+/** What `mirador brain` shows: the resolved source + what it would read. */
+export async function brainSummary(): Promise<BrainDiagnostic> {
+  const source = await resolveBrainSource();
+  const [files, topics] = await Promise.all([source.files(), source.read()]);
+  return {
+    agent: source.agent,
+    label: source.label,
+    files,
+    topics: topics.map((t) => ({ name: t.name, description: t.description ?? '' })),
+  };
 }

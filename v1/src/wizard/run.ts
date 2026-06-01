@@ -1,7 +1,7 @@
 import * as p from '@clack/prompts';
 import { ghAuthStatus } from '../adapters/gh-cli.js';
 import { vercelWhoami } from '../adapters/vercel.js';
-import { type BrainSeedAnswers, scaffoldBrain } from '../services/brain.js';
+import { brainSummary } from '../services/brain.js';
 import { installClaudeSkill, installCodexSkill, installSlashCommand } from '../services/skill.js';
 import { ensureUserProject } from '../services/vercel-project.js';
 import { createWorkspaceRepo, scaffoldWorkspace } from '../services/workspace.js';
@@ -49,65 +49,23 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
   const owner = (useOrg as string) || ghUser;
   const repoName = `${ghUser}-mirador`;
 
-  p.log.step('Brain bootstrap');
+  p.log.step('Brain source');
+  // No wizard, no store: your brain is your agent's living memory (design §8).
+  // Detect it and confirm — read-only, nothing is scaffolded or copied.
+  const brain = await brainSummary();
+  const foundCount = brain.files.filter((f) => f.exists).length;
   p.log.info(
-    'Your brain is private notes that shape how Claude Code reads the artifacts\n' +
-      'you open with mirador. Answer briefly — or press Enter to skip any. Edit\n' +
-      'later with `mirador brain`.',
+    `Mirador reads your brain from: ${brain.label}\n` +
+      `${foundCount} file(s) found, ${brain.topics.length} topic(s). Read-only — your brain never leaves your machine.`,
   );
-  const role = await p.text({
-    message: 'Your primary role at work?',
-    placeholder: 'e.g. Product Engineering Manager / Senior Backend / CFO',
-    defaultValue: '',
+  const okBrain = await p.confirm({
+    message: `Use ${brain.label} as your brain source?`,
+    initialValue: true,
   });
-  if (p.isCancel(role)) {
+  if (p.isCancel(okBrain)) {
     p.cancel('Aborted.');
     return;
   }
-  const reviewFocus = await p.text({
-    message: "Reviewing someone else's work — what do you check first?",
-    placeholder: 'e.g. scope creep, missing timelines, failure modes',
-    defaultValue: '',
-  });
-  if (p.isCancel(reviewFocus)) {
-    p.cancel('Aborted.');
-    return;
-  }
-  const authorAudience = await p.text({
-    message: "Authoring something — who's the audience?",
-    placeholder: 'e.g. my team, the whole company, the board, external clients',
-    defaultValue: '',
-  });
-  if (p.isCancel(authorAudience)) {
-    p.cancel('Aborted.');
-    return;
-  }
-  const domain = await p.text({
-    message: 'Domain language you work in?',
-    placeholder: 'e.g. fintech LatAm B2B; healthcare HIPAA; e-commerce checkout',
-    defaultValue: '',
-  });
-  if (p.isCancel(domain)) {
-    p.cancel('Aborted.');
-    return;
-  }
-  const preferences = await p.text({
-    message: 'Preferences that shape how you like to work?',
-    placeholder: 'e.g. tables not prose; avoid jargon; flag missing dates',
-    defaultValue: '',
-  });
-  if (p.isCancel(preferences)) {
-    p.cancel('Aborted.');
-    return;
-  }
-
-  const brainAnswers: BrainSeedAnswers = {
-    role: String(role),
-    reviewFocus: String(reviewFocus),
-    authorAudience: String(authorAudience),
-    domain: String(domain),
-    preferences: String(preferences),
-  };
 
   const spin = p.spinner();
   spin.start('Creating workspace repo on GitHub.');
@@ -116,7 +74,6 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
 
   spin.start('Scaffolding workspace.');
   await scaffoldWorkspace();
-  await scaffoldBrain(brainAnswers);
   spin.stop('Workspace ready.');
 
   spin.start('Ensuring Vercel project.');
