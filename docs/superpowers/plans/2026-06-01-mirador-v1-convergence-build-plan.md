@@ -104,13 +104,13 @@ CV-01 (brain = agent memory) ───────┴─────────
 - **Changes:** `services/staticPreview.ts` (stop wrapping arbitrary HTML; call `document.render(doc, theme)`), `services/artifact.ts` (artifact source = markdown++), `services/changeLog.ts` (delegate to `document.diff` for structured diffs), `commands/new.ts` (scaffold markdown++ + vision frontmatter placeholder).
 - **Reuses:** `v1/site-assets/themes/*` as renderers.
 
-**Acceptance criteria:**
-- [ ] `document.parse` → `render` round-trips a markdown++ doc into themed HTML identical in look to today's themes (golden test per theme).
-- [ ] Stable section anchors: editing §B never changes §A's anchor; diff of "edit §B" reports only §B.
-- [ ] `merge(base, ours, theirs)` is clean when edits touch different sections; returns `Conflict[]` (not a throw) when they touch the same section.
-- [ ] Fenced `chart`/`table`/`callout` parse to typed nodes and render under the `atlas`/`page` themes.
-- [ ] Raw-HTML escape-hatch path still publishes (broadcast-only, no diff/merge).
-- [ ] Unit tests for parse/render/diff/merge; integration test for `new → preview`.
+**Acceptance criteria:** ✅ **all met (2026-06-01)** — sub-plan: [`2026-06-01-mirador-v1-cv-00-document-seam.md`](./2026-06-01-mirador-v1-cv-00-document-seam.md)
+- [x] `document.parse` → `render` round-trips a markdown++ doc into themed HTML identical in look to today's themes (golden test per theme).
+- [x] Stable section anchors: editing §B never changes §A's anchor; diff of "edit §B" reports only §B.
+- [x] `merge(base, ours, theirs)` is clean when edits touch different sections; returns `Conflict[]` (not a throw) when they touch the same section.
+- [x] Fenced `chart`/`table`/`callout` parse to typed nodes and render under the `atlas`/`page` themes.
+- [x] Raw-HTML escape-hatch path still publishes (broadcast-only, no diff/merge).
+- [x] Unit tests for parse/render/diff/merge; integration test for `new → preview`.
 
 **Deps:** none (foundational). **Suggested model:** Claude (interface design + diff/merge semantics are subtle).
 

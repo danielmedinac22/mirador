@@ -3,7 +3,7 @@
 **Slice:** CV-00 · **Branch:** `feat/v1-cv-00-document-seam`
 **Parent plan:** [`2026-06-01-mirador-v1-convergence-build-plan.md`](./2026-06-01-mirador-v1-convergence-build-plan.md)
 **Design:** [`../specs/2026-06-01-mirador-v1-convergence-design.md`](../specs/2026-06-01-mirador-v1-convergence-design.md) §7 · **SAD:** [`../specs/2026-05-21-mirador-v1-sad.md`](../specs/2026-05-21-mirador-v1-sad.md) §2
-**Status:** In progress (started 2026-06-01)
+**Status:** ✅ Complete (2026-06-01) — 94 tests pass · lint + tsc clean · bundle builds · CLI smoke-tested (`new`/`preview`/`diff`). All acceptance criteria met (see §4).
 
 ---
 
