@@ -91,6 +91,49 @@ That's the loop: refine through your own AI, every change carries its intent, ea
 
 ---
 
+## The multi-agent flow
+
+You don't actually type those commands. **You talk to your agent** — Claude Code, Codex, or Gemini — and a thin per-agent **shim** turns the conversation into `mirador` calls. The CLI is a deterministic engine (no model inside it); each agent brings the lens and the hands. Same artifact, same protocol, whichever agent each collaborator brings.
+
+```
+                  one artifact · markdown++ in git
+           vision: "board-ready Q3, anchored on NRR"
+      ┌─────────────────────┼─────────────────────┐
+  Claude Code             Codex                 Gemini
+   (Daniel)              (María)               (Sofía)
+   SKILL.md             AGENTS.md             GEMINI.md     ← thin shims · one contract
+      └─────────────────────┼─────────────────────┘
+                    mirador CLI · one engine
+         parse · render · diff · merge · handoff · status
+```
+
+What it feels like — nobody types a command:
+
+> **María → Codex:** *"Daniel shared q3-strategy. Get me in."*
+> *Codex, silently:* installs `mirador-cli`, clones the repo, runs `mirador open`, reads **María's** memory.
+> **Codex → María:** *"You're in. He's anchoring the Q3 board narrative on NRR, and §Retention is hand-wavy — that's your area. Tighten it?"*
+> **María → Codex:** *"Yes. Q2 NRR was 112%; cite the board deck."*
+> *Codex, silently:* edits §Retention, then `mirador push --intent "Backed the retention claim with the Q2 NRR figure (112%)." --move tighten`.
+
+Daniel, on a different agent, pulls:
+
+> **Daniel → Claude Code:** *"Anything new on q3-strategy?"*
+> *Claude, silently:* `mirador open`, reads **Daniel's** memory.
+> **Claude → Daniel:** *"María backed the NRR claim with the Q2 figure — it de-risks the board number and moves us toward the vision. §3 still has one open challenge. Next: lock §Retention · check §Timeline still matches the date."*
+
+Same change, two agents, two brains — and **the briefs differ because the brains differ, not because the agents do.** What crosses between them is plain text: git commits, intent notes (`.mirador/intents/<sha>.md`), and paste-able `@mirador-*` seeds. No agent ever talks to another agent; they converge through git.
+
+| Agent | Reads as your brain | Shim it installs |
+|---|---|---|
+| Claude Code | auto-memory + project `CLAUDE.md` | `~/.claude/skills/mirador/SKILL.md` |
+| Codex | `AGENTS.md` | `~/.codex/skills/mirador/AGENTS.md` |
+| Gemini | `GEMINI.md` | `~/.gemini/skills/mirador/GEMINI.md` |
+| anything else | `AGENTS.md` / `CLAUDE.md` convention | manual mode |
+
+**No supported agent? The CLI is the floor.** `mirador handoff` prints the same packet and `mirador push --intent` records the same note — the whole loop by copy-paste.
+
+---
+
 ## Why it's built this way
 
 - **Brain = your agent's living memory.** No wizard, no separate store. Mirador reads what your agent already maintains (Claude memory, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`). It's strictly private — **it never enters git or a handoff packet**, only its *effects* (your refinements, your intent notes) are shared.
