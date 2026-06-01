@@ -60,7 +60,7 @@ export async function installSiteChrome(siteRoot: string): Promise<void> {
  *
  * Env var MIRADOR_SITE_ASSETS_OVERRIDE wins (used by tests).
  */
-function resolveSiteAssetsRoot(): string {
+export function resolveSiteAssetsRoot(): string {
   if (process.env.MIRADOR_SITE_ASSETS_OVERRIDE) return process.env.MIRADOR_SITE_ASSETS_OVERRIDE;
 
   const here = dirname(fileURLToPath(import.meta.url));

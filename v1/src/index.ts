@@ -19,6 +19,7 @@ import { registerShare } from './commands/share.js';
 import { registerStatus } from './commands/status.js';
 import { registerUpgrade } from './commands/upgrade.js';
 import { registerVision } from './commands/vision.js';
+import { registerWatch } from './commands/watch.js';
 import { computeInbox, renderInbox } from './services/inbox.js';
 import { VERSION } from './version.js';
 
@@ -39,6 +40,7 @@ registerPush(program);
 registerHandoff(program);
 registerVision(program);
 registerStatus(program);
+registerWatch(program);
 registerBrain(program);
 registerShare(program);
 registerRequest(program);

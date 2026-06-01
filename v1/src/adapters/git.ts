@@ -49,6 +49,16 @@ export async function hasUncommittedChanges(dir: string): Promise<boolean> {
   return stdout.trim().length > 0;
 }
 
+/** Best-effort `git fetch` (swallows failure — e.g. no remote / offline). */
+export async function fetchRemote(dir: string): Promise<boolean> {
+  try {
+    await execa('git', ['fetch', '--quiet'], { cwd: dir });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** True if the repo has at least one configured remote. */
 export async function hasRemote(dir: string): Promise<boolean> {
   try {
