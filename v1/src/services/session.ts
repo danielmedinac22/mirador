@@ -1,10 +1,15 @@
+import { join } from 'node:path';
 import { writeSessionSkill } from '../adapters/claudeCode.js';
+import { pathExists } from '../adapters/fs.js';
+import { repoRoot } from '../adapters/git.js';
 import { readConfig } from '../shared/config.js';
 import { readLastSeen, updateLastSeen } from '../shared/lastSeen.js';
 import { resolveArtifactPath } from './artifact.js';
 import { listBrain, loadBrain } from './brain.js';
 import { type FileChange, changesSince } from './changeLog.js';
+import { assembleHandoff, renderHandoff } from './handoff.js';
 import { effectiveRole, readManifest } from './role.js';
+import { SOURCE_FILE } from './staticPreview.js';
 
 export interface SessionResult {
   brief: string;
@@ -14,18 +19,45 @@ export interface SessionResult {
 
 export async function openSession(slug: string): Promise<SessionResult> {
   const artifactPath = await resolveArtifactPath(slug);
-  const lastSeen = await readLastSeen();
-  const entry = lastSeen[slug];
 
-  const changes = await changesSince(artifactPath, entry?.last_open_at ?? null);
-
-  // VS-09: role inference from manifest
+  // Role inference from manifest (unchanged across both paths).
   const config = await readConfig();
   const viewer = config?.github.handle ?? '';
   const role = await effectiveRole(artifactPath, viewer);
+
+  // Convergence path: a git-tracked markdown++ artifact surfaces the handoff
+  // packet (the agent reframes it through its own brain). Otherwise fall back to
+  // the legacy file-mtime brief (non-git workspaces, raw-HTML artifacts).
+  const root = await repoRoot(artifactPath);
+  const hasSource = await pathExists(join(artifactPath, SOURCE_FILE));
+
+  let brief: string;
+  if (root && hasSource) {
+    const packet = await assembleHandoff(slug);
+    brief = renderHandoff(packet);
+    await updateLastSeen(slug, {
+      last_open_at: new Date().toISOString(),
+      last_open_commit: packet.head ?? undefined,
+    });
+  } else {
+    brief = await legacyBrief(slug, artifactPath, role);
+    await updateLastSeen(slug, { last_open_at: new Date().toISOString() });
+  }
+
+  const sessionSkillPath = await writeSessionSkill({ slug, artifactPath, expectedRole: role });
+  return { brief, sessionSkillPath, role };
+}
+
+async function legacyBrief(
+  slug: string,
+  artifactPath: string,
+  role: string | undefined,
+): Promise<string> {
+  const lastSeen = await readLastSeen();
+  const entry = lastSeen[slug];
+  const changes = await changesSince(artifactPath, entry?.last_open_at ?? null);
   const manifest = await readManifest(artifactPath);
 
-  // Brain flag: if we have a role + matching brain section, pull one-line "instinct"
   let brainFlag: string | undefined;
   if (role) {
     try {
@@ -40,21 +72,11 @@ export async function openSession(slug: string): Promise<SessionResult> {
     }
   }
 
-  const brief = renderBrief(slug, artifactPath, entry?.last_open_at ?? null, changes, {
+  return renderBrief(slug, artifactPath, entry?.last_open_at ?? null, changes, {
     role,
     sharedWith: manifest?.shared_with,
     brainFlag,
   });
-
-  const sessionSkillPath = await writeSessionSkill({
-    slug,
-    artifactPath,
-    expectedRole: role,
-  });
-
-  await updateLastSeen(slug, { last_open_at: new Date().toISOString() });
-
-  return { brief, sessionSkillPath, role };
 }
 
 interface BriefContext {

@@ -1,52 +1,61 @@
-import { mkdtemp, readdir, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { ensureDir, writeFileAtomic } from '../adapters/fs.js';
-import { brainRoot, listBrain, loadBrain } from './brain.js';
+import { ensureDir } from '../adapters/fs.js';
+import { paths } from '../shared/paths.js';
+import { brainSummary, listBrain, loadBrain, readBrain } from './brain.js';
 
-describe('services/brain — privacy boundary (structural)', () => {
+/**
+ * Privacy boundary (design §3.1 / §8.2): the brain is read from the agent's own
+ * memory and NEVER copied into a shared repo or a handoff packet. CV-01 made the
+ * brain read-only by construction — these assertions guard that structurally.
+ */
+describe('services/brain — privacy boundary (agent-native)', () => {
   let tmp: string;
-  const original = process.env.MIRADOR_HOME_OVERRIDE;
+  let project: string;
+  const saved: Record<string, string | undefined> = {};
+  const KEYS = ['MIRADOR_HOME_OVERRIDE', 'MIRADOR_PROJECT_OVERRIDE', 'MIRADOR_AGENT'] as const;
 
   beforeEach(async () => {
+    for (const k of KEYS) saved[k] = process.env[k];
     tmp = await mkdtemp(join(tmpdir(), 'mirador-brainpriv-'));
+    project = join(tmp, 'project');
+    await mkdir(project, { recursive: true });
+    // Brain content lives in the project (agent memory), with "secret content".
+    await writeFile(join(project, 'AGENTS.md'), '---\ndescription: t\n---\nsecret content');
     process.env.MIRADOR_HOME_OVERRIDE = tmp;
-    const brainDir = join(tmp, 'workspace', 'brain');
-    await ensureDir(brainDir);
-    await writeFileAtomic(
-      join(brainDir, 'preferences.md'),
-      '---\nname: preferences\ndescription: t\nmetadata:\n  type: brain\n---\nsecret content',
-    );
-    // Simulate a shared-clones dir to verify nothing gets written there
+    process.env.MIRADOR_PROJECT_OVERRIDE = project;
+    process.env.MIRADOR_AGENT = 'generic';
+    // A shared-clones dir to prove nothing is written there.
     await ensureDir(join(tmp, 'shared', 'fake-artifact'));
   });
 
   afterEach(async () => {
     await rm(tmp, { recursive: true, force: true });
-    process.env.MIRADOR_HOME_OVERRIDE = original;
-  });
-
-  it('listBrain only touches files under workspace/brain/', async () => {
-    const root = await brainRoot();
-    const entries = await listBrain();
-    for (const entry of entries) {
-      expect(entry.path.startsWith(root)).toBe(true);
+    for (const k of KEYS) {
+      if (saved[k] === undefined) delete process.env[k];
+      else process.env[k] = saved[k];
     }
   });
 
-  it('loadBrain output never references a shared-repo path', async () => {
-    const file = await loadBrain('preferences');
-    expect(file.path).not.toContain(`${tmp}/shared/`);
-    expect(file.path).toContain(`${tmp}/workspace/brain/`);
+  it('every brain path read sits under the project, never under shared/', async () => {
+    const shared = paths.sharedClonesRoot();
+    for (const topic of await readBrain()) {
+      expect(topic.path.startsWith(project)).toBe(true);
+      expect(topic.path.startsWith(shared)).toBe(false);
+    }
+    const d = await brainSummary();
+    for (const f of d.files) {
+      expect(f.path.startsWith(shared)).toBe(false);
+    }
   });
 
-  it('shared/ remains empty after brain operations', async () => {
+  it('shared/ is untouched after brain reads (no write path exists)', async () => {
     await listBrain();
-    await loadBrain('preferences');
-    const sharedSubs = await readdir(join(tmp, 'shared'));
-    const fakeArtifactContents = await readdir(join(tmp, 'shared', 'fake-artifact'));
-    expect(sharedSubs).toEqual(['fake-artifact']); // pre-existing dir untouched
-    expect(fakeArtifactContents).toEqual([]); // nothing was written inside
+    await loadBrain('agents');
+    await brainSummary();
+    expect(await readdir(join(tmp, 'shared'))).toEqual(['fake-artifact']);
+    expect(await readdir(join(tmp, 'shared', 'fake-artifact'))).toEqual([]);
   });
 });

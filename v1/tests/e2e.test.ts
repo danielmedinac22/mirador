@@ -4,7 +4,6 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ensureDir, writeFileAtomic } from '../src/adapters/fs.js';
 import { createArtifact } from '../src/services/artifact.js';
-import { scaffoldBrain } from '../src/services/brain.js';
 import { computeInbox, renderInbox } from '../src/services/inbox.js';
 import { parseSeed } from '../src/services/promptSeed.js';
 import { acceptRequest, createRequest } from '../src/services/request.js';
@@ -35,6 +34,9 @@ describe('Mirador v1 — end-to-end', () => {
     process.env.MIRADOR_HOME_OVERRIDE = tmp;
     process.env.CLAUDE_HOME_OVERRIDE = join(tmp, 'claude');
     process.env.CODEX_HOME_OVERRIDE = join(tmp, 'codex');
+    // Pin brain resolution to an empty generic source (machine-independent).
+    process.env.MIRADOR_AGENT = 'generic';
+    process.env.MIRADOR_PROJECT_OVERRIDE = join(tmp, 'project');
 
     // 1. Stand up a workspace as if `init` had run.
     const workspace = join(tmp, 'workspace');
@@ -57,14 +59,8 @@ describe('Mirador v1 — end-to-end', () => {
       docs: [],
     });
 
-    // 2. Seed a brain (the role-reviewer section is what drives the brain flag later).
-    await scaffoldBrain({
-      role: 'Product Engineering Manager',
-      reviewFocus: 'scope and timelines first',
-      authorAudience: 'the board',
-      domain: 'fintech LatAm',
-      preferences: 'tables not prose',
-    });
+    // 2. Brain is the agent's living memory now (no store to seed). Pinned to an
+    //    empty generic source above, so the brief carries no fabricated brain flag.
   });
 
   afterAll(async () => {
@@ -72,6 +68,8 @@ describe('Mirador v1 — end-to-end', () => {
     delete process.env.MIRADOR_HOME_OVERRIDE;
     delete process.env.CLAUDE_HOME_OVERRIDE;
     delete process.env.CODEX_HOME_OVERRIDE;
+    delete process.env.MIRADOR_AGENT;
+    delete process.env.MIRADOR_PROJECT_OVERRIDE;
   });
 
   it('runs the full demo flow', async () => {
@@ -116,7 +114,6 @@ describe('Mirador v1 — end-to-end', () => {
     const sharedOpen = await openSession('q2-draft');
     expect(sharedOpen.role).toBe('author');
     expect(sharedOpen.brief).toContain('role: author');
-    expect(sharedOpen.brief).toMatch(/Brain flag/i);
 
     // 6b. Now simulate a collaborator perspective by rewriting the manifest's
     //     owner to a different handle, so our config.handle === 'danielm' is
@@ -130,14 +127,13 @@ describe('Mirador v1 — end-to-end', () => {
     const collabOpen = await openSession('q2-draft');
     expect(collabOpen.role).toBe('reviewer');
     expect(collabOpen.brief).toContain('role: reviewer');
-    expect(collabOpen.brief).toMatch(/Brain flag.*scope/i);
 
     // 6c. Verify extraction happened.
     const wsArtifact = join(tmp, 'workspace', 'artifacts', 'q2-draft');
     const wsContents = await readdir(wsArtifact);
     expect(wsContents).toEqual(['.mirador-link']);
     const cloneContents = await readdir(join(tmp, 'shared', 'q2-draft'));
-    expect(cloneContents).toContain('CONTEXT.md');
+    expect(cloneContents).toContain('source.md');
     expect(cloneContents).toContain('notes.md');
     expect(cloneContents).toContain('.mirador');
 
@@ -159,8 +155,8 @@ describe('Mirador v1 — end-to-end', () => {
       const accept = await acceptRequest(reqSeed);
       expect(accept.responseSeed).toContain('@mirador-response');
       expect(accept.responseSeed).toContain('Status: accepted');
-      // Artifact created
-      const ctx = await readFile(join(accept.artifactPath, 'CONTEXT.md'), 'utf8');
+      // Artifact created — the request context lands in the markdown++ source
+      const ctx = await readFile(join(accept.artifactPath, 'source.md'), 'utf8');
       expect(ctx).toContain('Requested by');
     }
 

@@ -1,0 +1,373 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`markdown++ · render + golden per theme (T4) > renders the canonical doc under "atlas" (golden) 1`] = `
+"<!doctype html>
+<html lang="en" data-mirador-theme="atlas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mirador · preview</title>
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: light)" href="/assets/aperture-favicon.svg">
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: dark)" href="/assets/aperture-favicon-dark.svg">
+<link rel="stylesheet" href="/themes/atlas/theme.css">
+<style>
+.mirador-content .callout{border-left:3px solid var(--page-accent,#2541B2);background:rgba(37,65,178,.05);padding:.75rem 1rem;margin:1.5rem 0;border-radius:0 6px 6px 0}
+.mirador-content .callout-warn{border-left-color:#b45309;background:rgba(180,83,9,.07)}
+.mirador-content .callout-quote{font-style:italic}
+.mirador-content .callout>:first-child{margin-top:0}
+.mirador-content .callout>:last-child{margin-bottom:0}
+.mirador-content .chart{display:flex;flex-direction:column;gap:.45rem;margin:1.5rem 0}
+.mirador-content .chart-row{display:grid;grid-template-columns:minmax(5rem,9rem) 1fr auto;align-items:center;gap:.75rem;font-size:.9rem}
+.mirador-content .chart-label{color:var(--page-fg-muted,#666);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mirador-content .chart-track{background:rgba(37,65,178,.1);border-radius:4px;overflow:hidden}
+.mirador-content .chart-bar{display:block;height:1.2rem;background:var(--page-accent,#2541B2);width:var(--v,0%);min-width:2px;border-radius:4px}
+.mirador-content .chart-val{font-variant-numeric:tabular-nums;color:var(--page-fg-muted,#666);font-size:.85rem}
+</style>
+
+</head>
+<body>
+<div class="mirador-content">
+<section>
+<p>This is the lead paragraph before any heading.</p>
+</section>
+<section id="overview">
+<h1 id="overview">Q3 Strategy</h1>
+<p>Intro under overview.</p>
+</section>
+<section id="summary">
+<h2 id="summary">Summary</h2>
+<p>A short summary with <strong>bold</strong> and a <a href="https://example.com">link</a>.</p>
+<ul>
+<li>one</li>
+<li>two</li>
+</ul>
+</section>
+<section id="risks">
+<h2 id="risks">Risks</h2>
+<aside class="callout callout-warn">
+<p>Watch the <strong>churn</strong> trend.</p>
+</aside>
+<table class="data-table"><thead><tr><th>Quarter</th><th>NRR</th></tr></thead><tbody><tr><td>Q1</td><td>108%</td></tr><tr><td>Q2</td><td>112%</td></tr></tbody></table>
+<figure class="chart"><div class="chart-title">NRR by quarter</div><div class="chart-row"><span class="chart-label">Q1</span><span class="chart-track"><span class="chart-bar" style="--v:96%"></span></span><span class="chart-val">108</span></div><div class="chart-row"><span class="chart-label">Q2</span><span class="chart-track"><span class="chart-bar" style="--v:100%"></span></span><span class="chart-val">112</span></div></figure>
+</section>
+<section id="appendix">
+<h2 id="appendix">Appendix</h2>
+<pre><code class="language-md"># Not A Heading
+still appendix
+</code></pre>
+</section>
+</div>
+</body>
+</html>
+"
+`;
+
+exports[`markdown++ · render + golden per theme (T4) > renders the canonical doc under "console" (golden) 1`] = `
+"<!doctype html>
+<html lang="en" data-mirador-theme="console">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mirador · preview</title>
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: light)" href="/assets/aperture-favicon.svg">
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: dark)" href="/assets/aperture-favicon-dark.svg">
+<link rel="stylesheet" href="/themes/console/theme.css">
+<style>
+.mirador-content .callout{border-left:3px solid var(--page-accent,#2541B2);background:rgba(37,65,178,.05);padding:.75rem 1rem;margin:1.5rem 0;border-radius:0 6px 6px 0}
+.mirador-content .callout-warn{border-left-color:#b45309;background:rgba(180,83,9,.07)}
+.mirador-content .callout-quote{font-style:italic}
+.mirador-content .callout>:first-child{margin-top:0}
+.mirador-content .callout>:last-child{margin-bottom:0}
+.mirador-content .chart{display:flex;flex-direction:column;gap:.45rem;margin:1.5rem 0}
+.mirador-content .chart-row{display:grid;grid-template-columns:minmax(5rem,9rem) 1fr auto;align-items:center;gap:.75rem;font-size:.9rem}
+.mirador-content .chart-label{color:var(--page-fg-muted,#666);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mirador-content .chart-track{background:rgba(37,65,178,.1);border-radius:4px;overflow:hidden}
+.mirador-content .chart-bar{display:block;height:1.2rem;background:var(--page-accent,#2541B2);width:var(--v,0%);min-width:2px;border-radius:4px}
+.mirador-content .chart-val{font-variant-numeric:tabular-nums;color:var(--page-fg-muted,#666);font-size:.85rem}
+</style>
+
+</head>
+<body>
+<div class="mirador-content">
+<section>
+<p>This is the lead paragraph before any heading.</p>
+</section>
+<section id="overview">
+<h1 id="overview">Q3 Strategy</h1>
+<p>Intro under overview.</p>
+</section>
+<section id="summary">
+<h2 id="summary">Summary</h2>
+<p>A short summary with <strong>bold</strong> and a <a href="https://example.com">link</a>.</p>
+<ul>
+<li>one</li>
+<li>two</li>
+</ul>
+</section>
+<section id="risks">
+<h2 id="risks">Risks</h2>
+<aside class="callout callout-warn">
+<p>Watch the <strong>churn</strong> trend.</p>
+</aside>
+<table class="data-table"><thead><tr><th>Quarter</th><th>NRR</th></tr></thead><tbody><tr><td>Q1</td><td>108%</td></tr><tr><td>Q2</td><td>112%</td></tr></tbody></table>
+<figure class="chart"><div class="chart-title">NRR by quarter</div><div class="chart-row"><span class="chart-label">Q1</span><span class="chart-track"><span class="chart-bar" style="--v:96%"></span></span><span class="chart-val">108</span></div><div class="chart-row"><span class="chart-label">Q2</span><span class="chart-track"><span class="chart-bar" style="--v:100%"></span></span><span class="chart-val">112</span></div></figure>
+</section>
+<section id="appendix">
+<h2 id="appendix">Appendix</h2>
+<pre><code class="language-md"># Not A Heading
+still appendix
+</code></pre>
+</section>
+</div>
+</body>
+</html>
+"
+`;
+
+exports[`markdown++ · render + golden per theme (T4) > renders the canonical doc under "deck" (golden) 1`] = `
+"<!doctype html>
+<html lang="en" data-mirador-theme="deck">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mirador · preview</title>
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: light)" href="/assets/aperture-favicon.svg">
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: dark)" href="/assets/aperture-favicon-dark.svg">
+<link rel="stylesheet" href="/themes/deck/theme.css">
+<style>
+.mirador-content .callout{border-left:3px solid var(--page-accent,#2541B2);background:rgba(37,65,178,.05);padding:.75rem 1rem;margin:1.5rem 0;border-radius:0 6px 6px 0}
+.mirador-content .callout-warn{border-left-color:#b45309;background:rgba(180,83,9,.07)}
+.mirador-content .callout-quote{font-style:italic}
+.mirador-content .callout>:first-child{margin-top:0}
+.mirador-content .callout>:last-child{margin-bottom:0}
+.mirador-content .chart{display:flex;flex-direction:column;gap:.45rem;margin:1.5rem 0}
+.mirador-content .chart-row{display:grid;grid-template-columns:minmax(5rem,9rem) 1fr auto;align-items:center;gap:.75rem;font-size:.9rem}
+.mirador-content .chart-label{color:var(--page-fg-muted,#666);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mirador-content .chart-track{background:rgba(37,65,178,.1);border-radius:4px;overflow:hidden}
+.mirador-content .chart-bar{display:block;height:1.2rem;background:var(--page-accent,#2541B2);width:var(--v,0%);min-width:2px;border-radius:4px}
+.mirador-content .chart-val{font-variant-numeric:tabular-nums;color:var(--page-fg-muted,#666);font-size:.85rem}
+</style>
+<script src="/themes/deck/deck.js" defer></script>
+</head>
+<body>
+<div class="mirador-content">
+<section>
+<p>This is the lead paragraph before any heading.</p>
+</section>
+<section id="overview">
+<h1 id="overview">Q3 Strategy</h1>
+<p>Intro under overview.</p>
+</section>
+<section id="summary">
+<h2 id="summary">Summary</h2>
+<p>A short summary with <strong>bold</strong> and a <a href="https://example.com">link</a>.</p>
+<ul>
+<li>one</li>
+<li>two</li>
+</ul>
+</section>
+<section id="risks">
+<h2 id="risks">Risks</h2>
+<aside class="callout callout-warn">
+<p>Watch the <strong>churn</strong> trend.</p>
+</aside>
+<table class="data-table"><thead><tr><th>Quarter</th><th>NRR</th></tr></thead><tbody><tr><td>Q1</td><td>108%</td></tr><tr><td>Q2</td><td>112%</td></tr></tbody></table>
+<figure class="chart"><div class="chart-title">NRR by quarter</div><div class="chart-row"><span class="chart-label">Q1</span><span class="chart-track"><span class="chart-bar" style="--v:96%"></span></span><span class="chart-val">108</span></div><div class="chart-row"><span class="chart-label">Q2</span><span class="chart-track"><span class="chart-bar" style="--v:100%"></span></span><span class="chart-val">112</span></div></figure>
+</section>
+<section id="appendix">
+<h2 id="appendix">Appendix</h2>
+<pre><code class="language-md"># Not A Heading
+still appendix
+</code></pre>
+</section>
+</div>
+</body>
+</html>
+"
+`;
+
+exports[`markdown++ · render + golden per theme (T4) > renders the canonical doc under "memo" (golden) 1`] = `
+"<!doctype html>
+<html lang="en" data-mirador-theme="memo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mirador · preview</title>
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: light)" href="/assets/aperture-favicon.svg">
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: dark)" href="/assets/aperture-favicon-dark.svg">
+<link rel="stylesheet" href="/themes/memo/theme.css">
+<style>
+.mirador-content .callout{border-left:3px solid var(--page-accent,#2541B2);background:rgba(37,65,178,.05);padding:.75rem 1rem;margin:1.5rem 0;border-radius:0 6px 6px 0}
+.mirador-content .callout-warn{border-left-color:#b45309;background:rgba(180,83,9,.07)}
+.mirador-content .callout-quote{font-style:italic}
+.mirador-content .callout>:first-child{margin-top:0}
+.mirador-content .callout>:last-child{margin-bottom:0}
+.mirador-content .chart{display:flex;flex-direction:column;gap:.45rem;margin:1.5rem 0}
+.mirador-content .chart-row{display:grid;grid-template-columns:minmax(5rem,9rem) 1fr auto;align-items:center;gap:.75rem;font-size:.9rem}
+.mirador-content .chart-label{color:var(--page-fg-muted,#666);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mirador-content .chart-track{background:rgba(37,65,178,.1);border-radius:4px;overflow:hidden}
+.mirador-content .chart-bar{display:block;height:1.2rem;background:var(--page-accent,#2541B2);width:var(--v,0%);min-width:2px;border-radius:4px}
+.mirador-content .chart-val{font-variant-numeric:tabular-nums;color:var(--page-fg-muted,#666);font-size:.85rem}
+</style>
+
+</head>
+<body>
+<div class="mirador-content">
+<section>
+<p>This is the lead paragraph before any heading.</p>
+</section>
+<section id="overview">
+<h1 id="overview">Q3 Strategy</h1>
+<p>Intro under overview.</p>
+</section>
+<section id="summary">
+<h2 id="summary">Summary</h2>
+<p>A short summary with <strong>bold</strong> and a <a href="https://example.com">link</a>.</p>
+<ul>
+<li>one</li>
+<li>two</li>
+</ul>
+</section>
+<section id="risks">
+<h2 id="risks">Risks</h2>
+<aside class="callout callout-warn">
+<p>Watch the <strong>churn</strong> trend.</p>
+</aside>
+<table class="data-table"><thead><tr><th>Quarter</th><th>NRR</th></tr></thead><tbody><tr><td>Q1</td><td>108%</td></tr><tr><td>Q2</td><td>112%</td></tr></tbody></table>
+<figure class="chart"><div class="chart-title">NRR by quarter</div><div class="chart-row"><span class="chart-label">Q1</span><span class="chart-track"><span class="chart-bar" style="--v:96%"></span></span><span class="chart-val">108</span></div><div class="chart-row"><span class="chart-label">Q2</span><span class="chart-track"><span class="chart-bar" style="--v:100%"></span></span><span class="chart-val">112</span></div></figure>
+</section>
+<section id="appendix">
+<h2 id="appendix">Appendix</h2>
+<pre><code class="language-md"># Not A Heading
+still appendix
+</code></pre>
+</section>
+</div>
+</body>
+</html>
+"
+`;
+
+exports[`markdown++ · render + golden per theme (T4) > renders the canonical doc under "none" (golden) 1`] = `
+"<!doctype html>
+<html lang="en" data-mirador-theme="none">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mirador · preview</title>
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: light)" href="/assets/aperture-favicon.svg">
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: dark)" href="/assets/aperture-favicon-dark.svg">
+
+<style>
+.mirador-content .callout{border-left:3px solid var(--page-accent,#2541B2);background:rgba(37,65,178,.05);padding:.75rem 1rem;margin:1.5rem 0;border-radius:0 6px 6px 0}
+.mirador-content .callout-warn{border-left-color:#b45309;background:rgba(180,83,9,.07)}
+.mirador-content .callout-quote{font-style:italic}
+.mirador-content .callout>:first-child{margin-top:0}
+.mirador-content .callout>:last-child{margin-bottom:0}
+.mirador-content .chart{display:flex;flex-direction:column;gap:.45rem;margin:1.5rem 0}
+.mirador-content .chart-row{display:grid;grid-template-columns:minmax(5rem,9rem) 1fr auto;align-items:center;gap:.75rem;font-size:.9rem}
+.mirador-content .chart-label{color:var(--page-fg-muted,#666);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mirador-content .chart-track{background:rgba(37,65,178,.1);border-radius:4px;overflow:hidden}
+.mirador-content .chart-bar{display:block;height:1.2rem;background:var(--page-accent,#2541B2);width:var(--v,0%);min-width:2px;border-radius:4px}
+.mirador-content .chart-val{font-variant-numeric:tabular-nums;color:var(--page-fg-muted,#666);font-size:.85rem}
+</style>
+
+</head>
+<body>
+<div class="mirador-content">
+<section>
+<p>This is the lead paragraph before any heading.</p>
+</section>
+<section id="overview">
+<h1 id="overview">Q3 Strategy</h1>
+<p>Intro under overview.</p>
+</section>
+<section id="summary">
+<h2 id="summary">Summary</h2>
+<p>A short summary with <strong>bold</strong> and a <a href="https://example.com">link</a>.</p>
+<ul>
+<li>one</li>
+<li>two</li>
+</ul>
+</section>
+<section id="risks">
+<h2 id="risks">Risks</h2>
+<aside class="callout callout-warn">
+<p>Watch the <strong>churn</strong> trend.</p>
+</aside>
+<table class="data-table"><thead><tr><th>Quarter</th><th>NRR</th></tr></thead><tbody><tr><td>Q1</td><td>108%</td></tr><tr><td>Q2</td><td>112%</td></tr></tbody></table>
+<figure class="chart"><div class="chart-title">NRR by quarter</div><div class="chart-row"><span class="chart-label">Q1</span><span class="chart-track"><span class="chart-bar" style="--v:96%"></span></span><span class="chart-val">108</span></div><div class="chart-row"><span class="chart-label">Q2</span><span class="chart-track"><span class="chart-bar" style="--v:100%"></span></span><span class="chart-val">112</span></div></figure>
+</section>
+<section id="appendix">
+<h2 id="appendix">Appendix</h2>
+<pre><code class="language-md"># Not A Heading
+still appendix
+</code></pre>
+</section>
+</div>
+</body>
+</html>
+"
+`;
+
+exports[`markdown++ · render + golden per theme (T4) > renders the canonical doc under "page" (golden) 1`] = `
+"<!doctype html>
+<html lang="en" data-mirador-theme="page">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mirador · preview</title>
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: light)" href="/assets/aperture-favicon.svg">
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: dark)" href="/assets/aperture-favicon-dark.svg">
+<link rel="stylesheet" href="/themes/page/theme.css">
+<style>
+.mirador-content .callout{border-left:3px solid var(--page-accent,#2541B2);background:rgba(37,65,178,.05);padding:.75rem 1rem;margin:1.5rem 0;border-radius:0 6px 6px 0}
+.mirador-content .callout-warn{border-left-color:#b45309;background:rgba(180,83,9,.07)}
+.mirador-content .callout-quote{font-style:italic}
+.mirador-content .callout>:first-child{margin-top:0}
+.mirador-content .callout>:last-child{margin-bottom:0}
+.mirador-content .chart{display:flex;flex-direction:column;gap:.45rem;margin:1.5rem 0}
+.mirador-content .chart-row{display:grid;grid-template-columns:minmax(5rem,9rem) 1fr auto;align-items:center;gap:.75rem;font-size:.9rem}
+.mirador-content .chart-label{color:var(--page-fg-muted,#666);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mirador-content .chart-track{background:rgba(37,65,178,.1);border-radius:4px;overflow:hidden}
+.mirador-content .chart-bar{display:block;height:1.2rem;background:var(--page-accent,#2541B2);width:var(--v,0%);min-width:2px;border-radius:4px}
+.mirador-content .chart-val{font-variant-numeric:tabular-nums;color:var(--page-fg-muted,#666);font-size:.85rem}
+</style>
+
+</head>
+<body>
+<div class="mirador-content">
+<section>
+<p>This is the lead paragraph before any heading.</p>
+</section>
+<section id="overview">
+<h1 id="overview">Q3 Strategy</h1>
+<p>Intro under overview.</p>
+</section>
+<section id="summary">
+<h2 id="summary">Summary</h2>
+<p>A short summary with <strong>bold</strong> and a <a href="https://example.com">link</a>.</p>
+<ul>
+<li>one</li>
+<li>two</li>
+</ul>
+</section>
+<section id="risks">
+<h2 id="risks">Risks</h2>
+<aside class="callout callout-warn">
+<p>Watch the <strong>churn</strong> trend.</p>
+</aside>
+<table class="data-table"><thead><tr><th>Quarter</th><th>NRR</th></tr></thead><tbody><tr><td>Q1</td><td>108%</td></tr><tr><td>Q2</td><td>112%</td></tr></tbody></table>
+<figure class="chart"><div class="chart-title">NRR by quarter</div><div class="chart-row"><span class="chart-label">Q1</span><span class="chart-track"><span class="chart-bar" style="--v:96%"></span></span><span class="chart-val">108</span></div><div class="chart-row"><span class="chart-label">Q2</span><span class="chart-track"><span class="chart-bar" style="--v:100%"></span></span><span class="chart-val">112</span></div></figure>
+</section>
+<section id="appendix">
+<h2 id="appendix">Appendix</h2>
+<pre><code class="language-md"># Not A Heading
+still appendix
+</code></pre>
+</section>
+</div>
+</body>
+</html>
+"
+`;

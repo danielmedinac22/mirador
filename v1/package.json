@@ -10,7 +10,11 @@
   "bin": {
     "mirador": "./dist/index.js"
   },
-  "files": ["dist", "site-assets", "skill"],
+  "files": [
+    "dist",
+    "site-assets",
+    "shims"
+  ],
   "keywords": [
     "claude-code",
     "claude-code-skill",
@@ -38,15 +42,19 @@
     "test:watch": "vitest",
     "lint": "biome check .",
     "format": "biome format --write .",
+    "demo:two-brains": "node demo/two-brains.mjs",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",
     "commander": "^12.0.0",
-    "execa": "^9.6.1"
+    "execa": "^9.6.1",
+    "markdown-it": "14.2.0",
+    "yaml": "2.9.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",
+    "@types/markdown-it": "14.1.2",
     "@types/node": "^20.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.5.0",

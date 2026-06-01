@@ -17,7 +17,7 @@ export async function createArtifact(input: NewArtifactInput): Promise<{ path: s
     throw new MiradorError('ARTIFACT_EXISTS', `Artifact "${input.slug}" already exists.`);
   }
   await ensureDir(dir);
-  await writeFileAtomic(join(dir, 'CONTEXT.md'), renderContext(input));
+  await writeFileAtomic(join(dir, 'source.md'), renderSource(input));
   return { path: dir };
 }
 
@@ -56,16 +56,29 @@ function validateSlug(slug: string): void {
   }
 }
 
-function renderContext(input: NewArtifactInput): string {
-  return `# ${input.slug}
+/**
+ * Scaffolds the markdown++ source of truth (design §7.2). Headings carry
+ * explicit `{#anchor}`s from birth so they're stable diff/merge units (CV-00).
+ * The `vision` frontmatter is a placeholder here; the creator's agent sharpens
+ * it, and owner-gated evolution lands in CV-04.
+ */
+function renderSource(input: NewArtifactInput): string {
+  const purpose = input.purpose || '(not specified yet — edit me)';
+  const audience = input.audience || '(not specified yet — edit me)';
+  return `---
+vision: TODO — one line on what this artifact is converging toward
+---
 
-## Purpose
-${input.purpose || '(not specified yet — edit me)'}
+# ${input.slug} {#overview}
 
-## Audience
-${input.audience || '(not specified yet — edit me)'}
+${purpose}
 
-## Notes
+## Audience {#audience}
+
+${audience}
+
+## Notes {#notes}
+
 Add your working notes here as you build out the artifact.
 `;
 }

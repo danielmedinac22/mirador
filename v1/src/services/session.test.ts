@@ -8,15 +8,23 @@ import { openSession } from './session.js';
 describe('services/session', () => {
   let tmp: string;
   const original = process.env.MIRADOR_HOME_OVERRIDE;
+  const originalAgent = process.env.MIRADOR_AGENT;
+  const originalProject = process.env.MIRADOR_PROJECT_OVERRIDE;
 
   beforeEach(async () => {
     tmp = await mkdtemp(join(tmpdir(), 'mirador-session-'));
     process.env.MIRADOR_HOME_OVERRIDE = tmp;
+    // Pin brain resolution to an empty generic source so the brief is
+    // deterministic regardless of the machine's real agent memory.
+    process.env.MIRADOR_AGENT = 'generic';
+    process.env.MIRADOR_PROJECT_OVERRIDE = tmp;
   });
 
   afterEach(async () => {
     await rm(tmp, { recursive: true, force: true });
     process.env.MIRADOR_HOME_OVERRIDE = original;
+    process.env.MIRADOR_AGENT = originalAgent;
+    process.env.MIRADOR_PROJECT_OVERRIDE = originalProject;
   });
 
   it('fresh artifact brief reads "newly created"', async () => {
@@ -30,8 +38,8 @@ describe('services/session', () => {
   it('subsequent open with no further changes says "no changes"', async () => {
     await createArtifact({ slug: 'q' });
     await openSession('q'); // first open sets last-seen
-    // Make sure the CONTEXT.md mtime is older than the just-written last-seen
-    const ctxFile = join(tmp, 'workspace', 'artifacts', 'q', 'CONTEXT.md');
+    // Make sure the source.md mtime is older than the just-written last-seen
+    const ctxFile = join(tmp, 'workspace', 'artifacts', 'q', 'source.md');
     const old = new Date(Date.now() - 60_000);
     await utimes(ctxFile, old, old);
     const { brief } = await openSession('q');
@@ -57,7 +65,8 @@ describe('services/session', () => {
     const { readFile } = await import('node:fs/promises');
     const content = await readFile(join(sessionSkillPath, 'SKILL.md'), 'utf8');
     expect(content).toContain('mirador-session-skilled');
-    expect(content).toContain('verbatim');
+    // The session skill now instructs brain-framing of the handoff, not verbatim.
+    expect(content).toMatch(/one-screen brief|frame the handoff/i);
   });
 
   it('updates last-seen after open', async () => {

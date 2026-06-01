@@ -49,6 +49,82 @@ export async function hasUncommittedChanges(dir: string): Promise<boolean> {
   return stdout.trim().length > 0;
 }
 
+/** Best-effort `git fetch` (swallows failure — e.g. no remote / offline). */
+export async function fetchRemote(dir: string): Promise<boolean> {
+  try {
+    await execa('git', ['fetch', '--quiet'], { cwd: dir });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** True if the repo has at least one configured remote. */
+export async function hasRemote(dir: string): Promise<boolean> {
+  try {
+    const { stdout } = await execa('git', ['remote'], { cwd: dir });
+    return stdout.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** Absolute path of the repo root containing `dir`, or null if not in a repo. */
+export async function repoRoot(dir: string): Promise<string | null> {
+  try {
+    const { stdout } = await execa('git', ['rev-parse', '--show-toplevel'], { cwd: dir });
+    return stdout.trim();
+  } catch {
+    return null;
+  }
+}
+
+/** The current HEAD sha, or null if not a repo / no commits yet. */
+export async function headSha(dir: string): Promise<string | null> {
+  try {
+    const { stdout } = await execa('git', ['rev-parse', 'HEAD'], { cwd: dir });
+    return stdout.trim();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Commit shas in `(since, head]` (newest first). `since=null` → all of `head`'s
+ * history. Returns [] if the range can't be resolved.
+ */
+export async function commitsBetween(
+  dir: string,
+  since: string | null,
+  head = 'HEAD',
+): Promise<string[]> {
+  const range = since ? `${since}..${head}` : head;
+  try {
+    const { stdout } = await execa('git', ['log', '--format=%H', range], { cwd: dir });
+    return stdout.trim() ? stdout.trim().split('\n') : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Contents of `relPathFromRoot` at git `ref` (e.g. `HEAD`), or null if the file
+ * does not exist at that ref / the dir is not a repo. `relPathFromRoot` is
+ * resolved from the repo root with forward slashes, as `git show ref:path` expects.
+ */
+export async function showFileAtRef(
+  dir: string,
+  ref: string,
+  relPathFromRoot: string,
+): Promise<string | null> {
+  try {
+    const { stdout } = await execa('git', ['show', `${ref}:${relPathFromRoot}`], { cwd: dir });
+    return stdout;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Commit ALL tracked + untracked changes under one paths spec. Returns the new
  * HEAD SHA. Used to auto-commit a workspace before subtree-split so the split

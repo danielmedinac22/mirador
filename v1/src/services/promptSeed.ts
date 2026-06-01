@@ -30,7 +30,7 @@ export interface ResponseSeed {
   from: string;
   to: string;
   reRequest: string;
-  status: 'accepted' | 'declined' | 'completed' | 'reassigned';
+  status: 'accepted' | 'declined' | 'completed' | 'reassigned' | 'commented';
   note?: string;
   sent: string;
 }
@@ -40,6 +40,7 @@ export type Seed = InvitationSeed | RequestSeed | ResponseSeed;
 const INVITATION_HEADER = '@mirador-invitation';
 const REQUEST_HEADER = '@mirador-request';
 const RESPONSE_HEADER = '@mirador-response';
+const CLI_PACKAGE = 'mirador-cli';
 
 export function composeSeed(seed: Seed): string {
   if (seed.kind === 'invitation') return composeInvitation(seed);
@@ -57,10 +58,17 @@ function composeInvitation(s: InvitationSeed): string {
     s.roleExpected ? `Role expected: ${s.roleExpected}` : undefined,
     s.note ? `Note: ${s.note}` : undefined,
     `Sent: ${s.sent}`,
-    '',
-    'Paste this whole block into Claude Code to open.',
     s.preview ? `Read-only: ${s.preview}` : undefined,
     s.landing ? `Landing: ${s.landing}` : undefined,
+    '',
+    // Onboard-to-refine: the recipient's agent executes these, zero manual setup.
+    'Paste this whole block into your agent. It onboards you to refine:',
+    `  1. install if missing:  npm i -g ${CLI_PACKAGE}`,
+    `  2. clone:  git clone ${s.repo}`,
+    `  3. brief through your brain, then refine:  mirador open ${s.artifact}`,
+    '',
+    'Lighter rungs: T0 read (the Read-only link) · T1 comment (reply with an',
+    '@mirador-response block — no CLI) · T2 refine (the 3 steps above).',
     '',
     '— mirador.',
   ].filter((l): l is string => l !== undefined);
@@ -140,7 +148,7 @@ function parseInvitation(raw: string): InvitationSeed {
     roleExpected: fieldOf(raw, 'Role expected'),
     note: fieldOf(raw, 'Note'),
     sent: require(raw, 'Sent'),
-    preview: fieldOf(raw, 'Read-only preview'),
+    preview: fieldOf(raw, 'Read-only'),
     landing: fieldOf(raw, 'Landing'),
   };
 }
@@ -162,7 +170,7 @@ function parseRequest(raw: string): RequestSeed {
 
 function parseResponse(raw: string): ResponseSeed {
   const status = require(raw, 'Status');
-  if (!['accepted', 'declined', 'completed', 'reassigned'].includes(status)) {
+  if (!['accepted', 'declined', 'completed', 'reassigned', 'commented'].includes(status)) {
     throw new MiradorError('SEED_INVALID', `Invalid status "${status}".`);
   }
   return {

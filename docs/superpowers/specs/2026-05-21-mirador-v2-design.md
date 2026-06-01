@@ -1,7 +1,7 @@
 # Mirador v2 — Design Spec
 
 **Date:** 2026-05-21
-**Status:** Draft (pending review)
+**Status:** Superseded in part (2026-06-01) by [`2026-06-01-mirador-v1-convergence-design.md`](2026-06-01-mirador-v1-convergence-design.md) — the **product identity** evolved from *"HTML publisher + share"* to *"multi-context convergence medium."* The **architecture & hard principles below still hold** (git substrate, brain-private, no hosted frontend, prompt-seeds, CLI/agent split). Read this PRD for the durable architecture; read the convergence design for the current product shape.
 **Author:** daniel.medina@simetrik.com
 **Code name:** `mirador` (name preserved, metaphor reinterpreted — see §1.3)
 **Working directory:** `/Users/equipo/Simetrik/html-viewer`

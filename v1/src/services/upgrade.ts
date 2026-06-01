@@ -1,11 +1,19 @@
-import { mkdir, readFile, rename } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rename } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { ensureDir, pathExists, writeFileAtomic } from '../adapters/fs.js';
 import { readConfig, writeConfig } from '../shared/config.js';
 import { paths } from '../shared/paths.js';
+import { resolveBrainSource } from './brain.js';
+import { type ShimAgent, installShim, installSlashCommand } from './skill.js';
 
 export interface UpgradeAction {
-  kind: 'backup-alpha-config' | 'create-workspace' | 'migrate-doc' | 'seed-brain' | 'noop';
+  kind:
+    | 'backup-alpha-config'
+    | 'create-workspace'
+    | 'migrate-doc'
+    | 'install-shim'
+    | 'harvest-brain'
+    | 'noop';
   detail: string;
 }
 
@@ -72,12 +80,17 @@ export async function planUpgrade(): Promise<UpgradeAction[]> {
   for (const doc of alphaConfig.docs ?? []) {
     actions.push({
       kind: 'migrate-doc',
-      detail: `Move alpha site/d/${doc.slug}/ → workspace/artifacts/${doc.slug}/ with legacy marker`,
+      detail: `Keep published ${doc.slug} as broadcast-only HTML (no markdown++ source; URL + shareRegistry preserved)`,
     });
   }
   actions.push({
-    kind: 'seed-brain',
-    detail: 'Bootstrap empty brain (interactive prompt offered).',
+    kind: 'install-shim',
+    detail: 'Install the shim for your detected agent (brain = your agent memory; no store).',
+  });
+  actions.push({
+    kind: 'harvest-brain',
+    detail:
+      'Read any old brain store once for a harvest hint, then leave it — agent memory takes over.',
   });
   return actions;
 }
@@ -86,9 +99,12 @@ export interface RunUpgradeInput {
   ghHandle: string; // for the workspace repo name
 }
 
-export async function runUpgrade(
-  input: RunUpgradeInput,
-): Promise<{ migrated: string[]; backupPath: string }> {
+export async function runUpgrade(input: RunUpgradeInput): Promise<{
+  migrated: string[];
+  backupPath: string;
+  shimAgent: ShimAgent;
+  brainHarvest?: string;
+}> {
   const { alphaConfig } = await detectAlpha();
   if (!alphaConfig) {
     throw new Error('No alpha install detected — nothing to upgrade.');
@@ -99,10 +115,13 @@ export async function runUpgrade(
   const cfgRaw = await readFile(paths.configFile(), 'utf8');
   await writeFileAtomic(backupPath, cfgRaw);
 
-  // 2. Scaffold v1 workspace (local only — does NOT create the GitHub repo here;
-  //    caller can run `mirador-v1 init` separately if they want full v1 init.)
+  // 1b. One-time harvest hint from any old brain store — then we leave it; the
+  //     brain is the agent's living memory now, no parallel store is maintained.
+  const brainHarvest = await harvestOldBrain();
+
+  // 2. Scaffold v1 workspace (local only). No brain/ store — agent memory is the
+  //    brain (CV-01). Caller can run `mirador init` for full v1 init.
   await ensureDir(paths.workspaceClone());
-  await ensureDir(join(paths.workspaceClone(), 'brain'));
   await ensureDir(join(paths.workspaceClone(), 'artifacts'));
   await ensureDir(join(paths.workspaceClone(), 'incoming-requests'));
   await ensureDir(join(paths.workspaceClone(), 'outgoing-requests'));
@@ -121,13 +140,16 @@ export async function runUpgrade(
     }
     await mkdir(dirname(v1ArtifactDir), { recursive: true });
     await rename(alphaDocDir, v1ArtifactDir);
-    // Legacy marker
+    // Legacy marker — broadcast-only: published HTML survives (viewable via the
+    // render escape hatch), but it has no markdown++ source, so it is not
+    // co-refinable. The URL is preserved; new artifacts default to markdown++.
     await ensureDir(join(v1ArtifactDir, '.mirador'));
     await writeFileAtomic(
       join(v1ArtifactDir, '.mirador', 'legacy.json'),
       `${JSON.stringify(
         {
           imported_from: 'alpha',
+          broadcast_only: true,
           alpha_url: doc.url ?? null,
           alpha_visibility: doc.visibility ?? null,
           alpha_title: doc.title ?? null,
@@ -139,6 +161,12 @@ export async function runUpgrade(
     );
     migrated.push(doc.slug);
   }
+
+  // 3b. Install the shim for the detected agent (Claude full; others functional).
+  const { agent } = await resolveBrainSource();
+  const shimAgent: ShimAgent = agent === 'codex' || agent === 'gemini' ? agent : 'claude';
+  await installShim(shimAgent);
+  if (shimAgent === 'claude') await installSlashCommand();
 
   // 4. Write a starter v1 config (caller can complete via `mirador-v1 config`)
   await writeConfig({
@@ -161,7 +189,19 @@ export async function runUpgrade(
     docs: [],
   });
 
-  return { migrated, backupPath };
+  return { migrated, backupPath, shimAgent, brainHarvest };
+}
+
+/**
+ * Read any pre-existing brain *store* once and return a one-line harvest hint.
+ * We do NOT keep maintaining it — the brain is the agent's living memory now.
+ */
+async function harvestOldBrain(): Promise<string | undefined> {
+  const brainDir = join(paths.workspaceClone(), 'brain');
+  if (!(await pathExists(brainDir))) return undefined;
+  const files = (await readdir(brainDir).catch(() => [])).filter((f) => f.endsWith('.md'));
+  if (files.length === 0) return undefined;
+  return `Found ${files.length} file(s) in an old brain store — your agent memory is the brain now; the store won't be maintained.`;
 }
 
 // Ensure the recently-checked v1 config persists across re-reads.

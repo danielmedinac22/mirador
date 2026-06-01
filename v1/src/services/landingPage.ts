@@ -59,7 +59,18 @@ export function renderLanding(input: LandingInput): string {
         ${input.previewUrl ? `<a class="cta-secondary" href="${escapeHtml(input.previewUrl)}">Or just read it.</a>` : ''}
       </div>
 
-      <p class="cta-hint">Copies a prompt to your clipboard. Paste it into <a href="https://claude.ai/code" target="_blank" rel="noopener">Claude Code</a> to start.</p>
+      <p class="cta-hint">Copies a prompt to your clipboard. Paste it into <a href="https://claude.ai/code" target="_blank" rel="noopener">Claude Code</a> (or Codex / Gemini) to start.</p>
+
+      ${
+        input.kind === 'invitation'
+          ? `
+      <ul class="tiers" aria-label="ways to participate" style="list-style:none;padding:0;margin:var(--space-6,1.5rem) 0;display:grid;gap:.5rem;text-align:left">
+        <li><strong>T0 · Read</strong> — open the link, zero setup.${input.previewUrl ? ` <a href="${escapeHtml(input.previewUrl)}">read it ↗</a>` : ''}</li>
+        <li><strong>T1 · Comment</strong> — no CLI: reply with an <code>@mirador-response</code> block.</li>
+        <li><strong>T2 · Refine</strong> — paste the seed; your agent installs mirador, clones, briefs you through your brain, and leaves you refining.</li>
+      </ul>`
+          : ''
+      }
 
       ${
         noteOrContext
@@ -153,10 +164,8 @@ function composeCopy(input: LandingInput): {
     return {
       eyebrow: input.role ? `invitation · ${input.role}` : 'invitation',
       hero: `${input.from} sent you ${input.slug}.`,
-      sub: input.role
-        ? 'Open in Claude Code to read it with context.'
-        : 'Open in Claude Code to read it with context.',
-      primaryCta: 'Open in Claude Code',
+      sub: 'Paste into your agent to refine it with your context — or just read it.',
+      primaryCta: 'Open & refine',
     };
   }
   return {
