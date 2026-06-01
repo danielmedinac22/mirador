@@ -65,7 +65,8 @@ describe('services/session', () => {
     const { readFile } = await import('node:fs/promises');
     const content = await readFile(join(sessionSkillPath, 'SKILL.md'), 'utf8');
     expect(content).toContain('mirador-session-skilled');
-    expect(content).toContain('verbatim');
+    // The session skill now instructs brain-framing of the handoff, not verbatim.
+    expect(content).toMatch(/one-screen brief|frame the handoff/i);
   });
 
   it('updates last-seen after open', async () => {
