@@ -190,12 +190,12 @@ CV-01 (brain = agent memory) ───────┴─────────
 - **New:** `services/vision.ts` (vision in frontmatter; auto-drafted by the creator's agent; evolution rules), `services/convergence.ts` (compute locked/contested/open from intent notes + move tags + lock markers).
 - **Changes:** `services/role.ts` (owner = arbiter for same-section conflicts; reuse `effectiveRole`), `services/handoff.ts` (add the vision vector to the packet), `.mirador/manifest.json` schema (+ `vision`, `owner`; role inference, not declaration).
 
-**Acceptance criteria:**
-- [ ] New artifacts get an auto-drafted one-line vision in frontmatter; `mirador vision --set` is owner-gated.
-- [ ] `mirador status` renders the locked/contested/open readout (design §11.3) from real intent/move/lock data.
-- [ ] A same-section conflict (from CV-00's `merge`) routes to the owner with both intent notes attached.
-- [ ] The handoff brief references direction relative to the vision (vector, not just delta).
-- [ ] Unit tests for convergence-state computation; integration test for a conflict → owner-arbitration flow.
+**Acceptance criteria:** ✅ **all met (2026-06-01)** — sub-plan: [`2026-06-01-mirador-v1-cv-04-vision-owner-state.md`](./2026-06-01-mirador-v1-cv-04-vision-owner-state.md)
+- [x] New artifacts get an auto-drafted one-line vision in frontmatter; `mirador vision --set` is owner-gated.
+- [x] `mirador status` renders the locked/contested/open readout (design §11.3) from real intent/move data (locks computed from `endorse` moves, not stored).
+- [x] A same-section conflict (from CV-00's `merge`) routes to the owner with both sides attached (`arbitrationFor`).
+- [x] The handoff brief references direction relative to the vision (vector, not just delta).
+- [x] Unit tests for convergence-state computation; integration test for a conflict → owner-arbitration flow.
 
 **Deps:** CV-02, CV-03. **Suggested model:** Claude.
 
