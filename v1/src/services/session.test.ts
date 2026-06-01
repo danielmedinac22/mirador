@@ -30,8 +30,8 @@ describe('services/session', () => {
   it('subsequent open with no further changes says "no changes"', async () => {
     await createArtifact({ slug: 'q' });
     await openSession('q'); // first open sets last-seen
-    // Make sure the CONTEXT.md mtime is older than the just-written last-seen
-    const ctxFile = join(tmp, 'workspace', 'artifacts', 'q', 'CONTEXT.md');
+    // Make sure the source.md mtime is older than the just-written last-seen
+    const ctxFile = join(tmp, 'workspace', 'artifacts', 'q', 'source.md');
     const old = new Date(Date.now() - 60_000);
     await utimes(ctxFile, old, old);
     const { brief } = await openSession('q');

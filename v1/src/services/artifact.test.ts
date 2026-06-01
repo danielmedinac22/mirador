@@ -18,23 +18,24 @@ describe('services/artifact', () => {
     process.env.MIRADOR_HOME_OVERRIDE = original;
   });
 
-  it('createArtifact creates folder + CONTEXT.md', async () => {
+  it('createArtifact creates folder + markdown++ source.md', async () => {
     const { path } = await createArtifact({
       slug: 'q2-draft',
       purpose: 'Q2 forecast',
       audience: 'the board',
     });
     expect(path).toContain('q2-draft');
-    const ctx = await readFile(join(path, 'CONTEXT.md'), 'utf8');
-    expect(ctx).toContain('# q2-draft');
-    expect(ctx).toContain('Q2 forecast');
-    expect(ctx).toContain('the board');
+    const src = await readFile(join(path, 'source.md'), 'utf8');
+    expect(src).toContain('vision:'); // frontmatter anchor for convergence
+    expect(src).toContain('# q2-draft {#overview}'); // stable anchor from birth
+    expect(src).toContain('Q2 forecast');
+    expect(src).toContain('the board');
   });
 
   it('createArtifact uses placeholders when fields are omitted', async () => {
     const { path } = await createArtifact({ slug: 'untitled-1' });
-    const ctx = await readFile(join(path, 'CONTEXT.md'), 'utf8');
-    expect(ctx).toContain('(not specified yet');
+    const src = await readFile(join(path, 'source.md'), 'utf8');
+    expect(src).toContain('(not specified yet');
   });
 
   it('createArtifact errors when artifact already exists', async () => {

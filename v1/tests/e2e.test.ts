@@ -137,7 +137,7 @@ describe('Mirador v1 — end-to-end', () => {
     const wsContents = await readdir(wsArtifact);
     expect(wsContents).toEqual(['.mirador-link']);
     const cloneContents = await readdir(join(tmp, 'shared', 'q2-draft'));
-    expect(cloneContents).toContain('CONTEXT.md');
+    expect(cloneContents).toContain('source.md');
     expect(cloneContents).toContain('notes.md');
     expect(cloneContents).toContain('.mirador');
 
@@ -159,8 +159,8 @@ describe('Mirador v1 — end-to-end', () => {
       const accept = await acceptRequest(reqSeed);
       expect(accept.responseSeed).toContain('@mirador-response');
       expect(accept.responseSeed).toContain('Status: accepted');
-      // Artifact created
-      const ctx = await readFile(join(accept.artifactPath, 'CONTEXT.md'), 'utf8');
+      // Artifact created — the request context lands in the markdown++ source
+      const ctx = await readFile(join(accept.artifactPath, 'source.md'), 'utf8');
       expect(ctx).toContain('Requested by');
     }
 
