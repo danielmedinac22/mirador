@@ -1,45 +1,43 @@
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pathExists, readText, writeFileAtomic } from '../adapters/fs.js';
+import * as document from './document/index.js';
+import { renderShell } from './document/shell.js';
 
-export type ThemeName = 'page' | 'memo' | 'deck' | 'console' | 'atlas' | 'none';
+// Themes are document renderers now (design §7.3); the canonical theme list and
+// `normaliseTheme` live in the document seam. Re-exported here so existing
+// callers (services/share.ts) keep importing them from staticPreview.
+export type { ThemeName } from './document/index.js';
+export { normaliseTheme } from './document/index.js';
 
-const KNOWN_THEMES: readonly ThemeName[] = [
-  'page',
-  'memo',
-  'deck',
-  'console',
-  'atlas',
-  'none',
-] as const;
-
-const THEMES_WITH_SCRIPTS: Partial<Record<ThemeName, string[]>> = {
-  deck: ['/themes/deck/deck.js'],
-};
+/** The markdown++ source of truth for an artifact. */
+export const SOURCE_FILE = 'source.md';
 
 /**
- * Renders the artifact's HTML wrapped in its theme.
+ * Renders the artifact's HTML view wrapped in its theme.
  *
- * Wrapper references shared chrome assets at `/style.css` and
- * `/themes/<theme>/theme.css` — installed under the Vercel site root by
- * services/siteChrome.ts before publish.
+ * Two paths:
+ *   1. **markdown++** — if `source.md` exists, parse + `document.render` (the
+ *      convergence-era default; co-refinable, diffable, mergeable).
+ *   2. **raw-HTML escape hatch** — otherwise fall back to the publish-era path:
+ *      find an HTML index and wrap it (broadcast-only; no diff/merge, design §7.4).
  *
- * Themes catalogued in docs/design/spec.md.
+ * The wrapper references shared chrome at `/themes/<theme>/theme.css`, installed
+ * under the Vercel site root by services/siteChrome.ts before publish.
  */
 export async function renderPreview(artifactPath: string, theme = 'page'): Promise<string> {
-  const themeName = normaliseTheme(theme);
-  const indexHtml = await findIndexHtml(artifactPath);
-  if (!indexHtml) return renderNoPreview(themeName);
-  const body = await readText(indexHtml);
-  return wrapInTheme(body, themeName);
-}
+  const themeName = document.normaliseTheme(theme);
 
-export function normaliseTheme(theme: string): ThemeName {
-  const lower = (theme || '').toLowerCase().trim();
-  if ((KNOWN_THEMES as readonly string[]).includes(lower)) return lower as ThemeName;
-  // Legacy alpha names → V1 themes
-  if (lower === 'default') return 'page';
-  return 'page';
+  const sourcePath = join(artifactPath, SOURCE_FILE);
+  if (await pathExists(sourcePath)) {
+    const model = document.parse(await readText(sourcePath));
+    return document.render(model, themeName);
+  }
+
+  const indexHtml = await findIndexHtml(artifactPath);
+  if (!indexHtml) return renderShell(noPreviewContent(themeName), themeName);
+  const body = await readText(indexHtml);
+  return renderShell(ensureWrapper(body, themeName), themeName);
 }
 
 async function findIndexHtml(dir: string): Promise<string | null> {
@@ -55,54 +53,26 @@ async function findIndexHtml(dir: string): Promise<string | null> {
   return null;
 }
 
-function renderNoPreview(theme: ThemeName): string {
-  const body =
-    '<div class="mirador-content"><h1>No preview</h1><p>This artifact has no HTML index.</p></div>';
-  return wrapInTheme(body, theme);
-}
-
-function wrapInTheme(bodyHtml: string, theme: ThemeName): string {
-  const themeLink =
-    theme === 'none' ? '' : `<link rel="stylesheet" href="/themes/${theme}/theme.css">`;
-
-  const scripts = (THEMES_WITH_SCRIPTS[theme] ?? [])
-    .map((src) => `<script src="${src}" defer></script>`)
-    .join('\n');
-
-  const wrapped = ensureWrapper(bodyHtml, theme);
-
-  return `<!doctype html>
-<html lang="en" data-mirador-theme="${theme}">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>mirador · preview</title>
-<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: light)" href="/assets/aperture-favicon.svg">
-<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: dark)" href="/assets/aperture-favicon-dark.svg">
-${themeLink}
-${scripts}
-</head>
-<body>
-${wrapped}
-</body>
-</html>
-`;
+function noPreviewContent(theme: document.ThemeName): string {
+  const inner =
+    '<div class="mirador-content"><h1>No preview</h1><p>This artifact has no markdown++ source or HTML index.</p></div>';
+  return theme === 'none'
+    ? '<h1>No preview</h1><p>This artifact has no markdown++ source or HTML index.</p>'
+    : inner;
 }
 
 /**
- * If the artifact body is a full HTML document, extract its <body> contents.
- * Then ensure the content is wrapped in `.mirador-content` so theme styles apply.
- * `none` skips wrapping (publish verbatim).
+ * If the raw body is a full HTML document, extract its <body> contents, then
+ * ensure it's wrapped in `.mirador-content` so theme styles apply. `none`
+ * publishes verbatim.
  */
-function ensureWrapper(raw: string, theme: ThemeName): string {
+function ensureWrapper(raw: string, theme: document.ThemeName): string {
   let inner = raw;
   const bodyMatch = raw.match(/<body[^>]*>([\s\S]*)<\/body>/i);
   if (bodyMatch) inner = bodyMatch[1] ?? raw;
 
   if (theme === 'none') return inner;
-
   if (/class\s*=\s*["'][^"']*\bmirador-content\b/.test(inner)) return inner;
-
   return `<div class="mirador-content">${inner}</div>`;
 }
 

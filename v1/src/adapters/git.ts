@@ -49,6 +49,34 @@ export async function hasUncommittedChanges(dir: string): Promise<boolean> {
   return stdout.trim().length > 0;
 }
 
+/** Absolute path of the repo root containing `dir`, or null if not in a repo. */
+export async function repoRoot(dir: string): Promise<string | null> {
+  try {
+    const { stdout } = await execa('git', ['rev-parse', '--show-toplevel'], { cwd: dir });
+    return stdout.trim();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Contents of `relPathFromRoot` at git `ref` (e.g. `HEAD`), or null if the file
+ * does not exist at that ref / the dir is not a repo. `relPathFromRoot` is
+ * resolved from the repo root with forward slashes, as `git show ref:path` expects.
+ */
+export async function showFileAtRef(
+  dir: string,
+  ref: string,
+  relPathFromRoot: string,
+): Promise<string | null> {
+  try {
+    const { stdout } = await execa('git', ['show', `${ref}:${relPathFromRoot}`], { cwd: dir });
+    return stdout;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Commit ALL tracked + untracked changes under one paths spec. Returns the new
  * HEAD SHA. Used to auto-commit a workspace before subtree-split so the split

@@ -42,7 +42,10 @@ export function registerNew(program: Command): void {
 
         const { path } = await createArtifact({ slug, purpose, audience });
         await logActivity(`new slug=${slug}`);
-        p.outro(`Created at ${muted(path)}.\nOpen with \`mirador open ${slug}\`.`);
+        p.outro(
+          `Created at ${muted(path)} ${muted('(markdown++ source.md)')}.\n` +
+            `Preview: \`mirador preview ${slug}\`  ·  Open: \`mirador open ${slug}\`.`,
+        );
       },
     );
 }
