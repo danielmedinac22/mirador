@@ -211,12 +211,12 @@ CV-01 (brain = agent memory) ───────┴─────────
 - **New:** `services/cockpit.ts` (file-watch the source → `document.render` → push to browser; remote fetch loop → on new commits, re-render + surface the handoff), `adapters/localServer.ts` (tiny local HTTP + SSE; SSE per design §18 — one-way mirror, no editing channel).
 - **Changes:** `services/refine.ts` (auto-start cockpit), `v1/site-assets/` (a minimal cockpit shell that renders the view + a slot for the surfaced brief).
 
-**Acceptance criteria:**
-- [ ] **Mirror half:** editing the source (by hand or agent) hot-reloads the browser view within ~1s. Read-only — no edit affordance in the page.
-- [ ] **Convergence half:** a `git fetch` that brings a collaborator's refinement updates the mirror and surfaces the handoff brief in-view.
-- [ ] Convergence arrives **async via git** — no realtime cross-user channel. The only live channel is local (source → mirror).
-- [ ] Cockpit is local-only (binds localhost); nothing is published by `watch`.
-- [ ] Integration test for the watch → edit → reload loop; test for fetch → surface.
+**Acceptance criteria:** ✅ **met (2026-06-01; live browser-reload + real remote-fetch are manual)** — sub-plan: [`2026-06-01-mirador-v1-cv-05-cockpit.md`](./2026-06-01-mirador-v1-cv-05-cockpit.md)
+- [x] **Mirror half:** editing the source pushes a reload (SSE) → the browser re-fetches `/view`. Read-only — no edit affordance. *(live browser reload = manual)*
+- [x] **Convergence half:** a new commit (via `checkRemote` after `git fetch`) updates the mirror and surfaces the handoff brief in-view. *(real remote fetch = manual)*
+- [x] Convergence arrives **async via git** — SSE is local-only; no realtime cross-user channel.
+- [x] Cockpit is local-only (binds `127.0.0.1`); nothing is published by `watch`.
+- [x] Integration test for watch → edit → reload; test for new-commit → surface.
 
 **Deps:** CV-00 (mirror); CV-03 (convergence surfacing). **Suggested model:** Claude (server + UX), Codex acceptable for the adapter plumbing.
 
