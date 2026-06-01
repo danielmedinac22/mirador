@@ -2,7 +2,7 @@ import * as p from '@clack/prompts';
 import { ghAuthStatus } from '../adapters/gh-cli.js';
 import { vercelWhoami } from '../adapters/vercel.js';
 import { brainSummary } from '../services/brain.js';
-import { installClaudeSkill, installCodexSkill, installSlashCommand } from '../services/skill.js';
+import { type ShimAgent, installShim, installSlashCommand } from '../services/skill.js';
 import { ensureUserProject } from '../services/vercel-project.js';
 import { createWorkspaceRepo, scaffoldWorkspace } from '../services/workspace.js';
 import { printSplash } from '../shared/ansi.js';
@@ -80,15 +80,12 @@ export async function runInit(opts: RunInitOptions = {}): Promise<void> {
   const { projectName, domain: vercelDomain } = await ensureUserProject(ghUser);
   spin.stop(`Vercel: ${projectName} (${vercelDomain})`);
 
-  spin.start('Installing the Claude Code skill.');
-  await installClaudeSkill();
-  await installSlashCommand();
-  const installCodex = await p.confirm({
-    message: 'Also install for Codex?',
-    initialValue: false,
-  });
-  if (!p.isCancel(installCodex) && installCodex) await installCodexSkill();
-  spin.stop('Skills installed.');
+  spin.start('Installing the agent shim.');
+  const shimAgent: ShimAgent =
+    brain.agent === 'codex' || brain.agent === 'gemini' ? brain.agent : 'claude';
+  await installShim(shimAgent);
+  if (shimAgent === 'claude') await installSlashCommand();
+  spin.stop(`Shim installed (${shimAgent}).`);
 
   await writeConfig({
     version: 1,

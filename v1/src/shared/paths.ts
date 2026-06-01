@@ -23,6 +23,7 @@ export const paths = {
   claudeSkill: () => join(claudeHome(), 'skills', 'mirador'),
   claudeCommand: () => join(claudeHome(), 'commands', 'mirador.md'),
   codexSkill: () => join(codexHome(), 'skills', 'mirador'),
+  geminiSkill: () => join(geminiHome(), 'skills', 'mirador'),
   /** Claude Code memory dir for a project: ~/.claude/projects/<slug>/memory */
   claudeMemoryDir: (root: string) =>
     join(claudeHome(), 'projects', root.replaceAll('/', '-'), 'memory'),

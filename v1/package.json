@@ -13,7 +13,7 @@
   "files": [
     "dist",
     "site-assets",
-    "skill"
+    "shims"
   ],
   "keywords": [
     "claude-code",
