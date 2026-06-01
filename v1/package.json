@@ -1,7 +1,7 @@
 {
   "name": "mirador-cli",
   "version": "1.0.0",
-  "description": "Share AI-generated HTML in under a minute — a Claude Code skill + CLI that turns any HTML your agent produces into a shareable link on your own Vercel.",
+  "description": "The git-native medium where many minds converge on one living artifact — each refines it through their own AI, toward an owned vision. CLI + agent shim; the HTML is just a view.",
   "license": "MIT",
   "type": "module",
   "engines": {
@@ -19,9 +19,10 @@
     "claude-code",
     "claude-code-skill",
     "mirador",
-    "html",
-    "vercel",
-    "publish",
+    "collaboration",
+    "convergence",
+    "markdown",
+    "git",
     "ai",
     "agent",
     "cli"
