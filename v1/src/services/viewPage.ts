@@ -26,7 +26,9 @@ const CHROME_STYLE = `<style>
   --mv-grad:linear-gradient(135deg,#2541B2 0%,#4F7DF3 100%);
   --mv-bg:#fafafa;--mv-fg:#0a0a0a;--mv-muted:#666;--mv-border:#e5e5e5;
   --mv-card:#ffffff;--mv-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,monospace;
-  --mv-ease:cubic-bezier(.2,.8,.2,1);
+  --mv-warn:#b45309;--mv-on-accent:#fff;
+  --mv-ring:0 0 0 3px rgba(79,125,243,.35);--mv-shadow:0 4px 14px rgba(37,65,178,.3);
+  --mv-ease:cubic-bezier(.2,.8,.2,1);--mv-ease-out:cubic-bezier(0,0,.2,1);
 }
 @media (prefers-color-scheme:dark){:root{
   --mv-bg:#0f0f0f;--mv-fg:#fafafa;--mv-muted:#999;--mv-border:#1f1f1f;--mv-card:#0a0a0a;
@@ -36,7 +38,7 @@ const CHROME_STYLE = `<style>
 .mv *{box-sizing:border-box}
 .mv-col{max-width:720px;margin:0 auto;padding:2rem 1.5rem 2.5rem}
 .mv a{color:inherit}
-.mv :focus-visible{outline:none;box-shadow:0 0 0 3px rgba(79,125,243,.35);border-radius:4px}
+.mv :focus-visible{outline:none;box-shadow:var(--mv-ring);border-radius:4px}
 
 .mv-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2.25rem}
 .mv-lockup{display:inline-flex;align-items:center;gap:.5em;font-weight:600;
@@ -48,8 +50,8 @@ const CHROME_STYLE = `<style>
 .mv-lockup .dot{color:var(--mv-cobalt)}
 .mv-updated{font-family:var(--mv-mono);font-size:.75rem;color:var(--mv-muted)}
 
-.mv-title{margin:0 0 .5rem;font-size:2rem;font-weight:600;letter-spacing:-.015em;line-height:1.25}
-.mv-meta{display:flex;gap:.75em;flex-wrap:wrap;font-family:var(--mv-mono);font-size:.75rem;
+.mv-title{margin:0 0 .5rem;overflow-wrap:anywhere;font-size:2rem;font-weight:600;letter-spacing:-.015em;line-height:1.25}
+.mv-meta{display:flex;gap:.75em;flex-wrap:wrap;overflow-wrap:anywhere;min-width:0;font-family:var(--mv-mono);font-size:.75rem;
   color:var(--mv-muted);margin-bottom:1.75rem}
 .mv-meta .sep{color:var(--mv-border)}
 
@@ -59,15 +61,15 @@ const CHROME_STYLE = `<style>
 .mv-vision p{margin:0;font-size:1rem;line-height:1.6}
 .mv-vision .mv-owner-tag{font-family:var(--mv-mono);font-size:.6875rem;color:var(--mv-muted)}
 
-.mv-seed{position:relative;border-radius:8px;padding:1px;background:var(--mv-grad);margin:0 0 1.5rem}
-.mv-seed-in{background:var(--mv-card);border-radius:7px;padding:1.1rem 1.25rem}
+.mv-seed{position:relative;border-radius:8px;border:1px solid var(--mv-border);background:var(--mv-card);margin:0 0 1.5rem}
+.mv-seed-in{padding:1.1rem 1.25rem}
 .mv-seed pre{margin:.1rem 0 .9rem;font-family:var(--mv-mono);font-size:.8125rem;line-height:1.55;
   white-space:pre-wrap;word-break:break-word;color:var(--mv-fg)}
 .mv-seed pre .at{color:var(--mv-cobalt);font-weight:500}
-.mv-copy{font-family:inherit;font-size:.8125rem;font-weight:500;color:#fff;
+.mv-copy{font-family:inherit;font-size:.8125rem;font-weight:500;color:var(--mv-on-accent);
   background:var(--mv-grad);border:none;border-radius:6px;padding:.5em 1.1em;cursor:pointer;
-  transition:transform 200ms ease-out,box-shadow 200ms ease-out}
-.mv-copy:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(37,65,178,.3)}
+  transition:transform 200ms var(--mv-ease-out),box-shadow 200ms var(--mv-ease-out)}
+.mv-copy:hover{transform:translateY(-1px);box-shadow:var(--mv-shadow)}
 .mv-copy:active{transform:translateY(0)}
 .mv-seed-hint{font-size:.8125rem;color:var(--mv-muted);margin-left:.85em}
 
@@ -84,9 +86,9 @@ const CHROME_STYLE = `<style>
 .mv-dot{width:.5em;height:.5em;border-radius:99px;flex-shrink:0;position:relative;top:-.08em;
   border:1.5px solid var(--mv-muted);background:transparent}
 .mv-dot-locked{background:var(--mv-cobalt);border-color:var(--mv-cobalt)}
-.mv-dot-contested{background:#b45309;border-color:#b45309}
+.mv-dot-contested{background:var(--mv-warn);border-color:var(--mv-warn)}
 .mv-sections .st{font-family:var(--mv-mono);font-size:.6875rem;color:var(--mv-muted);margin-left:auto;flex-shrink:0}
-.mv-sections .st-contested{color:#b45309}
+.mv-sections .st-contested{color:var(--mv-warn)}
 .mv-sections .st-locked{color:var(--mv-cobalt)}
 
 .mv-intent{padding:.65rem 0;border-top:1px solid var(--mv-border)}
@@ -103,7 +105,7 @@ const CHROME_STYLE = `<style>
 .mv-docnav{display:flex;gap:.5em;flex-wrap:wrap;margin-top:1.25rem}
 .mv-docnav a{font-family:var(--mv-mono);font-size:.75rem;text-decoration:none;
   border:1px solid var(--mv-border);border-radius:6px;padding:.35em .8em;color:var(--mv-muted);
-  transition:border-color 200ms ease-out,color 200ms ease-out}
+  transition:border-color 200ms var(--mv-ease-out),color 200ms var(--mv-ease-out)}
 .mv-docnav a:hover{border-color:var(--mv-cobalt);color:var(--mv-fg)}
 
 .mv-doc-sep{max-width:680px;margin:3rem auto 0;padding:1.25rem 1.5rem 0;display:flex;
