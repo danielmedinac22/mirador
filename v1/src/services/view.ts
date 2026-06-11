@@ -206,6 +206,29 @@ export async function scaffoldMiradorDir(
   if (!existsSync(keepPath)) await writeFile(keepPath, '', 'utf8');
 }
 
+/**
+ * Inline the theme stylesheet into the pushed page so the view never depends
+ * on the viewer serving theme assets — only fonts and favicons stay external.
+ */
+export async function inlineThemeCss(html: string, theme: ThemeName): Promise<string> {
+  if (theme === 'none') return html;
+  const here = dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    join(here, '..', 'site-assets', 'themes', theme, 'theme.css'),
+    join(here, '..', '..', 'site-assets', 'themes', theme, 'theme.css'),
+  ];
+  const cssPath = candidates.find((c) => existsSync(c));
+  if (!cssPath) return html;
+  const css = (await readFile(cssPath, 'utf8')).replace(
+    /@import url\(['"][./]*fonts\.css['"]\);?/,
+    "@import url('/fonts.css');",
+  );
+  return html.replace(
+    `<link rel="stylesheet" href="/themes/${theme}/theme.css">`,
+    `<style>\n${css}\n</style>`,
+  );
+}
+
 /** The packaged convention skill — resolved both from src (tests) and dist (bundle). */
 export function conventionSkillPath(): string {
   const here = dirname(fileURLToPath(import.meta.url));

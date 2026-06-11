@@ -138,7 +138,8 @@ describe('VL-02 — view init', () => {
     expect(html).toContain('@mirador-view');
     expect(html).toContain('https://github.com/acme/docs.git');
     expect(html).toContain('versiones/close-cli');
-    expect(html).toContain('/themes/page/theme.css');
+    expect(html).toContain('--page-accent'); // theme css inlined — self-contained page
+    expect(html).not.toContain('<link rel="stylesheet" href="/themes/');
   });
 
   it('never leaks the write token into the rendered page', async () => {

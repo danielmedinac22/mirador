@@ -9,6 +9,7 @@ import {
   defaultViewerUrl,
   discoverDocs,
   gitMeta,
+  inlineThemeCss,
   installConventionSkill,
   parseDocs,
   pushToViewer,
@@ -42,9 +43,10 @@ async function assembleViewHtml(dir: string, config: ViewConfig): Promise<string
     );
   }
   const docs = await parseDocs(dir, files);
-  return buildViewPage({
+  const theme = normaliseTheme(config.theme ?? 'page');
+  const html = buildViewPage({
     title: config.title ?? basename(dir),
-    theme: normaliseTheme(config.theme ?? 'page'),
+    theme,
     docs,
     vision: await readVision(dir),
     state: await readState(dir),
@@ -52,6 +54,7 @@ async function assembleViewHtml(dir: string, config: ViewConfig): Promise<string
     git: await gitMeta(dir),
     generatedAt: new Date().toISOString(),
   });
+  return inlineThemeCss(html, theme);
 }
 
 export function registerView(program: Command): void {
