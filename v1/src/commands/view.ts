@@ -68,10 +68,11 @@ export function registerView(program: Command): void {
     .option('--viewer <url>', 'Viewer base URL.', defaultViewerUrl())
     .option('--title <title>', 'View title (defaults to the folder name).')
     .option('--theme <theme>', `Theme: ${ALL_THEMES.join(' | ')}.`, 'page')
+    .option('--docs <files>', 'Comma-separated allowlist — only these .md files publish.')
     .action(
       async (
         dirArg: string | undefined,
-        opts: { viewer: string; title?: string; theme: string },
+        opts: { viewer: string; title?: string; theme: string; docs?: string },
       ) => {
         const dir = resolve(dirArg ?? '.');
         const existing = await readViewConfig(dir);
@@ -82,11 +83,15 @@ export function registerView(program: Command): void {
             `Run \`mirador view push\` — the link is ${existing.viewer.replace(/\/$/, '')}/v/${existing.slug}.`,
           );
         }
-        const files = await discoverDocs(dir);
+        const allowlist = opts.docs
+          ?.split(',')
+          .map((f) => f.trim())
+          .filter(Boolean);
+        const files = await discoverDocs(dir, allowlist);
         if (!files.length) {
           throw new MiradorError(
             'NO_DOCS',
-            `No markdown documents found in ${dir}.`,
+            `No markdown documents found in ${dir}${allowlist ? ' matching --docs' : ''}.`,
             'Run it from (or point it at) the folder that holds the documents.',
           );
         }

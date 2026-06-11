@@ -62,6 +62,11 @@ export function defaultViewerUrl(): string {
 
 // ── artifact folder reading ──────────────────────────────────────────────────
 
+/**
+ * Without a `preferred` list, every top-level .md in the folder. With one
+ * (config.docs), a STRICT allowlist — files not named never publish, so a
+ * vault folder can share one doc without leaking its neighbours.
+ */
 export async function discoverDocs(dir: string, preferred?: string[]): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true });
   const all = entries
@@ -69,9 +74,7 @@ export async function discoverDocs(dir: string, preferred?: string[]): Promise<s
     .map((e) => e.name)
     .sort();
   if (!preferred?.length) return all;
-  const head = preferred.filter((f) => all.includes(f));
-  const rest = all.filter((f) => !head.includes(f));
-  return [...head, ...rest];
+  return preferred.filter((f) => all.includes(f));
 }
 
 export async function parseDocs(dir: string, files: string[]): Promise<ParsedDoc[]> {

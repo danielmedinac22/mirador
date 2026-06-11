@@ -211,6 +211,28 @@ describe('VL-02 — view push', () => {
     expect(html).toContain('challenge');
   });
 
+  it('config.docs is a strict allowlist — unlisted vault files never publish', async () => {
+    await writeFile(join(artifact, 'private-note.md'), '# Privado\n\nNo debe publicarse.\n');
+    await run([
+      'init',
+      artifact,
+      '--viewer',
+      stubUrl,
+      '--docs',
+      'definicion-funcional.md,rfc-be.md',
+    ]);
+    const config = JSON.parse(await readFile(join(artifact, '.mirador', 'config.json'), 'utf8'));
+    expect(config.docs).toEqual(['definicion-funcional.md', 'rfc-be.md']);
+    const html = pushed.get(config.slug) ?? '';
+    expect(html).toContain('El envelope es {ok, data}.');
+    expect(html).not.toContain('No debe publicarse.');
+
+    await writeFile(join(artifact, 'otra-nota.md'), '# Otra\n\nTampoco debe salir.\n');
+    await run(['push', artifact]);
+    const html2 = pushed.get(config.slug) ?? '';
+    expect(html2).not.toContain('Tampoco debe salir.');
+  });
+
   it('reads intents newest-first', async () => {
     await run(['init', artifact, '--viewer', stubUrl]);
     await writeFile(
