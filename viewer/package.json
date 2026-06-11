@@ -1,0 +1,28 @@
+{
+  "name": "mirador-viewer",
+  "version": "2.0.0",
+  "private": true,
+  "description": "The link side of mirador — stores and serves artifact views pushed by mirador-cli. No GitHub credentials, no accounts: a write token per artifact.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --target node20 --shims --no-splitting --clean",
+    "dev": "tsup src/index.ts --format esm --target node20 --shims --watch",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "sync-assets": "rm -rf static && mkdir -p static && cp -R ../v1/site-assets/themes ../v1/site-assets/fonts ../v1/site-assets/fonts.css ../v1/site-assets/assets static/",
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.0",
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

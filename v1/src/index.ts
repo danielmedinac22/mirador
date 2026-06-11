@@ -20,6 +20,7 @@ import { registerShare } from './commands/share.js';
 import { registerShim } from './commands/shim.js';
 import { registerStatus } from './commands/status.js';
 import { registerUpgrade } from './commands/upgrade.js';
+import { registerView } from './commands/view.js';
 import { registerVision } from './commands/vision.js';
 import { registerWatch } from './commands/watch.js';
 import { computeInbox, renderInbox } from './services/inbox.js';
@@ -32,6 +33,7 @@ program
   .description('mirador — share AI-generated artifacts on git.')
   .version(VERSION);
 
+registerView(program);
 registerInit(program);
 registerNew(program);
 registerOpen(program);

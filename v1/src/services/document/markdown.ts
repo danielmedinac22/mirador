@@ -44,6 +44,8 @@ const PREAMBLE_ANCHOR = '__preamble__';
 
 function slugify(text: string): string {
   const slug = text
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
@@ -279,7 +281,8 @@ function serialize(doc: DocModel): string {
   return `${parts.join('\n\n').trimEnd()}\n`;
 }
 
-function render(doc: DocModel, theme: ThemeName): string {
+/** The `.mirador-content` div alone — for callers composing their own page chrome. */
+export function renderContent(doc: DocModel): string {
   const parts: string[] = [];
   for (const s of doc.sections) {
     const bodyHtml = s.body.trim() ? md.render(s.body) : '';
@@ -290,8 +293,11 @@ function render(doc: DocModel, theme: ThemeName): string {
     const heading = `<h${s.depth} id="${s.anchor}">${md.renderInline(s.headingText)}</h${s.depth}>`;
     parts.push(`<section id="${s.anchor}">\n${heading}\n${bodyHtml}</section>`);
   }
-  const content = `<div class="mirador-content">\n${parts.join('\n')}\n</div>`;
-  return renderShell(content, theme);
+  return `<div class="mirador-content">\n${parts.join('\n')}\n</div>`;
+}
+
+function render(doc: DocModel, theme: ThemeName): string {
+  return renderShell(renderContent(doc), theme);
 }
 
 /** Normalised body for comparison — ignores trailing-whitespace / edge-blank noise. */

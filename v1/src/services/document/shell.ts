@@ -30,7 +30,11 @@ const BLOCK_PRIMITIVES = `<style>
 .mirador-content .chart-val{font-variant-numeric:tabular-nums;color:var(--page-fg-muted,#666);font-size:.85rem}
 </style>`;
 
-export function renderShell(bodyHtml: string, theme: ThemeName): string {
+export function renderShell(
+  bodyHtml: string,
+  theme: ThemeName,
+  title = 'mirador · preview',
+): string {
   const themeLink =
     theme === 'none' ? '' : `<link rel="stylesheet" href="/themes/${theme}/theme.css">`;
 
@@ -38,12 +42,14 @@ export function renderShell(bodyHtml: string, theme: ThemeName): string {
     .map((src) => `<script src="${src}" defer></script>`)
     .join('\n');
 
+  const escapedTitle = title.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
   return `<!doctype html>
 <html lang="en" data-mirador-theme="${theme}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>mirador · preview</title>
+<title>${escapedTitle}</title>
 <link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: light)" href="/assets/aperture-favicon.svg">
 <link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: dark)" href="/assets/aperture-favicon-dark.svg">
 ${themeLink}

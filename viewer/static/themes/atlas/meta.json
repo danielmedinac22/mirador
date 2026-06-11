@@ -1,0 +1,9 @@
+{
+  "name": "atlas",
+  "thesis": "Numbers earn the spotlight.",
+  "primaryFont": "IBM Plex Sans",
+  "lightDefault": true,
+  "darkSupport": true,
+  "contentMaxWidth": 1200,
+  "distinguishing": "tabular nums; sticky table headers; zebra rows; KPI card primitives."
+}
