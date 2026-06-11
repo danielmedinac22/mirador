@@ -1,10 +1,30 @@
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { type IncomingMessage, type Server, type ServerResponse, createServer } from 'node:http';
+import { extname, join, normalize, resolve, sep } from 'node:path';
 import { FileStore, isValidSlug } from './store.js';
 
 export interface ViewerOptions {
   dataDir: string;
   maxBytes?: number;
   publicBaseUrl?: string;
+  assetsDir?: string;
+}
+
+const ASSET_TYPES: Record<string, string> = {
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
+  '.png': 'image/png',
+};
+
+/** Resolve a URL path inside assetsDir, refusing anything that escapes it. */
+function resolveAsset(assetsDir: string, urlPath: string): string | null {
+  const cleaned = normalize(decodeURIComponent(urlPath)).replace(/^([/\\])+/, '');
+  const full = resolve(assetsDir, cleaned);
+  if (full !== resolve(assetsDir) && !full.startsWith(resolve(assetsDir) + sep)) return null;
+  if (!existsSync(full) || !statSync(full).isFile()) return null;
+  return full;
 }
 
 const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;
@@ -153,6 +173,20 @@ export function createViewerServer(options: ViewerOptions): Server {
         sendJson(res, 404, { error: 'not_found' });
         return;
       }
+
+      if (req.method === 'GET' && options.assetsDir) {
+        const type = ASSET_TYPES[extname(path)];
+        const file = type ? resolveAsset(options.assetsDir, path) : null;
+        if (file && type) {
+          res.writeHead(200, {
+            'content-type': type,
+            'cache-control': 'public, max-age=86400',
+          });
+          res.end(readFileSync(file));
+          return;
+        }
+      }
+
       sendHtml(res, 404, NOT_FOUND_PAGE);
     } catch {
       sendJson(res, 500, { error: 'internal' });

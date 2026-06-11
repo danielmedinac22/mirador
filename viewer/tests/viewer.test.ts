@@ -11,7 +11,11 @@ let dataDir: string;
 
 beforeAll(async () => {
   dataDir = mkdtempSync(join(tmpdir(), 'mirador-viewer-'));
-  server = createViewerServer({ dataDir, maxBytes: 64 * 1024 });
+  server = createViewerServer({
+    dataDir,
+    maxBytes: 64 * 1024,
+    assetsDir: new URL('../static', import.meta.url).pathname,
+  });
   await new Promise<void>((resolve) => server.listen(0, resolve));
   const address = server.address();
   if (address === null || typeof address === 'string') throw new Error('no port');
@@ -148,5 +152,29 @@ describe('push + view', () => {
   it('rejects path-traversal-shaped slugs', async () => {
     const view = await fetch(`${base}/v/..%2F..%2Fetc%2Fpasswd`);
     expect(view.status).toBe(404);
+  });
+});
+
+describe('theme assets', () => {
+  it('serves theme css with the right content-type', async () => {
+    const res = await fetch(`${base}/themes/page/theme.css`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('text/css');
+    expect(await res.text()).toContain('--page-accent');
+  });
+
+  it('serves fonts.css and woff2 files', async () => {
+    const css = await fetch(`${base}/fonts.css`);
+    expect(css.status).toBe(200);
+    const woff = await fetch(`${base}/fonts/ibm-plex-sans-latin-400-normal.woff2`);
+    expect(woff.status).toBe(200);
+    expect(woff.headers.get('content-type')).toBe('font/woff2');
+  });
+
+  it('refuses asset paths that escape the assets dir', async () => {
+    const res = await fetch(`${base}/themes/..%2F..%2Fpackage.json`);
+    expect(res.status).toBe(404);
+    const res2 = await fetch(`${base}/..%2Fpackage.json`);
+    expect(res2.status).toBe(404);
   });
 });
