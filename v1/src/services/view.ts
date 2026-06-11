@@ -57,7 +57,7 @@ export interface GitMeta {
 const MIRADOR_DIR = '.mirador';
 
 export function defaultViewerUrl(): string {
-  return process.env.MIRADOR_VIEWER_URL ?? 'https://mirador-viewer.up.railway.app';
+  return process.env.MIRADOR_VIEWER_URL ?? 'https://mirador-viewer-production.up.railway.app';
 }
 
 // ── artifact folder reading ──────────────────────────────────────────────────

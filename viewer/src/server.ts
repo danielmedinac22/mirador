@@ -29,19 +29,48 @@ function resolveAsset(assetsDir: string, urlPath: string): string | null {
 
 const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;
 
-const NOT_FOUND_PAGE = `<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>mirador — not found</title>
-<style>body{font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0;background:#101014;color:#e8e8ec}
-main{text-align:center;padding:2rem}h1{font-size:1.2rem;font-weight:600}p{color:#9a9aa4}</style></head>
-<body><main><h1>This view doesn't exist (or was never pushed).</h1>
-<p>Ask the artifact owner for a fresh link.</p></main></body></html>`;
+/* Brand chrome per the mirador design spec: cobalt #2541B2, IBM Plex (served
+   from /fonts.css), light + dark intrinsic, aperture mark + wordmark. */
+function brandPage(title: string, heading: string, sub: string): string {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title>
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: light)" href="/assets/aperture-favicon.svg">
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: dark)" href="/assets/aperture-favicon-dark.svg">
+<link rel="stylesheet" href="/fonts.css">
+<style>
+:root{--bg:#fafafa;--fg:#0a0a0a;--muted:#666;--cobalt:#2541B2}
+@media (prefers-color-scheme:dark){:root{--bg:#0a0a0a;--fg:#fafafa;--muted:#999}}
+body{font-family:'IBM Plex Sans',system-ui,sans-serif;display:grid;place-items:center;
+min-height:100vh;margin:0;background:var(--bg);color:var(--fg)}
+main{text-align:center;padding:2rem;max-width:26rem}
+.ap{width:28px;height:28px;margin-bottom:1.25rem;opacity:0;animation:in 200ms ease-out 120ms forwards}
+.ap .in{fill:var(--cobalt);transform:translate(8px,-8px);animation:slide 280ms cubic-bezier(.2,.8,.2,1) 320ms forwards}
+h1{font-size:1.25rem;font-weight:600;letter-spacing:-.015em;margin:0 0 .5rem;opacity:0;animation:rise 320ms cubic-bezier(.2,.8,.2,1) 600ms forwards}
+p{color:var(--muted);font-size:.9375rem;line-height:1.6;margin:0;opacity:0;animation:rise 320ms cubic-bezier(.2,.8,.2,1) 720ms forwards}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.85em}
+.wm{font-weight:600;letter-spacing:-.04em}.wm b{color:var(--cobalt);font-weight:600}
+@keyframes in{to{opacity:1}}@keyframes slide{to{transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.ap,h1,p{animation:none;opacity:1}.ap .in{animation:none;transform:none}}
+</style></head>
+<body><main>
+<svg class="ap" viewBox="0 0 24 24" aria-hidden="true"><rect x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect class="in" x="14" y="4" width="6" height="6"/></svg>
+<h1>${heading}</h1>
+<p>${sub}</p>
+</main></body></html>`;
+}
 
-const LANDING_PAGE = `<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>mirador viewer</title>
-<style>body{font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0;background:#101014;color:#e8e8ec}
-main{text-align:center;padding:2rem}h1{font-size:1.2rem;font-weight:600}p{color:#9a9aa4}code{background:#1c1c22;padding:.15em .4em;border-radius:4px}</style></head>
-<body><main><h1>mirador viewer</h1>
-<p>Views are pushed here by <code>mirador-cli</code> and served at unlisted URLs.<br>There is nothing to browse.</p></main></body></html>`;
+const NOT_FOUND_PAGE = brandPage(
+  'mirador · not found',
+  'No view here.',
+  'It was never pushed, or the link changed. Ask the artifact owner for a fresh one.',
+);
+
+const LANDING_PAGE = brandPage(
+  'mirador',
+  '<span class="wm">mirador<b>.</b></span>',
+  'Same artifact. Your lens. Views are pushed by <code>mirador-cli</code> and live at unlisted links — there is nothing to browse.',
+);
 
 function readBody(req: IncomingMessage, maxBytes: number): Promise<Buffer | 'too_large'> {
   return new Promise((resolve, reject) => {
