@@ -36,7 +36,7 @@ const CHROME_STYLE = `<style>
 .mv{background:var(--mv-bg);color:var(--mv-fg);border-bottom:1px solid var(--mv-border);
   font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:.9375rem;line-height:1.5}
 .mv *{box-sizing:border-box}
-.mv-col{max-width:720px;margin:0 auto;padding:2rem 1.5rem 2.5rem}
+.mv-col{max-width:680px;margin:0 auto;padding:2rem 1.5rem 2.5rem}
 .mv a{color:inherit}
 .mv :focus-visible{outline:none;box-shadow:var(--mv-ring);border-radius:4px}
 
@@ -55,6 +55,8 @@ const CHROME_STYLE = `<style>
   color:var(--mv-muted);margin-bottom:1.75rem}
 .mv-meta .sep{color:var(--mv-border)}
 
+.mv-what{margin:0 0 1.5rem;font-size:.9375rem;color:var(--mv-muted);max-width:54ch}
+.mv-what strong{color:var(--mv-fg);font-weight:500}
 .mv-label{display:block;font-family:var(--mv-mono);font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.1em;color:var(--mv-muted);margin-bottom:.45rem}
 .mv-vision{border-left:2px solid var(--mv-cobalt);padding:.1rem 0 .1rem 1.1rem;margin:0 0 1.5rem}
@@ -73,11 +75,12 @@ const CHROME_STYLE = `<style>
 .mv-copy:active{transform:translateY(0)}
 .mv-seed-hint{font-size:.8125rem;color:var(--mv-muted);margin-left:.85em}
 
-.mv-grid{display:grid;gap:1rem;grid-template-columns:1fr;margin-bottom:.25rem}
+.mv-grid{display:grid;gap:1rem;grid-template-columns:1fr;align-items:start;margin-bottom:.25rem}
 @media (min-width:720px){.mv-grid{grid-template-columns:1fr 1fr}}
 .mv-card{background:var(--mv-card);border:1px solid var(--mv-border);border-radius:8px;
   padding:1.1rem 1.25rem;min-width:0}
 
+.mv-scroll{max-height:19rem;overflow-y:auto;overscroll-behavior:contain}
 .mv-sections{list-style:none;margin:0;padding:0}
 .mv-sections li{display:flex;align-items:baseline;gap:.6em;padding:.3rem 0;font-size:.875rem}
 .mv-doc-name{font-family:var(--mv-mono);font-size:.6875rem;color:var(--mv-muted);
@@ -115,6 +118,26 @@ const CHROME_STYLE = `<style>
 .mv-footer{max-width:680px;margin:4rem auto 2.5rem;padding:0 1.5rem;display:flex;align-items:center;
   gap:.5em;font-family:var(--mv-mono);font-size:.6875rem;color:var(--mv-muted)}
 .mv-footer .mv-ap{width:.95em;height:.95em}
+
+
+/* GitBook-flavored content the themes don't cover — Notion-style toggles, soft mark */
+.mirador-content details{border:1px solid var(--page-border,#e5e5e5);border-radius:8px;margin:1rem 0}
+.mirador-content details+details{margin-top:.6rem}
+.mirador-content summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:.65em;
+  padding:.85rem 1.1rem;font-weight:600;font-size:1rem;border-radius:8px;
+  transition:background-color 200ms var(--mv-ease-out)}
+.mirador-content summary:hover{background:var(--page-code-bg,#f5f5f5)}
+.mirador-content summary::-webkit-details-marker{display:none}
+.mirador-content summary::before{content:'';width:.4em;height:.4em;flex-shrink:0;position:relative;top:-.12em;
+  border-right:1.5px solid var(--page-fg-muted,#666);border-bottom:1.5px solid var(--page-fg-muted,#666);
+  transform:rotate(-45deg);transition:transform 200ms var(--mv-ease-out)}
+.mirador-content details[open]>summary::before{transform:rotate(45deg)}
+.mirador-content details[open]>summary{border-bottom:1px solid var(--page-border,#e5e5e5);border-radius:8px 8px 0 0}
+.mirador-content details>:not(summary){margin-left:1.1rem;margin-right:1.1rem}
+.mirador-content details>:nth-child(2){margin-top:.9rem}
+.mirador-content details>:last-child{margin-bottom:1rem}
+.mirador-content mark{background:rgba(37,65,178,.14);color:inherit;padding:.06em .3em;border-radius:3px}
+@media (max-width:720px){.mirador-content table{display:block;overflow-x:auto}}
 
 @media (prefers-reduced-motion:no-preference){
   .mv-reveal{opacity:0;transform:translateY(8px);
@@ -182,7 +205,9 @@ function statePanel(state: ArtifactState): string {
     .join('\n');
   return `<section class="mv-card mv-reveal mv-d4">
 <span class="mv-label">Sections — ${counts}</span>
+<div class="mv-scroll">
 ${body}
+</div>
 </section>`;
 }
 
@@ -271,6 +296,7 @@ export function buildViewPage(input: ViewPageInput): string {
 <div class="mv-top mv-reveal">${lockup()}<span class="mv-updated">${updated}</span></div>
 <h1 class="mv-title mv-reveal mv-d1">${esc(title)}</h1>
 <div class="mv-meta mv-reveal mv-d1">${metaBits}</div>
+<p class="mv-what mv-reveal mv-d2"><strong>One living document, many lenses.</strong> Everyone refines it through their own AI agent — this page is where it stands right now.</p>
 ${visionBlock}
 ${seedCard(git)}
 <div class="mv-grid">
